@@ -105,7 +105,7 @@ export const paginationMetaSchema = z.object({
 });
 
 export const localErrorSchema = z.object({
-    code: z.enum(["validation", "unauthorized", "not_found", "conflict_already_materialized", "in_use", "storage_failed"]),
+    code: z.enum(["validation", "unauthorized", "not_found", "conflict_already_materialized", "in_use", "storage_failed", "api_failed"]),
     message: z.string(),
     fields: z.record(z.string(), z.union([z.string(), z.array(z.string())])).optional(),
 });

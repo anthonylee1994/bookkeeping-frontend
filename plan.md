@@ -163,7 +163,7 @@ Date（`Asia/Hong_Kong`）：
 
 ## Step 4 — Auth repository + authStore
 
-對照 swagger：`POST /auth/register`、`POST /auth/login`、`GET /me`
+對照 swagger：`POST /api/v1/auth/register`、`POST /api/v1/auth/login`、`GET /api/v1/me`
 
 **檔案**：`src/data/repository.ts`（auth 部分）、`src/stores/auth-store.ts`、`src/stores/auth-store.test.ts`
 

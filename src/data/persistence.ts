@@ -9,12 +9,12 @@ export type StorageAdapter = Pick<Storage, "getItem" | "setItem">;
 
 export const repositoryStateSchema = z.object({
     version: z.literal(PERSISTENCE_VERSION),
-    accounts: z.array(accountSchema),
-    categories: z.array(categorySchema),
-    merchants: z.array(merchantSchema),
-    transactions: z.array(transactionSchema),
-    recurringRules: z.array(recurringRuleSchema),
-    idempotencyKeys: z.record(z.string().uuid(), z.string().uuid()),
+    accounts: z.array(accountSchema).default([]),
+    categories: z.array(categorySchema).default([]),
+    merchants: z.array(merchantSchema).default([]),
+    transactions: z.array(transactionSchema).default([]),
+    recurringRules: z.array(recurringRuleSchema).default([]),
+    idempotencyKeys: z.record(z.string().uuid(), z.string().uuid()).default({}),
 });
 
 export type RepositoryState = z.infer<typeof repositoryStateSchema>;
