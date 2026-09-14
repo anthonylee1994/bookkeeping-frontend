@@ -21,28 +21,26 @@ describe("auth store", () => {
         expect(useAuthStore.getState()).toMatchObject({token: null, user: null, hydrated: false});
     });
 
-    it("sets, persists and clears a minimal session", () => {
+    it("sets a session, persists only its token and clears it on logout", () => {
         useAuthStore.getState().setSession(token, user);
         expect(useAuthStore.getState()).toMatchObject({token, user});
-        expect(localStorage.getItem(AUTH_STORAGE_KEY)).toContain(token);
+        expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBe(token);
 
         useAuthStore.getState().clearSession();
         expect(useAuthStore.getState()).toMatchObject({token: null, user: null});
         expect(localStorage.getItem(AUTH_STORAGE_KEY)).toBeNull();
     });
 
-    it("hydrates a valid persisted session without persisting extra fields", async () => {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({state: {token, user, password: "must-not-survive"}, version: 0}));
+    it("hydrates a stored token and leaves user restoration to getMe", async () => {
+        localStorage.setItem(AUTH_STORAGE_KEY, token);
 
         await hydrateAuthStore();
 
-        expect(useAuthStore.getState()).toMatchObject({token, user, hydrated: true});
-        useAuthStore.getState().setSession(token, user);
-        expect(localStorage.getItem(AUTH_STORAGE_KEY)).not.toContain("password");
+        expect(useAuthStore.getState()).toMatchObject({token, user: null, hydrated: true});
     });
 
-    it("fails closed when persisted session data is malformed", async () => {
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({state: {token: "", user}, version: 1}));
+    it("fails closed when the stored token is blank", async () => {
+        localStorage.setItem(AUTH_STORAGE_KEY, "   ");
 
         await hydrateAuthStore();
 
@@ -53,18 +51,18 @@ describe("auth store", () => {
         useAuthStore.getState().setSession(token, user);
         const unsubscribe = subscribeToAuthStorageEvents();
 
-        window.dispatchEvent(new StorageEvent("storage", {key: AUTH_STORAGE_KEY, newValue: JSON.stringify({state: {token: null, user: null}, version: 1})}));
+        window.dispatchEvent(new StorageEvent("storage", {key: AUTH_STORAGE_KEY, newValue: null}));
 
         expect(useAuthStore.getState()).toMatchObject({token: null, user: null});
         unsubscribe();
     });
 
-    it("fails closed for malformed cross-tab session data", () => {
+    it("hydrates a new token from another tab without copying user data", () => {
         useAuthStore.getState().setSession(token, user);
         const unsubscribe = subscribeToAuthStorageEvents();
 
-        expect(() => window.dispatchEvent(new StorageEvent("storage", {key: AUTH_STORAGE_KEY, newValue: "not-json"}))).not.toThrow();
-        expect(useAuthStore.getState()).toMatchObject({token: null, user: null});
+        window.dispatchEvent(new StorageEvent("storage", {key: AUTH_STORAGE_KEY, newValue: "other-tab-token"}));
+        expect(useAuthStore.getState()).toMatchObject({token: "other-tab-token", user: null});
         unsubscribe();
     });
 });
