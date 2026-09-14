@@ -13,6 +13,6 @@ export class DashboardRepository {
 
     async get(date: string): Promise<LocalResult<Dashboard>> {
         if (!dateSchema.safeParse(date).success) return localValidation("Dashboard 日期無效");
-        return apiRequest(this.#token, {method: "GET", url: "/api/v1/dashboard", params: {date}}, dashboardResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: "/dashboard", params: {date}}, dashboardResponseSchema);
     }
 }

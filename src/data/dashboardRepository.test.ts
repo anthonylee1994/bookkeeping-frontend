@@ -26,7 +26,7 @@ describe("DashboardRepository", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: response});
 
         expect(await new DashboardRepository(TOKEN).get("2026-09-14")).toEqual({ok: true, value: response});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/api/v1/dashboard", params: {date: "2026-09-14"}}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/dashboard", params: {date: "2026-09-14"}}));
     });
 
     it("rejects invalid dates before requesting", async () => {

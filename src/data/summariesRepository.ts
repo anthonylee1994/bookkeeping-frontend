@@ -18,6 +18,6 @@ export class SummariesRepository {
         if (!Number.isInteger(page) || page < 1 || !Number.isInteger(perPage) || perPage < 1 || perPage > MAX_PER_PAGE) {
             return localValidation(`頁碼必須大過 0，每頁數量必須係 1 至 ${MAX_PER_PAGE}`);
         }
-        return apiRequest(this.#token, {method: "GET", url: `/api/v1/summaries/${period}`, params: {date, page, per_page: perPage}}, summaryResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: `/summaries/${period}`, params: {date, page, per_page: perPage}}, summaryResponseSchema);
     }
 }

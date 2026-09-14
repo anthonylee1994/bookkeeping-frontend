@@ -25,11 +25,11 @@ export class TransactionsRepository {
 
     async list(filters: TransactionFilters = {}): Promise<LocalResult<Paginated<Transaction>>> {
         const {keyword, ...params} = filters;
-        return apiRequest(this.#token, {method: "GET", url: "/api/v1/transactions", params: {...params, q: keyword}}, paginatedTransactionsResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: "/transactions", params: {...params, q: keyword}}, paginatedTransactionsResponseSchema);
     }
 
     async get(id: UUID): Promise<LocalResult<Transaction>> {
-        return apiRequest(this.#token, {method: "GET", url: `/api/v1/transactions/${id}`}, transactionResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: `/transactions/${id}`}, transactionResponseSchema);
     }
 
     async create(input: TransactionInput, idempotencyKey: UUID): Promise<LocalResult<Transaction>> {
@@ -38,7 +38,7 @@ export class TransactionsRepository {
         if (!parsed.success) return localValidation("交易資料無效");
         const kindFields = validateKindFields(parsed.data);
         if (!kindFields.ok) return kindFields;
-        return apiRequest(this.#token, {method: "POST", url: "/api/v1/transactions", data: parsed.data, headers: {"Idempotency-Key": idempotencyKey}}, transactionResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: "/transactions", data: parsed.data, headers: {"Idempotency-Key": idempotencyKey}}, transactionResponseSchema);
     }
 
     async update(id: UUID, input: TransactionUpdateInput): Promise<LocalResult<Transaction>> {
@@ -46,20 +46,20 @@ export class TransactionsRepository {
         if (!parsed.success) return localValidation("交易資料無效");
         const kindFields = validateKindFields(parsed.data);
         if (!kindFields.ok) return kindFields;
-        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/transactions/${id}`, data: parsed.data}, transactionResponseSchema);
+        return apiRequest(this.#token, {method: "PATCH", url: `/transactions/${id}`, data: parsed.data}, transactionResponseSchema);
     }
 
     async delete(id: UUID): Promise<LocalResult<true>> {
-        return apiDelete(this.#token, `/api/v1/transactions/${id}`);
+        return apiDelete(this.#token, `/transactions/${id}`);
     }
 
     async refund(id: UUID, input: RefundInput): Promise<LocalResult<Transaction>> {
         const parsed = refundInputSchema.safeParse(input);
         if (!parsed.success) return localValidation("退款資料無效");
-        return apiRequest(this.#token, {method: "POST", url: `/api/v1/transactions/${id}/refund`, data: parsed.data}, transactionResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: `/transactions/${id}/refund`, data: parsed.data}, transactionResponseSchema);
     }
 
     async duplicate(id: UUID): Promise<LocalResult<Transaction>> {
-        return apiRequest(this.#token, {method: "POST", url: `/api/v1/transactions/${id}/duplicate`}, transactionResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: `/transactions/${id}/duplicate`}, transactionResponseSchema);
     }
 }

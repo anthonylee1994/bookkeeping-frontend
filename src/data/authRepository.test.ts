@@ -31,7 +31,7 @@ describe("AuthRepository API client", () => {
 
         const result = await new AuthRepository(storage).register({username: "  Anthony  ", password: "correct horse"});
 
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/api/v1/auth/register", data: {username: "Anthony", password: "correct horse"}}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/auth/register", data: {username: "Anthony", password: "correct horse"}}));
         expect(result).toEqual({ok: true, value: {token: "api-token", user}});
         expect(storage.getItem(AUTH_TOKEN_STORAGE_KEY)).toBe("api-token");
     });
@@ -70,6 +70,6 @@ describe("AuthRepository API client", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {user}});
 
         expect(await new AuthRepository(storage).getMe()).toEqual({ok: true, value: user});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/api/v1/me", headers: expect.objectContaining({Authorization: "Bearer stored-token"})}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/me", headers: expect.objectContaining({Authorization: "Bearer stored-token"})}));
     });
 });

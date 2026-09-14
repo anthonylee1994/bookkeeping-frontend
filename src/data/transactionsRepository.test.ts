@@ -51,9 +51,7 @@ describe("TransactionsRepository", () => {
         });
 
         expect(result).toMatchObject({ok: true, value: {meta: {page: 2, per_page: 10}}});
-        expect(request).toHaveBeenCalledWith(
-            expect.objectContaining({url: "/api/v1/transactions", params: expect.objectContaining({q: "咖啡", sort: "amount_cents", order: "asc", page: 2, per_page: 10})})
-        );
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({url: "/transactions", params: expect.objectContaining({q: "咖啡", sort: "amount_cents", order: "asc", page: 2, per_page: 10})}));
     });
 
     it("gets, duplicates and deletes a transaction", async () => {
@@ -64,9 +62,9 @@ describe("TransactionsRepository", () => {
         expect(await repository.duplicate(transaction.id)).toMatchObject({ok: true});
         expect(await repository.delete(transaction.id)).toEqual({ok: true, value: true});
         expect(request.mock.calls.map(call => [call[0].method, call[0].url])).toEqual([
-            ["GET", `/api/v1/transactions/${transaction.id}`],
-            ["POST", `/api/v1/transactions/${transaction.id}/duplicate`],
-            ["DELETE", `/api/v1/transactions/${transaction.id}`],
+            ["GET", `/transactions/${transaction.id}`],
+            ["POST", `/transactions/${transaction.id}/duplicate`],
+            ["DELETE", `/transactions/${transaction.id}`],
         ]);
     });
 
@@ -102,6 +100,6 @@ describe("TransactionsRepository", () => {
             ok: false,
             error: {code: "validation", message: "退款金額超過可退款上限", fields: {amount_cents: ["最多可退 7000"]}},
         });
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: `/api/v1/transactions/${transaction.id}/refund`}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: `/transactions/${transaction.id}/refund`}));
     });
 });

@@ -15,7 +15,7 @@ describe("CategoriesRepository", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {categories: domainTestState.categories}});
 
         expect(await new CategoriesRepository(TOKEN).list("income")).toEqual({ok: true, value: domainTestState.categories});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/api/v1/categories", params: {kind: "income"}}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/categories", params: {kind: "income"}}));
     });
 
     it("creates and updates categories through their API endpoints", async () => {
@@ -25,8 +25,8 @@ describe("CategoriesRepository", () => {
         expect(await repository.create({name: "工資", kind: "income", position: 1})).toMatchObject({ok: true});
         expect(await repository.update(category.id, {name: "薪金", kind: "income", position: 2})).toMatchObject({ok: true});
         expect(request.mock.calls.map(call => [call[0].method, call[0].url])).toEqual([
-            ["POST", "/api/v1/categories"],
-            ["PATCH", `/api/v1/categories/${category.id}`],
+            ["POST", "/categories"],
+            ["PATCH", `/categories/${category.id}`],
         ]);
     });
 
@@ -34,7 +34,7 @@ describe("CategoriesRepository", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: null});
 
         expect(await new CategoriesRepository(TOKEN).delete(category.id)).toEqual({ok: true, value: true});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "DELETE", url: `/api/v1/categories/${category.id}`}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "DELETE", url: `/categories/${category.id}`}));
     });
 
     it("rejects invalid category input locally", async () => {

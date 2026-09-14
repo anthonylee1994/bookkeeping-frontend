@@ -15,7 +15,7 @@ describe("AccountsRepository", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {accounts: domainTestState.accounts}});
 
         expect(await new AccountsRepository(TOKEN).list()).toEqual({ok: true, value: domainTestState.accounts});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/api/v1/accounts", headers: expect.objectContaining({Authorization: `Bearer ${TOKEN}`})}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/accounts", headers: expect.objectContaining({Authorization: `Bearer ${TOKEN}`})}));
     });
 
     it("creates and updates accounts with normalized HKD values", async () => {
@@ -25,8 +25,8 @@ describe("AccountsRepository", () => {
         expect(await repository.create({name: "現金", kind: "cash", currency: "HKD"})).toMatchObject({ok: true});
         expect(await repository.update(account.id, {name: "銀包", kind: "cash", currency: "HKD", initial_balance_cents: 5000})).toMatchObject({ok: true});
         expect(request.mock.calls.map(call => call[0])).toEqual([
-            expect.objectContaining({method: "POST", url: "/api/v1/accounts", data: expect.objectContaining({currency: "HKD", initial_balance_cents: 0})}),
-            expect.objectContaining({method: "PATCH", url: `/api/v1/accounts/${account.id}`, data: expect.objectContaining({initial_balance_cents: 5000})}),
+            expect.objectContaining({method: "POST", url: "/accounts", data: expect.objectContaining({currency: "HKD", initial_balance_cents: 0})}),
+            expect.objectContaining({method: "PATCH", url: `/accounts/${account.id}`, data: expect.objectContaining({initial_balance_cents: 5000})}),
         ]);
     });
 

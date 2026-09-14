@@ -28,38 +28,38 @@ export class RecurringRulesRepository {
     }
 
     async list(status?: RecurringStatus): Promise<LocalResult<RecurringRule[]>> {
-        return apiRequest(this.#token, {method: "GET", url: "/api/v1/recurring_rules", params: status === undefined ? undefined : {status}}, recurringRulesResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: "/recurring_rules", params: status === undefined ? undefined : {status}}, recurringRulesResponseSchema);
     }
 
     async create(input: RecurringRuleInput): Promise<LocalResult<RecurringRule>> {
         const parsed = parseRecurringRuleInput(input);
         if (!parsed.ok) return parsed;
-        return apiRequest(this.#token, {method: "POST", url: "/api/v1/recurring_rules", data: parsed.value}, recurringRuleResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: "/recurring_rules", data: parsed.value}, recurringRuleResponseSchema);
     }
 
     async update(id: UUID, input: RecurringRuleInput): Promise<LocalResult<RecurringRule>> {
         const parsed = parseRecurringRuleInput(input);
         if (!parsed.ok) return parsed;
-        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/recurring_rules/${id}`, data: parsed.value}, recurringRuleResponseSchema);
+        return apiRequest(this.#token, {method: "PATCH", url: `/recurring_rules/${id}`, data: parsed.value}, recurringRuleResponseSchema);
     }
 
     async delete(id: UUID): Promise<LocalResult<true>> {
-        return apiDelete(this.#token, `/api/v1/recurring_rules/${id}`);
+        return apiDelete(this.#token, `/recurring_rules/${id}`);
     }
 
     async pause(id: UUID): Promise<LocalResult<RecurringRule>> {
-        return apiRequest(this.#token, {method: "POST", url: `/api/v1/recurring_rules/${id}/pause`}, recurringRuleResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/pause`}, recurringRuleResponseSchema);
     }
 
     async resume(id: UUID): Promise<LocalResult<RecurringRule>> {
-        return apiRequest(this.#token, {method: "POST", url: `/api/v1/recurring_rules/${id}/resume`}, recurringRuleResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/resume`}, recurringRuleResponseSchema);
     }
 
     async runNow(id: UUID): Promise<LocalResult<Transaction>> {
-        return apiRequest(this.#token, {method: "POST", url: `/api/v1/recurring_rules/${id}/run_now`}, transactionResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/run_now`}, transactionResponseSchema);
     }
 
     async skipNext(id: UUID): Promise<LocalResult<SkipNextResult>> {
-        return apiRequest(this.#token, {method: "POST", url: `/api/v1/recurring_rules/${id}/skip_next`}, skipNextResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/skip_next`}, skipNextResponseSchema);
     }
 }

@@ -17,22 +17,22 @@ export class CategoriesRepository {
     }
 
     async list(kind?: CategoryKind): Promise<LocalResult<Category[]>> {
-        return apiRequest(this.#token, {method: "GET", url: "/api/v1/categories", params: kind === undefined ? undefined : {kind}}, categoriesResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: "/categories", params: kind === undefined ? undefined : {kind}}, categoriesResponseSchema);
     }
 
     async create(input: CategoryInput): Promise<LocalResult<Category>> {
         const parsed = parseCategoryInput(input);
         if (!parsed.ok) return parsed;
-        return apiRequest(this.#token, {method: "POST", url: "/api/v1/categories", data: parsed.value}, categoryResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: "/categories", data: parsed.value}, categoryResponseSchema);
     }
 
     async update(id: UUID, input: CategoryInput): Promise<LocalResult<Category>> {
         const parsed = parseCategoryInput(input);
         if (!parsed.ok) return parsed;
-        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/categories/${id}`, data: parsed.value}, categoryResponseSchema);
+        return apiRequest(this.#token, {method: "PATCH", url: `/categories/${id}`, data: parsed.value}, categoryResponseSchema);
     }
 
     async delete(id: UUID): Promise<LocalResult<true>> {
-        return apiDelete(this.#token, `/api/v1/categories/${id}`);
+        return apiDelete(this.#token, `/categories/${id}`);
     }
 }

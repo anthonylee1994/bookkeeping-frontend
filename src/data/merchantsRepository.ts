@@ -12,16 +12,16 @@ export class MerchantsRepository {
     }
 
     async search(q = ""): Promise<LocalResult<Merchant[]>> {
-        return apiRequest(this.#token, {method: "GET", url: "/api/v1/merchants", params: q.trim() === "" ? undefined : {q: q.trim()}}, merchantsResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: "/merchants", params: q.trim() === "" ? undefined : {q: q.trim()}}, merchantsResponseSchema);
     }
 
     async create(input: MerchantInput): Promise<LocalResult<Merchant>> {
         const parsed = merchantInputSchema.safeParse(input);
         if (!parsed.success) return localValidation("商戶資料無效");
-        return apiRequest(this.#token, {method: "POST", url: "/api/v1/merchants", data: parsed.data}, merchantResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: "/merchants", data: parsed.data}, merchantResponseSchema);
     }
 
     async delete(id: UUID): Promise<LocalResult<true>> {
-        return apiDelete(this.#token, `/api/v1/merchants/${id}`);
+        return apiDelete(this.#token, `/merchants/${id}`);
     }
 }

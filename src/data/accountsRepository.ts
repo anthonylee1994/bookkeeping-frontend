@@ -17,22 +17,22 @@ export class AccountsRepository {
     }
 
     async list(): Promise<LocalResult<Account[]>> {
-        return apiRequest(this.#token, {method: "GET", url: "/api/v1/accounts"}, accountsResponseSchema);
+        return apiRequest(this.#token, {method: "GET", url: "/accounts"}, accountsResponseSchema);
     }
 
     async create(input: AccountInput): Promise<LocalResult<Account>> {
         const parsed = parseAccountInput(input);
         if (!parsed.ok) return parsed;
-        return apiRequest(this.#token, {method: "POST", url: "/api/v1/accounts", data: parsed.value}, accountResponseSchema);
+        return apiRequest(this.#token, {method: "POST", url: "/accounts", data: parsed.value}, accountResponseSchema);
     }
 
     async update(id: UUID, input: AccountInput): Promise<LocalResult<Account>> {
         const parsed = parseAccountInput(input);
         if (!parsed.ok) return parsed;
-        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/accounts/${id}`, data: parsed.value}, accountResponseSchema);
+        return apiRequest(this.#token, {method: "PATCH", url: `/accounts/${id}`, data: parsed.value}, accountResponseSchema);
     }
 
     async delete(id: UUID): Promise<LocalResult<true>> {
-        return apiDelete(this.#token, `/api/v1/accounts/${id}`);
+        return apiDelete(this.#token, `/accounts/${id}`);
     }
 }

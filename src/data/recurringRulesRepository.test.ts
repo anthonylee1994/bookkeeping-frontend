@@ -46,10 +46,10 @@ describe("RecurringRulesRepository", () => {
         expect(await repository.update(rule.id, recurringInput())).toMatchObject({ok: true});
         expect(await repository.delete(rule.id)).toEqual({ok: true, value: true});
         expect(request.mock.calls.map(call => [call[0].method, call[0].url])).toEqual([
-            ["GET", "/api/v1/recurring_rules"],
-            ["POST", "/api/v1/recurring_rules"],
-            ["PATCH", `/api/v1/recurring_rules/${rule.id}`],
-            ["DELETE", `/api/v1/recurring_rules/${rule.id}`],
+            ["GET", "/recurring_rules"],
+            ["POST", "/recurring_rules"],
+            ["PATCH", `/recurring_rules/${rule.id}`],
+            ["DELETE", `/recurring_rules/${rule.id}`],
         ]);
     });
 
@@ -65,11 +65,7 @@ describe("RecurringRulesRepository", () => {
         expect(await repository.pause(rule.id)).toMatchObject({ok: true});
         expect(await repository.resume(rule.id)).toMatchObject({ok: true});
         expect(await repository.skipNext(rule.id)).toEqual({ok: true, value: skipped});
-        expect(request.mock.calls.map(call => call[0].url)).toEqual([
-            `/api/v1/recurring_rules/${rule.id}/pause`,
-            `/api/v1/recurring_rules/${rule.id}/resume`,
-            `/api/v1/recurring_rules/${rule.id}/skip_next`,
-        ]);
+        expect(request.mock.calls.map(call => call[0].url)).toEqual([`/recurring_rules/${rule.id}/pause`, `/recurring_rules/${rule.id}/resume`, `/recurring_rules/${rule.id}/skip_next`]);
     });
 
     it("maps run-now already-materialized conflicts", async () => {

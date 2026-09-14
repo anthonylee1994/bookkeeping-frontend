@@ -7,7 +7,7 @@ import type {LocalResult} from "./types";
 
 /** 全 app 共用嘅 axios instance：baseURL、將來的 interceptors／timeout 都集中喺呢度。 */
 export const apiClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? "",
+    baseURL: `${import.meta.env.VITE_API_URL ?? ""}/api/v1`,
 });
 
 const INVALID_RESPONSE_MESSAGE = "服務回應格式無效";

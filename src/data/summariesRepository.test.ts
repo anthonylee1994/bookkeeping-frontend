@@ -30,7 +30,7 @@ describe("SummariesRepository", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: response});
 
         expect(await new SummariesRepository(TOKEN).get("monthly", "2026-09-14", 2, 10)).toEqual({ok: true, value: response});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/api/v1/summaries/monthly", params: {date: "2026-09-14", page: 2, per_page: 10}}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "GET", url: "/summaries/monthly", params: {date: "2026-09-14", page: 2, per_page: 10}}));
     });
 
     it("rejects invalid dates and pagination before requesting", async () => {

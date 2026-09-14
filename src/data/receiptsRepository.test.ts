@@ -41,7 +41,7 @@ describe("ReceiptsRepository", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {preview}});
 
         expect(await new ReceiptsRepository(TOKEN).parse(preview.image_url)).toEqual({ok: true, value: preview});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/api/v1/ai/parse", data: {image_url: preview.image_url}}));
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/parse", data: {image_url: preview.image_url}}));
     });
 
     it("confirms an AI transaction with an idempotency key", async () => {
@@ -56,7 +56,7 @@ describe("ReceiptsRepository", () => {
 
         expect(await new ReceiptsRepository(TOKEN).confirm(input, IDEMPOTENCY_KEY)).toMatchObject({ok: true});
         expect(request).toHaveBeenCalledWith(
-            expect.objectContaining({method: "POST", url: "/api/v1/ai/confirm", data: expect.objectContaining({source: "ai"}), headers: expect.objectContaining({"Idempotency-Key": IDEMPOTENCY_KEY})})
+            expect.objectContaining({method: "POST", url: "/ai/confirm", data: expect.objectContaining({source: "ai"}), headers: expect.objectContaining({"Idempotency-Key": IDEMPOTENCY_KEY})})
         );
     });
 });

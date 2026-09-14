@@ -67,18 +67,18 @@ export class AuthRepository {
     async register(input: AuthInput): Promise<LocalResult<AuthSession>> {
         const parsed = authInputSchema.safeParse(input);
         if (!parsed.success) return localValidation("請輸入有效登入資料", AUTH_INPUT_FIELDS);
-        return this.#requestSession("/api/v1/auth/register", parsed.data);
+        return this.#requestSession("/auth/register", parsed.data);
     }
 
     async login(input: AuthInput): Promise<LocalResult<AuthSession>> {
         const parsed = authInputSchema.safeParse(input);
         if (!parsed.success) return localUnauthorized(AUTH_FAILURE_MESSAGE);
-        return this.#requestSession("/api/v1/auth/login", parsed.data);
+        return this.#requestSession("/auth/login", parsed.data);
     }
 
     async getMe(token = getStoredAuthToken(this.#storage)): Promise<LocalResult<User>> {
         if (token === null || token.trim() === "") return localUnauthorized(AUTH_FAILURE_MESSAGE);
-        return normalizeAuthResult(await apiRequest(token, {method: "GET", url: "/api/v1/me"}, userResponseSchema));
+        return normalizeAuthResult(await apiRequest(token, {method: "GET", url: "/me"}, userResponseSchema));
     }
 
     logout(): void {
