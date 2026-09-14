@@ -1,4 +1,5 @@
 import type {AxiosError} from "axios";
+import {messages} from "../lib/i18n";
 import {API_FAILURE_MESSAGE, UNAUTHORIZED_MESSAGE, localError} from "./localResult";
 import type {LocalError} from "./types";
 
@@ -35,11 +36,11 @@ export function normalizeApiError(error: unknown): LocalError {
     const serverCode = typeof payload.code === "string" ? payload.code : undefined;
 
     if (status === 401 || status === 403) return localError("unauthorized", UNAUTHORIZED_MESSAGE);
-    if (status === 404) return localError("not_found", serverMessage ?? "搵唔到指定資料");
+    if (status === 404) return localError("not_found", serverMessage ?? messages.errors.notFound);
     if (status === 409 && (serverCode === "already_materialized" || serverCode === "conflict_already_materialized")) {
-        return localError("conflict_already_materialized", serverMessage ?? "今日已經產生過交易");
+        return localError("conflict_already_materialized", serverMessage ?? messages.errors.conflictAlreadyMaterialized);
     }
-    if (status === 409) return localError("in_use", serverMessage ?? "資料仍然被使用，暫時不可刪除");
-    if (status === 422 || status === 400) return localError("validation", serverMessage ?? "輸入資料無效", stringFields(payload.fields ?? payload.errors));
+    if (status === 409) return localError("in_use", serverMessage ?? messages.errors.inUse);
+    if (status === 422 || status === 400) return localError("validation", serverMessage ?? messages.errors.validation, stringFields(payload.fields ?? payload.errors));
     return localError("api_failed", serverMessage ?? API_FAILURE_MESSAGE);
 }

@@ -1,3 +1,4 @@
+import {messages} from "../lib/i18n";
 import {apiRequest, publicApiRequest} from "./apiRepository";
 import {localApiFailure, localStorageFailure, localSuccess, localUnauthorized, localValidation} from "./localResult";
 import {authResponseSchema, userResponseSchema} from "./repositorySchemas";
@@ -5,7 +6,7 @@ import {authInputSchema} from "./schema";
 import type {AuthInput, AuthSession, LocalResult, User} from "./types";
 
 export const AUTH_TOKEN_STORAGE_KEY = "bookkeeping.auth.token";
-export const AUTH_FAILURE_MESSAGE = "登入資料無效";
+export const AUTH_FAILURE_MESSAGE = messages.auth.genericFailure;
 
 export type AuthTokenStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -19,7 +20,7 @@ function normalizeAuthResult<T>(result: LocalResult<T>): LocalResult<T> {
     if (result.ok) return result;
     if (result.error.code === "unauthorized") return localUnauthorized(AUTH_FAILURE_MESSAGE);
     if (result.error.code === "validation") return localValidation("請輸入有效登入資料");
-    if (result.error.code === "api_failed") return localApiFailure("暫時無法連接登入服務");
+    if (result.error.code === "api_failed") return localApiFailure(messages.errors.apiFailedLogin);
     return result;
 }
 
