@@ -69,7 +69,9 @@ Use Zustand's `create` function with `persist` for the explicitly listed local s
 - 使用 `React.useState()`、`React.useEffect()` 等 namespace API
 - Component 內 event handler 用一般 arrow function，除非有實測需要，否則不加 `React.useCallback()`
 - 非 component／hook function 使用 function declaration
-- 如建立新 project，入口 component 檔名為 `app.tsx`，並使用 `export const App`
+- 一般 TypeScript／模組檔名用 camelCase（例如 `authRepository.ts`、`authStore.ts`）
+- React component 檔名用 TitleCase（例如 `App.tsx`、`LoginForm.tsx`）
+- 如建立新 project，入口 component 檔名為 `App.tsx`，並使用 `export const App`
 - `.less` 不在本專案使用；如將來需要引入，import 必須放於所有 import 最後
 - 不使用 `any`；fixture、form input、local query params 全部有明確型別
 - 金額轉換集中於 `lib/money.ts`，日期／時區轉換集中於 `lib/date.ts`
@@ -79,7 +81,7 @@ Use Zustand's `create` function with `persist` for the explicitly listed local s
 
 ```text
 src/
-  app.tsx
+  App.tsx
   main.tsx
   routes/
   components/
@@ -89,20 +91,20 @@ src/
     auth/
     dashboard/
     transactions/
-    receipt-scan/
+    receiptScan/
     summaries/
-    recurring-rules/
+    recurringRules/
     accounts/
     categories/
     merchants/
   data/
     fixtures.ts
-    repository.ts
+    authRepository.ts
     types.ts
   stores/
-    auth-store.ts
-    ui-store.ts
-    draft-store.ts
+    authStore.ts
+    uiStore.ts
+    draftStore.ts
   hooks/
   lib/
   assets/
@@ -110,7 +112,7 @@ src/
   test/
 ```
 
-Feature 內可再分 `components/`、`hooks/`、`repository.ts`、`schema.ts` 同 `types.ts`。共用 UI 只放真正跨 feature 重用嘅 primitive，避免過早抽象。
+Feature 內可再分 `components/`、`hooks/`、`repository.ts`、`schema.ts` 同 `types.ts`。Component 檔名用 TitleCase，其餘模組檔名用 camelCase。共用 UI 只放真正跨 feature 重用嘅 primitive，避免過早抽象。
 
 ---
 
@@ -373,7 +375,7 @@ Actions：pause、resume、run now、skip next、edit、delete。
 
 ### 6.1 Local repository 規則
 
-- 所有 domain data 由 `data/repository.ts` 管理，初始資料來自 typed fixtures
+- 所有 domain data 由 `data/authRepository.ts` 管理，初始資料來自 typed fixtures
 - CRUD、搜尋、排序、分頁、summary 同 recurring 計算喺 browser 內完成
 - repository functions 必須係純同步、可測試；唔可以直接依賴 React component
 - local persistence 使用 `localStorage`；session／draft 使用 `sessionStorage`

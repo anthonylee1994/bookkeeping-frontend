@@ -40,12 +40,12 @@ async function requestAuthSession(path: string, input: AuthInput): Promise<Local
     }
 }
 
-export type RepositoryOptions = {
+export type AuthRepositoryOptions = {
     storage?: StorageAdapter;
     now?: Date;
 };
 
-export class LocalRepository {
+export class AuthRepository {
     readonly #storage: StorageAdapter | undefined;
     #state: RepositoryState;
 
@@ -54,14 +54,14 @@ export class LocalRepository {
         this.#storage = storage;
     }
 
-    static open(options: RepositoryOptions = {}): LocalResult<LocalRepository> {
+    static open(options: AuthRepositoryOptions = {}): LocalResult<AuthRepository> {
         const loaded = loadState(options.storage);
         if (!loaded.ok) {
             return loaded;
         }
 
         if (loaded.value !== null) {
-            return {ok: true, value: new LocalRepository(loaded.value, options.storage)};
+            return {ok: true, value: new AuthRepository(loaded.value, options.storage)};
         }
 
         const fixtures = createFixtureState(options.now);
@@ -69,7 +69,7 @@ export class LocalRepository {
         if (!saved.ok) {
             return saved;
         }
-        return {ok: true, value: new LocalRepository(fixtures, options.storage)};
+        return {ok: true, value: new AuthRepository(fixtures, options.storage)};
     }
 
     getState(): RepositoryState {
@@ -131,6 +131,6 @@ export class LocalRepository {
     }
 }
 
-export function openRepository(options: RepositoryOptions = {}): LocalResult<LocalRepository> {
-    return LocalRepository.open(options);
+export function openAuthRepository(options: AuthRepositoryOptions = {}): LocalResult<AuthRepository> {
+    return AuthRepository.open(options);
 }

@@ -1,19 +1,19 @@
 import axios from "axios";
 import {describe, expect, it, vi} from "vitest";
 import type {StorageAdapter} from "./persistence";
-import {AUTH_FAILURE_MESSAGE, openRepository} from "./repository";
+import {AUTH_FAILURE_MESSAGE, openAuthRepository} from "./authRepository";
 
 function createMemoryStorage(): StorageAdapter {
     return {getItem: () => null, setItem: () => undefined};
 }
 
 function repository() {
-    const opened = openRepository({storage: createMemoryStorage(), now: new Date("2026-09-14T08:00:00Z")});
+    const opened = openAuthRepository({storage: createMemoryStorage(), now: new Date("2026-09-14T08:00:00Z")});
     if (!opened.ok) throw new Error(opened.error.message);
     return opened.value;
 }
 
-describe("repository auth API client", () => {
+describe("AuthRepository auth API client", () => {
     it("posts a trimmed username to register and returns the API session", async () => {
         vi.spyOn(axios, "post").mockResolvedValueOnce({
             data: {access_token: "api-token", user: {id: "70000000-0000-4000-8000-000000000001", username: "Anthony", created_at: "2026-09-14T08:00:00.000Z"}},

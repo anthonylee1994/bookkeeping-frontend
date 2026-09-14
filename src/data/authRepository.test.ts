@@ -1,7 +1,7 @@
 import {describe, expect, it} from "vitest";
 import {PERSISTENCE_KEY} from "./persistence";
 import type {StorageAdapter} from "./persistence";
-import {openRepository} from "./repository";
+import {openAuthRepository} from "./authRepository";
 
 function createMemoryStorage(): StorageAdapter {
     const values = new Map<string, string>();
@@ -15,18 +15,18 @@ function createMemoryStorage(): StorageAdapter {
     };
 }
 
-describe("LocalRepository", () => {
+describe("AuthRepository", () => {
     const idempotencyKey = "60000000-0000-4000-8000-000000000001";
 
     it("seeds an empty store and reloads the saved snapshot", () => {
         const storage = createMemoryStorage();
-        const first = openRepository({storage, now: new Date("2026-09-14T08:00:00Z")});
+        const first = openAuthRepository({storage, now: new Date("2026-09-14T08:00:00Z")});
         expect(first.ok).toBe(true);
         if (!first.ok) {
             return;
         }
 
-        const second = openRepository({storage, now: new Date("2030-01-01T00:00:00Z")});
+        const second = openAuthRepository({storage, now: new Date("2030-01-01T00:00:00Z")});
         expect(second.ok).toBe(true);
         if (!second.ok) {
             return;
@@ -36,7 +36,7 @@ describe("LocalRepository", () => {
 
     it("returns the original transaction for a repeated idempotency key", () => {
         const storage = createMemoryStorage();
-        const opened = openRepository({storage, now: new Date("2026-09-14T08:00:00Z")});
+        const opened = openAuthRepository({storage, now: new Date("2026-09-14T08:00:00Z")});
         if (!opened.ok) {
             throw new Error(opened.error.message);
         }
@@ -61,7 +61,7 @@ describe("LocalRepository", () => {
                 }
             },
         };
-        const opened = openRepository({storage, now: new Date("2026-09-14T08:00:00Z")});
+        const opened = openAuthRepository({storage, now: new Date("2026-09-14T08:00:00Z")});
         if (!opened.ok) {
             throw new Error(opened.error.message);
         }

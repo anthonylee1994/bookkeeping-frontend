@@ -4,7 +4,7 @@
 
 ## 現況
 
-Repo 係 Vite + React 19 + TypeScript + Tailwind 4 skeleton。`src/app.tsx` 只有空殼。`package.json` 未裝 React Router、Zustand、RHF、Zod、PWA、Lucide、Recharts、date-fns、Vitest、Playwright。`.env` 有 `VITE_API_URL`，但 MVP **唔打 Rails**。`tsconfig.app.json` 未開 `strict`。
+Repo 係 Vite + React 19 + TypeScript + Tailwind 4 skeleton。`src/App.tsx` 只有空殼。`package.json` 未裝 React Router、Zustand、RHF、Zod、PWA、Lucide、Recharts、date-fns、Vitest、Playwright。`.env` 有 `VITE_API_URL`，但 MVP **唔打 Rails**。`tsconfig.app.json` 未開 `strict`。
 
 ## 兩份文件點對齊
 
@@ -39,7 +39,7 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 
 ## 關鍵決策
 
-1. **單一 source of truth**：domain data 喺 `data/repository.ts` + `appStore`。URL 管可分享 filter。RHF 管表單暫態。唔引入 React Query／SWR。
+1. **單一 source of truth**：domain data 喺 `data/authRepository.ts` + `appStore`。URL 管可分享 filter。RHF 管表單暫態。唔引入 React Query／SWR。
 2. **金額只做 integer cents**：所有加減喺 `lib/money.ts`。UI 輸入 dollar string，submit 先轉 cents。
 3. **時區固定 `Asia/Hong_Kong`**：全部 datetime 經 `lib/date.ts`。顯示 `YYYY年M月D日` + 24 小時。
 4. **Auth 係 route gate**，唔係安全邊界。Token 係本地 UUID。密碼唔 persist 明文到 authStore；users 表只存必要欄位。
@@ -75,7 +75,7 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 - `.env.example`：`VITE_APP_ENV=development`
 - `index.html`：`lang="zh-Hant-HK"`、viewport + `viewport-fit=cover`、CSP meta（`default-src 'self'`，img 按需要）、title 用繁中
 - `src/index.css`：neutral-50 bg、emerald primary、touch 44px、letter-spacing 0、safe-area、`prefers-reduced-motion`
-- 建目錄：`src/{routes,components/{ui,layout},features/{auth,dashboard,transactions,receipt-scan,summaries,recurring-rules,accounts,categories,merchants},data,stores,hooks,lib,styles,test}`
+- 建目錄：`src/{routes,components/{ui,layout},features/{auth,dashboard,transactions,receiptScan,summaries,recurringRules,accounts,categories,merchants},data,stores,hooks,lib,styles,test}`
 - 刪 Vite demo asset（`hero.png`、react/vite svg）如唔再使用
 
 **完成標準**：`pnpm dev` 起得；目錄齊；未有業務 UI 都得。
@@ -143,7 +143,7 @@ Date（`Asia/Hong_Kong`）：
 
 ## Step 3 — Fixtures、persistence、repository 核心
 
-**檔案**：`src/data/fixtures.ts`、`src/data/persistence.ts`、`src/data/repository.ts`（骨架）、`src/lib/id.ts`
+**檔案**：`src/data/fixtures.ts`、`src/data/persistence.ts`、`src/data/authRepository.ts`（骨架）、`src/lib/id.ts`
 
 - UUID：`crypto.randomUUID()`
 - Persistence key 版本化，例如 `bookkeeping.v1`
@@ -165,7 +165,7 @@ Date（`Asia/Hong_Kong`）：
 
 對照 swagger：`POST /api/v1/auth/register`、`POST /api/v1/auth/login`、`GET /api/v1/me`
 
-**檔案**：`src/data/repository.ts`（auth 部分）、`src/stores/auth-store.ts`、`src/stores/auth-store.test.ts`
+**檔案**：`src/data/authRepository.ts`（auth 部分）、`src/stores/authStore.ts`、`src/stores/authStore.test.ts`
 
 - Register：username trim 必填；password ≥ 8；username 重複 → 一般化錯誤（唔講「已存在」過細，login 失敗一律同一句）
 - Login 失敗唔透露 username 是否存在
@@ -239,7 +239,7 @@ Date（`Asia/Hong_Kong`）：
 
 ## Step 6 — appStore、uiStore、draftStore
 
-**檔案**：`src/stores/app-store.ts`、`ui-store.ts`、`draft-store.ts` + tests
+**檔案**：`src/stores/appStore.ts`、`uiStore.ts`、`draftStore.ts` + tests
 
 - `appStore`：accounts／categories／merchants／transactions／recurringRules、loading／error。Persist domain 到 `localStorage`（或 repository 自己 persist，store 只係 memory mirror——選 **repository persist，store 由 repository 寫入後 setState**，避免雙重 cache）
 - Selectors 只訂閱需要 slice：`useAppStore(s => s.transactions)`
@@ -254,7 +254,7 @@ Date（`Asia/Hong_Kong`）：
 
 ## Step 7 — URL helpers、i18n 字串、共用 hooks
 
-**檔案**：`src/lib/search-params.ts`、`src/lib/i18n.ts`（或 `messages/zh-HK.ts`）、`src/hooks/use-offline.ts`、`use-media-query.ts`、`use-toast.ts`
+**檔案**：`src/lib/searchParams.ts`、`src/lib/i18n.ts`（或 `messages/zh-HK.ts`）、`src/hooks/useOffline.ts`、`useMediaQuery.ts`、`useToast.ts`
 
 - Transaction filter serialize／parse：`from`、`to`、`kind`、`account_id`、`category_id`、`merchant_id`、`q`、`min`、`max`、`sort`、`order`、`page`、`per_page`
 - Summary：`period`、`date`、`page`
@@ -285,7 +285,7 @@ Date（`Asia/Hong_Kong`）：
 
 ## Step 9 — Layout、routing、route guard、PWA chrome
 
-**檔案**：`src/app.tsx`、`src/main.tsx`、`src/routes/*`、`src/components/layout/*`
+**檔案**：`src/App.tsx`、`src/main.tsx`、`src/routes/*`、`src/components/layout/*`
 
 Routes 跟 spec §4。Lazy load：transactions、scan、summaries、recurring、settings、recharts。
 
