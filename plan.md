@@ -4,7 +4,7 @@
 
 ## 現況
 
-Repo 係 Vite + React 19 + TypeScript + Tailwind 4 skeleton。`src/App.tsx` 只有空殼。`package.json` 未裝 React Router、Zustand、RHF、Zod、PWA、Lucide、Recharts、date-fns、Vitest、Playwright。`.env` 有 `VITE_API_URL`，但 MVP **唔打 Rails**。`tsconfig.app.json` 未開 `strict`。
+Repo 係 Vite + React 19 + TypeScript + Tailwind 4 skeleton。`src/App.tsx` 只有空殼。`package.json` 未裝 React Router、Zustand、RHF、Zod、PWA、Lucide、Recharts、Vitest、Playwright。`.env` 有 `VITE_API_URL`，但 MVP **唔打 Rails**。`tsconfig.app.json` 未開 `strict`。
 
 ## 兩份文件點對齊
 
@@ -69,7 +69,7 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 
 **做：**
 
-- 安裝：`react-router`、`zustand`、`react-hook-form`、`@hookform/resolvers`、`zod`、`lucide-react`、`recharts`、`date-fns`、`vite-plugin-pwa`、`vitest`、`@testing-library/react`、`jsdom`、`@playwright/test`
+- 安裝：`react-router`、`zustand`、`react-hook-form`、`@hookform/resolvers`、`zod`、`lucide-react`、`recharts`、`uuid`、`vite-plugin-pwa`、`vitest`、`@testing-library/react`、`jsdom`、`@playwright/test`
 - `vite.config.ts`：PWA plugin（dev 唔 enable SW）、alias 如需要
 - `tsconfig.app.json`：`strict: true`；Vitest types
 - `.env.example`：`VITE_APP_ENV=development`
@@ -119,7 +119,7 @@ Input types 直接對 swagger `*Input`。Fixtures 用同一套 Zod parse，parse
 
 ## Step 2 — Money 同 Date helpers + unit tests
 
-**檔案**：`src/lib/money.ts`、`src/lib/date.ts`、對應 `*.test.ts`
+**檔案**：`src/lib/money.ts`、`src/lib/date.ts`、`src/lib/schedule.ts`、`src/lib/calendar.ts`（內部共用 calendar primitive）、對應 `*.test.ts`
 
 Money：
 
@@ -135,7 +135,8 @@ Date（`Asia/Hong_Kong`）：
 - `toDisplayDateTime()` 24 小時
 - Month／week／day range：weekly 一至日
 - `addPeriod`／`startOfPeriod`／`endOfPeriod` for daily／weekly／monthly
-- Recurring `nextRunAt` from start_on + frequency + interval + day fields
+- Recurring `nextRunAt`（`src/lib/schedule.ts`）from start_on + frequency + interval + day fields
+- `calendar.ts` 只放 `date.ts`／`schedule.ts` 共用嘅 HK calendar primitive（`toHongKongCalendar`、`addCalendarDays`、`daysInMonth` 等），唔對外
 
 **完成標準**：spec 12.1 金額同香港日期 boundary 有 Vitest。
 
@@ -145,7 +146,7 @@ Date（`Asia/Hong_Kong`）：
 
 **檔案**：`src/data/fixtures.ts`、`src/data/persistence.ts`、`src/data/authRepository.ts`（骨架）、`src/lib/id.ts`
 
-- UUID：`crypto.randomUUID()`
+- UUID：用 `uuid` package（`v4`）
 - Persistence key 版本化，例如 `bookkeeping.v1`
 - `loadState()`／`saveState()`：失敗回 `storage_failed`，唔 throw 未處理 exception
 - Seed（註冊後或首次空庫）：
