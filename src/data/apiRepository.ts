@@ -61,11 +61,9 @@ export function localValidation<T>(message: string, fields?: LocalError["fields"
     return {ok: false, error: {code: "validation", message, ...(fields === undefined ? {} : {fields})}};
 }
 
-export async function apiRequest<T>(token: string, config: AxiosRequestConfig, schema: ZodType<T>): Promise<LocalResult<T>> {
-    const authorized = authorizedConfig(token, config);
-    if (authorized === null) return {ok: false, error: {code: "unauthorized", message: "登入已失效，請重新登入"}};
+async function request<T>(config: AxiosRequestConfig, schema: ZodType<T>): Promise<LocalResult<T>> {
     try {
-        const response = await axios.request(authorized);
+        const response = await axios.request({...config, baseURL: apiBaseUrl});
         const parsed = schema.safeParse(response.data);
         return parsed.success ? {ok: true, value: parsed.data} : {ok: false, error: {code: "api_failed", message: "服務回應格式無效"}};
     } catch (error) {
@@ -73,11 +71,21 @@ export async function apiRequest<T>(token: string, config: AxiosRequestConfig, s
     }
 }
 
+export async function publicApiRequest<T>(config: AxiosRequestConfig, schema: ZodType<T>): Promise<LocalResult<T>> {
+    return request(config, schema);
+}
+
+export async function apiRequest<T>(token: string, config: AxiosRequestConfig, schema: ZodType<T>): Promise<LocalResult<T>> {
+    const authorized = authorizedConfig(token, config);
+    if (authorized === null) return {ok: false, error: {code: "unauthorized", message: "登入已失效，請重新登入"}};
+    return request(authorized, schema);
+}
+
 export async function apiDelete(token: string, path: string): Promise<LocalResult<true>> {
     const authorized = authorizedConfig(token, {method: "DELETE", url: path});
     if (authorized === null) return {ok: false, error: {code: "unauthorized", message: "登入已失效，請重新登入"}};
     try {
-        await axios.request(authorized);
+        await axios.request({...authorized, baseURL: apiBaseUrl});
         return {ok: true, value: true};
     } catch (error) {
         return {ok: false, error: normalizeApiError(error)};

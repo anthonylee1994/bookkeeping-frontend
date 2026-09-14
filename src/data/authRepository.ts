@@ -1,13 +1,11 @@
-import axios from "axios";
-import type {AxiosError} from "axios";
 import {z} from "zod";
+import {apiRequest, publicApiRequest} from "./apiRepository";
 import {authInputSchema, userSchema} from "./schema";
 import type {AuthInput, AuthSession, LocalResult, User} from "./types";
 
 export const AUTH_TOKEN_STORAGE_KEY = "bookkeeping.auth.token";
 export const AUTH_FAILURE_MESSAGE = "登入資料無效";
 
-const apiBaseUrl = import.meta.env.VITE_API_URL ?? "";
 const authResponseSchema = z
     .object({
         token: z.string().min(1).optional(),
@@ -16,6 +14,7 @@ const authResponseSchema = z
     })
     .transform(value => ({token: value.token ?? value.access_token, user: value.user}))
     .refine((value): value is AuthSession => value.token !== undefined, {message: "Token is required"});
+const userResponseSchema = z.union([userSchema, z.object({user: userSchema}).transform(value => value.user)]);
 
 export type AuthTokenStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
@@ -23,11 +22,12 @@ function browserStorage(): AuthTokenStorage {
     return globalThis.localStorage;
 }
 
-function normalizeAuthError(error: unknown): LocalResult<never> {
-    const status = (error as AxiosError).response?.status;
-    if (status === 401) return {ok: false, error: {code: "unauthorized", message: AUTH_FAILURE_MESSAGE}};
-    if (status === 422 || status === 400) return {ok: false, error: {code: "validation", message: "請輸入有效登入資料"}};
-    return {ok: false, error: {code: "api_failed", message: "暫時無法連接登入服務"}};
+function normalizeAuthResult<T>(result: LocalResult<T>): LocalResult<T> {
+    if (result.ok) return result;
+    if (result.error.code === "unauthorized") return {ok: false, error: {code: "unauthorized", message: AUTH_FAILURE_MESSAGE}};
+    if (result.error.code === "validation") return {ok: false, error: {code: "validation", message: "請輸入有效登入資料"}};
+    if (result.error.code === "api_failed") return {ok: false, error: {code: "api_failed", message: "暫時無法連接登入服務"}};
+    return result;
 }
 
 export function getStoredAuthToken(storage?: AuthTokenStorage): string | null {
@@ -65,15 +65,10 @@ export class AuthRepository {
     }
 
     async #requestSession(path: string, input: AuthInput): Promise<LocalResult<AuthSession>> {
-        try {
-            const response = await axios.post(`${apiBaseUrl}${path}`, input);
-            const parsed = authResponseSchema.safeParse(response.data);
-            if (!parsed.success) return {ok: false, error: {code: "api_failed", message: "登入回應格式無效"}};
-            const stored = storeAuthToken(parsed.data.token, this.#storage);
-            return stored.ok ? {ok: true, value: parsed.data} : stored;
-        } catch (error) {
-            return normalizeAuthError(error);
-        }
+        const response = normalizeAuthResult(await publicApiRequest({method: "POST", url: path, data: input}, authResponseSchema));
+        if (!response.ok) return response;
+        const stored = storeAuthToken(response.value.token, this.#storage);
+        return stored.ok ? response : stored;
     }
 
     async register(input: AuthInput): Promise<LocalResult<AuthSession>> {
@@ -92,13 +87,7 @@ export class AuthRepository {
 
     async getMe(token = getStoredAuthToken(this.#storage)): Promise<LocalResult<User>> {
         if (token === null || token.trim() === "") return {ok: false, error: {code: "unauthorized", message: AUTH_FAILURE_MESSAGE}};
-        try {
-            const response = await axios.get(`${apiBaseUrl}/api/v1/me`, {headers: {Authorization: `Bearer ${token}`}});
-            const payload = z.union([userSchema, z.object({user: userSchema}).transform(value => value.user)]).safeParse(response.data);
-            return payload.success ? {ok: true, value: payload.data} : {ok: false, error: {code: "api_failed", message: "登入回應格式無效"}};
-        } catch (error) {
-            return normalizeAuthError(error);
-        }
+        return normalizeAuthResult(await apiRequest(token, {method: "GET", url: "/api/v1/me"}, userResponseSchema));
     }
 
     logout(): void {
