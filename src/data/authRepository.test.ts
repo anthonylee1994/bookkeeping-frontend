@@ -3,7 +3,7 @@ import {apiClient} from "./apiRepository";
 import {AUTH_FAILURE_MESSAGE, AUTH_TOKEN_STORAGE_KEY, AuthRepository} from "./authRepository";
 import type {AuthTokenStorage} from "./authRepository";
 
-const user = {id: "70000000-0000-4000-8000-000000000001", username: "Anthony", created_at: "2026-09-14T08:00:00.000Z"};
+const user = {id: "70000000-0000-4000-8000-000000000001", username: "Anthony", timezone: "Asia/Hong_Kong", currency: "HKD"};
 
 function createMemoryStorage(): AuthTokenStorage {
     const values = new Map<string, string>();

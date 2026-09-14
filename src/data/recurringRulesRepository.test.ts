@@ -54,17 +54,16 @@ describe("RecurringRulesRepository", () => {
     });
 
     it("calls pause, resume and skip-next action endpoints", async () => {
-        const skipped = {rule, skipped_date: rule.next_run_at};
         const request = vi
             .spyOn(apiClient, "request")
             .mockResolvedValueOnce({data: rule})
             .mockResolvedValueOnce({data: {recurring_rule: rule}})
-            .mockResolvedValueOnce({data: skipped});
+            .mockResolvedValueOnce({data: rule});
         const repository = new RecurringRulesRepository(TOKEN);
 
         expect(await repository.pause(rule.id)).toMatchObject({ok: true});
         expect(await repository.resume(rule.id)).toMatchObject({ok: true});
-        expect(await repository.skipNext(rule.id)).toEqual({ok: true, value: skipped});
+        expect(await repository.skipNext(rule.id)).toEqual({ok: true, value: rule});
         expect(request.mock.calls.map(call => call[0].url)).toEqual([`/recurring_rules/${rule.id}/pause`, `/recurring_rules/${rule.id}/resume`, `/recurring_rules/${rule.id}/skip_next`]);
     });
 

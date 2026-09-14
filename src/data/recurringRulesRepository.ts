@@ -1,15 +1,15 @@
 import {apiDelete, apiRequest} from "./apiRepository";
 import {localSuccess, localValidation} from "./localResult";
-import {recurringRuleResponseSchema, recurringRulesResponseSchema, skipNextResponseSchema, transactionResponseSchema} from "./repositorySchemas";
+import {recurringRuleResponseSchema, recurringRulesResponseSchema, transactionRowResponseSchema} from "./repositorySchemas";
 import {recurringRuleInputSchema} from "./schema";
-import type {LocalResult, RecurringRule, RecurringRuleInput, RecurringStatus, SkipNextResult, Transaction, UUID} from "./types";
+import type {LocalResult, RecurringRule, RecurringRuleInput, RecurringStatus, TransactionRow, UUID} from "./types";
 
 function validateSchedule(input: RecurringRuleInput): LocalResult<true> {
-    if (input.frequency === "weekly" && input.day_of_week === undefined) return localValidation("每週定期交易必須選擇星期", {day_of_week: "必填"});
-    if ((input.frequency === "monthly" || input.frequency === "yearly") && input.day_of_month === undefined) {
+    if (input.frequency === "weekly" && input.day_of_week == null) return localValidation("每週定期交易必須選擇星期", {day_of_week: "必填"});
+    if ((input.frequency === "monthly" || input.frequency === "yearly") && input.day_of_month == null) {
         return localValidation("定期交易必須選擇日期", {day_of_month: "必填"});
     }
-    if (input.frequency === "yearly" && input.month_of_year === undefined) return localValidation("每年定期交易必須選擇月份", {month_of_year: "必填"});
+    if (input.frequency === "yearly" && input.month_of_year == null) return localValidation("每年定期交易必須選擇月份", {month_of_year: "必填"});
     return localSuccess(true);
 }
 
@@ -55,11 +55,11 @@ export class RecurringRulesRepository {
         return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/resume`}, recurringRuleResponseSchema);
     }
 
-    async runNow(id: UUID): Promise<LocalResult<Transaction>> {
-        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/run_now`}, transactionResponseSchema);
+    async runNow(id: UUID): Promise<LocalResult<TransactionRow>> {
+        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/run_now`}, transactionRowResponseSchema);
     }
 
-    async skipNext(id: UUID): Promise<LocalResult<SkipNextResult>> {
-        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/skip_next`}, skipNextResponseSchema);
+    async skipNext(id: UUID): Promise<LocalResult<RecurringRule>> {
+        return apiRequest(this.#token, {method: "POST", url: `/recurring_rules/${id}/skip_next`}, recurringRuleResponseSchema);
     }
 }

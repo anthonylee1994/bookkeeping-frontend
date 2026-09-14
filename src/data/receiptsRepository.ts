@@ -1,8 +1,8 @@
 import {apiRequest} from "./apiRepository";
 import {localValidation} from "./localResult";
-import {aiResponseSchema, receiptUploadResponseSchema, transactionResponseSchema} from "./repositorySchemas";
+import {aiResponseSchema, receiptUploadResponseSchema, transactionRowResponseSchema} from "./repositorySchemas";
 import {transactionInputSchema, uuidSchema} from "./schema";
-import type {AiPreview, LocalResult, ReceiptUpload, Transaction, TransactionInput, UUID} from "./types";
+import type {AiPreview, LocalResult, ReceiptUpload, TransactionInput, TransactionRow, UUID} from "./types";
 
 const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 const receiptTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -27,10 +27,15 @@ export class ReceiptsRepository {
         return apiRequest(this.#token, {method: "POST", url: "/ai/parse", data: {image_url: imageUrl}}, aiResponseSchema);
     }
 
-    async confirm(input: TransactionInput, idempotencyKey: UUID): Promise<LocalResult<Transaction>> {
+    async confirm(input: TransactionInput, importLogId: UUID, idempotencyKey: UUID): Promise<LocalResult<TransactionRow>> {
+        if (!uuidSchema.safeParse(importLogId).success) return localValidation("AI log id 無效");
         if (!uuidSchema.safeParse(idempotencyKey).success) return localValidation("Idempotency key 無效");
         const parsed = transactionInputSchema.safeParse({...input, currency: "HKD", source: "ai"});
         if (!parsed.success) return localValidation("交易資料無效");
-        return apiRequest(this.#token, {method: "POST", url: "/ai/confirm", data: parsed.data, headers: {"Idempotency-Key": idempotencyKey}}, transactionResponseSchema);
+        return apiRequest(
+            this.#token,
+            {method: "POST", url: "/ai/confirm", data: {...parsed.data, ai_import_log_id: importLogId}, headers: {"Idempotency-Key": idempotencyKey}},
+            transactionRowResponseSchema
+        );
     }
 }

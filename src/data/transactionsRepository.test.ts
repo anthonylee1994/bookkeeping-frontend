@@ -51,7 +51,10 @@ describe("TransactionsRepository", () => {
         });
 
         expect(result).toMatchObject({ok: true, value: {meta: {page: 2, per_page: 10}}});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({url: "/transactions", params: expect.objectContaining({q: "咖啡", sort: "amount_cents", order: "asc", page: 2, per_page: 10})}));
+        expect(request).toHaveBeenCalledWith(
+            expect.objectContaining({url: "/transactions", params: expect.objectContaining({q: "咖啡", min_amount: 100, max_amount: 5000, sort: "amount_cents", page: 2, per_page: 10})})
+        );
+        expect(request.mock.calls[0]?.[0].params).not.toHaveProperty("order");
     });
 
     it("gets, duplicates and deletes a transaction", async () => {

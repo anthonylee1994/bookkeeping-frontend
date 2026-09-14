@@ -12,6 +12,14 @@ export const apiClient = axios.create({
 
 const INVALID_RESPONSE_MESSAGE = "服務回應格式無效";
 
+/** Backend 所有成功回應都包喺 `{data: ...}`；分頁再加 `meta`，所以有 `meta` 就唔拆。 */
+function unwrapEnvelope(body: unknown): unknown {
+    if (body !== null && typeof body === "object" && "data" in body && !("meta" in body)) {
+        return (body as {data: unknown}).data;
+    }
+    return body;
+}
+
 /** 加 Bearer token；token 係空白就回 null，由 caller 轉做 unauthorized。 */
 function authorizedConfig(token: string, config: AxiosRequestConfig): AxiosRequestConfig | null {
     if (token.trim() === "") return null;
@@ -21,7 +29,7 @@ function authorizedConfig(token: string, config: AxiosRequestConfig): AxiosReque
 async function request<T>(config: AxiosRequestConfig, schema: ZodType<T>): Promise<LocalResult<T>> {
     try {
         const response = await apiClient.request(config);
-        const parsed = schema.safeParse(response.data);
+        const parsed = schema.safeParse(unwrapEnvelope(response.data));
         return parsed.success ? localSuccess(parsed.data) : localApiFailure<T>(INVALID_RESPONSE_MESSAGE);
     } catch (error) {
         return localFailure<T>(normalizeApiError(error));

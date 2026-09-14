@@ -21,16 +21,16 @@ export const accountInputSchema = z.object({
     kind: z.enum(["cash", "bank", "credit_card", "e_wallet", "other"]),
     currency: currencySchema,
     initial_balance_cents: z.number().int().default(0),
-    icon: z.string().trim().optional(),
-    color: z.string().trim().optional(),
+    icon: z.string().trim().nullish(),
+    color: z.string().trim().nullish(),
 });
 
 export const categoryInputSchema = z.object({
     name: z.string().trim().min(1),
     kind: z.enum(["income", "expense"]),
     position: z.number().int().default(0),
-    icon: z.string().trim().optional(),
-    color: z.string().trim().optional(),
+    icon: z.string().trim().nullish(),
+    color: z.string().trim().nullish(),
 });
 
 export const merchantInputSchema = z.object({
@@ -74,22 +74,22 @@ export const recurringRuleInputSchema = z.object({
     start_on: dateSchema,
     end_on: dateSchema.nullable().optional(),
     next_run_at: dateTimeSchema,
-    day_of_week: z.number().int().min(0).max(6).optional(),
-    day_of_month: z.number().int().min(1).max(31).optional(),
-    month_of_year: z.number().int().min(1).max(12).optional(),
+    day_of_week: z.number().int().min(0).max(6).nullish(),
+    day_of_month: z.number().int().min(1).max(31).nullish(),
+    month_of_year: z.number().int().min(1).max(12).nullish(),
     status: z.enum(["active", "paused", "ended"]).default("active"),
     note: z.string().nullable().optional(),
 });
 
 /* ---------- Entity schema（input + id／timestamps／derived fields） ---------- */
 
-export const userSchema = z.object({id: uuidSchema, username: z.string().min(1), created_at: dateTimeSchema});
+export const userSchema = z.object({id: uuidSchema, username: z.string().min(1), timezone: z.string().min(1), currency: currencySchema});
 
 export const accountSchema = accountInputSchema.extend({
     id: uuidSchema,
     created_at: dateTimeSchema,
     updated_at: dateTimeSchema,
-    balance_cents: z.number().int(),
+    balance_cents: z.number().int().optional(),
 });
 
 export const categorySchema = categoryInputSchema.extend({id: uuidSchema, created_at: dateTimeSchema, updated_at: dateTimeSchema});
@@ -101,10 +101,13 @@ export const merchantSchema = merchantInputSchema.extend({
     updated_at: dateTimeSchema,
 });
 
-export const transactionSchema = transactionInputSchema.extend({
+export const transactionRowSchema = transactionInputSchema.extend({
     id: uuidSchema,
-    refund_of_id: nullableUuidSchema,
+    refund_of_id: nullableUuidSchema.optional(),
     net_amount_cents: z.number().int(),
+});
+
+export const transactionSchema = transactionRowSchema.extend({
     created_at: dateTimeSchema,
     updated_at: dateTimeSchema,
 });
@@ -127,19 +130,24 @@ export const paginationMetaSchema = z.object({
 /* ---------- AI preview ---------- */
 
 export const aiParsedFieldsSchema = z.object({
-    amount_cents: z.number().int().positive().nullable().optional(),
-    currency: currencySchema.nullable().optional(),
-    occurred_at: dateTimeSchema.nullable().optional(),
-    merchant_name: z.string().nullable().optional(),
-    category_name: z.string().nullable().optional(),
-    payment_method: z.string().nullable().optional(),
-    note: z.string().nullable().optional(),
+    amount_cents: z.number().int().positive().nullish(),
+    kind: z.enum(["income", "expense"]).nullish(),
+    occurred_at: z.string().nullish(),
+    merchant_name: z.string().nullish(),
+    category_hint: z.string().nullish(),
+    note: z.string().nullish(),
+    confidence: z.number().nullish(),
 });
 
 export const aiPreviewSchema = z.object({
-    confidence: z.number().min(0).max(1),
-    parsed: aiParsedFieldsSchema,
-    missing_fields: z.array(z.string()),
-    low_confidence_fields: z.array(z.string()),
-    image_url: z.string().url().optional(),
+    id: uuidSchema,
+    image_urls: z.array(imageUrlSchema),
+    sha256: z.string(),
+    status: z.enum(["success", "partial", "failed"]),
+    parsed: aiParsedFieldsSchema.nullable(),
+    raw_response: z.string().nullish(),
+    error: z.string().nullish(),
+    tokens_in: z.number().nullish(),
+    tokens_out: z.number().nullish(),
+    latency_ms: z.number().nullish(),
 });

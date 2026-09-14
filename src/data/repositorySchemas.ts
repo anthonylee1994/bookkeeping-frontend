@@ -1,5 +1,17 @@
 import {z} from "zod";
-import {accountSchema, aiPreviewSchema, categorySchema, merchantSchema, paginationMetaSchema, recurringRuleSchema, transactionSchema, userSchema, uuidSchema} from "./schema";
+import {
+    accountSchema,
+    aiPreviewSchema,
+    categorySchema,
+    merchantSchema,
+    paginationMetaSchema,
+    recurringRuleInputSchema,
+    recurringRuleSchema,
+    transactionRowSchema,
+    transactionSchema,
+    userSchema,
+    uuidSchema,
+} from "./schema";
 import type {AuthSession} from "./types";
 
 /* ---------- Envelope helper：backend 有時回裸 array／object，有時回 keyed envelope ---------- */
@@ -40,6 +52,7 @@ export const merchantsResponseSchema = listResponseSchema("merchants", merchantS
 export const merchantResponseSchema = itemResponseSchema("merchant", merchantSchema);
 
 export const transactionResponseSchema = itemResponseSchema("transaction", transactionSchema);
+export const transactionRowResponseSchema = itemResponseSchema("transaction", transactionRowSchema);
 
 export const recurringRulesResponseSchema = listResponseSchema("recurring_rules", recurringRuleSchema);
 export const recurringRuleResponseSchema = itemResponseSchema("recurring_rule", recurringRuleSchema);
@@ -51,39 +64,59 @@ export const paginatedTransactionsResponseSchema = z.union([
     z.object({transactions: z.array(transactionSchema), meta: paginationMetaSchema}).transform(value => ({data: value.transactions, meta: value.meta})),
 ]);
 
+export const paginatedTransactionRowsResponseSchema = z.union([
+    z.object({data: z.array(transactionRowSchema), meta: paginationMetaSchema}),
+    z.object({transactions: z.array(transactionRowSchema), meta: paginationMetaSchema}).transform(value => ({data: value.transactions, meta: value.meta})),
+]);
+
 /* ---------- Dashboard／summary ---------- */
 
-const amountDistributionSchema = z.object({id: uuidSchema.nullable(), name: z.string(), amount_cents: z.number().int()});
-const transferSummarySchema = z.object({count: z.number().int().min(0), amount_cents: z.number().int()});
+const rangeSchema = z.object({from: z.string(), to: z.string()});
+const categoryBreakdownSchema = z.object({category_id: uuidSchema.nullable(), name: z.string().nullable(), expense_cents: z.number().int(), refund_cents: z.number().int()});
+const accountBreakdownSchema = z.object({
+    account_id: uuidSchema.nullable(),
+    name: z.string().nullable(),
+    income_cents: z.number().int(),
+    expense_cents: z.number().int(),
+    refund_cents: z.number().int(),
+});
+const accountBalanceSchema = z.object({
+    id: uuidSchema,
+    name: z.string(),
+    currency: z.literal("HKD"),
+    initial_balance_cents: z.number().int(),
+    balance_cents: z.number().int(),
+});
+const transferSummarySchema = z.object({count: z.number().int().min(0), total_cents: z.number().int()});
+const recurringRuleSummarySchema = recurringRuleInputSchema.extend({id: uuidSchema});
 
 export const summaryResponseSchema = z.object({
-    period: z.enum(["daily", "weekly", "monthly"]),
-    from: z.string(),
-    to: z.string(),
+    range: rangeSchema,
     income_cents: z.number().int(),
     expense_cents: z.number().int(),
     refund_cents: z.number().int(),
     net_cents: z.number().int(),
-    category_distribution: z.array(amountDistributionSchema),
-    account_distribution: z.array(amountDistributionSchema),
+    by_category: z.array(categoryBreakdownSchema),
+    by_account: z.array(accountBreakdownSchema),
     transfers: transferSummarySchema,
-    transactions: paginatedTransactionsResponseSchema,
+    transactions: paginatedTransactionRowsResponseSchema,
 });
 
 export const dashboardResponseSchema = z.object({
-    from: z.string(),
-    to: z.string(),
+    range: rangeSchema,
     income_cents: z.number().int(),
     expense_cents: z.number().int(),
     refund_cents: z.number().int(),
+    net_expense_cents: z.number().int(),
     net_cents: z.number().int(),
-    top_expense_categories: z.array(amountDistributionSchema),
-    account_balances: z.array(accountSchema),
-    upcoming_recurring_rules: z.array(recurringRuleSchema),
-    recent_transactions: z.array(transactionSchema),
+    recent_transactions: z.array(transactionRowSchema),
+    by_category: z.array(categoryBreakdownSchema),
+    accounts: z.array(accountBalanceSchema),
+    account_balances: z.array(accountBalanceSchema),
+    upcoming_recurring: z.array(recurringRuleSummarySchema),
+    recurring_reminders: z.array(recurringRuleSummarySchema),
 });
 
 /* ---------- Receipt／recurring action ---------- */
 
-export const receiptUploadResponseSchema = z.object({image_url: z.string().min(1), sha256: z.string().regex(/^[a-f\d]{64}$/i)});
-export const skipNextResponseSchema = z.object({rule: recurringRuleSchema, skipped_date: z.string()});
+export const receiptUploadResponseSchema = z.object({url: z.string().min(1), sha256: z.string().regex(/^[a-f\d]{64}$/i)});

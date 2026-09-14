@@ -24,8 +24,13 @@ export class TransactionsRepository {
     }
 
     async list(filters: TransactionFilters = {}): Promise<LocalResult<Paginated<Transaction>>> {
-        const {keyword, ...params} = filters;
-        return apiRequest(this.#token, {method: "GET", url: "/transactions", params: {...params, q: keyword}}, paginatedTransactionsResponseSchema);
+        const {keyword, min_amount_cents, max_amount_cents, sort, order, ...params} = filters;
+        const query: Record<string, unknown> = {...params};
+        if (keyword !== undefined && keyword !== "") query.q = keyword;
+        if (min_amount_cents !== undefined) query.min_amount = min_amount_cents;
+        if (max_amount_cents !== undefined) query.max_amount = max_amount_cents;
+        if (sort !== undefined) query.sort = order === "desc" ? `-${sort}` : sort;
+        return apiRequest(this.#token, {method: "GET", url: "/transactions", params: query}, paginatedTransactionsResponseSchema);
     }
 
     async get(id: UUID): Promise<LocalResult<Transaction>> {

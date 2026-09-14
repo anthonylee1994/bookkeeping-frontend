@@ -7,7 +7,8 @@ import {AUTH_STORAGE_KEY, hydrateAuthStore, subscribeToAuthStorageEvents, useAut
 const user: User = {
     id: "70000000-0000-4000-8000-000000000001",
     username: "Anthony",
-    created_at: "2026-09-14T08:00:00.000Z",
+    timezone: "Asia/Hong_Kong",
+    currency: "HKD",
 };
 const token = "opaque.api.token";
 

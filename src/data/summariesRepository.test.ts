@@ -6,16 +6,14 @@ const TOKEN = "api-token";
 
 function summaryResponse() {
     return {
-        period: "monthly" as const,
-        from: "2026-08-31T16:00:00.000Z",
-        to: "2026-09-30T15:59:59.999Z",
+        range: {from: "2026-08-31T16:00:00.000Z", to: "2026-09-30T15:59:59.999Z"},
         income_cents: 0,
         expense_cents: 0,
         refund_cents: 0,
         net_cents: 0,
-        category_distribution: [],
-        account_distribution: [],
-        transfers: {count: 1, amount_cents: 20000},
+        by_category: [],
+        by_account: [],
+        transfers: {count: 1, total_cents: 20000},
         transactions: {data: [], meta: {page: 1, per_page: 25, total: 0, total_pages: 0}},
     };
 }

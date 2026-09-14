@@ -18,16 +18,16 @@ export type AccountInput = {
     kind: AccountKind;
     currency: Currency;
     initial_balance_cents?: number;
-    icon?: string;
-    color?: string;
+    icon?: string | null;
+    color?: string | null;
 };
 
 export type CategoryInput = {
     name: string;
     kind: CategoryKind;
     position?: number;
-    icon?: string;
-    color?: string;
+    icon?: string | null;
+    color?: string | null;
 };
 
 export type MerchantInput = {
@@ -64,9 +64,9 @@ export type RecurringRuleInput = {
     start_on: string;
     end_on?: string | null;
     next_run_at: string;
-    day_of_week?: number;
-    day_of_month?: number;
-    month_of_year?: number;
+    day_of_week?: number | null;
+    day_of_month?: number | null;
+    month_of_year?: number | null;
     status?: RecurringStatus;
     note?: string | null;
 };
@@ -74,7 +74,8 @@ export type RecurringRuleInput = {
 export type User = {
     id: UUID;
     username: string;
-    created_at: string;
+    timezone: string;
+    currency: Currency;
 };
 
 export type AuthSession = {
@@ -87,7 +88,7 @@ export type Account = Omit<AccountInput, "initial_balance_cents"> & {
     initial_balance_cents: number;
     created_at: string;
     updated_at: string;
-    balance_cents: number;
+    balance_cents?: number;
 };
 
 export type Category = Omit<CategoryInput, "position"> & {
@@ -104,13 +105,16 @@ export type Merchant = MerchantInput & {
     updated_at: string;
 };
 
-export type Transaction = Omit<TransactionInput, "currency" | "source" | "image_urls"> & {
+export type TransactionRow = Omit<TransactionInput, "currency" | "source" | "image_urls"> & {
     id: UUID;
     currency: Currency;
     source: TransactionSource;
     image_urls: string[];
-    refund_of_id: UUID | null;
+    refund_of_id?: UUID | null;
     net_amount_cents: number;
+};
+
+export type Transaction = TransactionRow & {
     created_at: string;
     updated_at: string;
 };
@@ -123,6 +127,26 @@ export type RecurringRule = Omit<RecurringRuleInput, "currency" | "interval" | "
     note: string | null;
     created_at: string;
     updated_at: string;
+};
+
+export type RecurringRuleSummary = {
+    id: UUID;
+    account_id: UUID;
+    category_id?: UUID | null;
+    merchant_id?: UUID | null;
+    kind: "income" | "expense";
+    amount_cents: number;
+    currency: Currency;
+    frequency: RecurringFrequency;
+    interval: number;
+    start_on: string;
+    end_on?: string | null;
+    next_run_at: string;
+    day_of_week?: number | null;
+    day_of_month?: number | null;
+    month_of_year?: number | null;
+    status: RecurringStatus;
+    note?: string | null;
 };
 
 export type PaginationMeta = {
@@ -144,20 +168,25 @@ export type LocalResult<T> = {ok: true; value: T} | {ok: false; error: LocalErro
 
 export type AiParsedFields = {
     amount_cents?: number | null;
-    currency?: Currency | null;
+    kind?: "income" | "expense" | null;
     occurred_at?: string | null;
     merchant_name?: string | null;
-    category_name?: string | null;
-    payment_method?: string | null;
+    category_hint?: string | null;
     note?: string | null;
+    confidence?: number | null;
 };
 
 export type AiPreview = {
-    confidence: number;
-    parsed: AiParsedFields;
-    missing_fields: string[];
-    low_confidence_fields: string[];
-    image_url?: string;
+    id: UUID;
+    image_urls: string[];
+    sha256: string;
+    status: "success" | "partial" | "failed";
+    parsed: AiParsedFields | null;
+    raw_response?: string | null;
+    error?: string | null;
+    tokens_in?: number | null;
+    tokens_out?: number | null;
+    latency_ms?: number | null;
 };
 
 export type TransactionSortField = "occurred_at" | "amount_cents" | "created_at";
@@ -184,42 +213,64 @@ export type Paginated<T> = {
     meta: PaginationMeta;
 };
 
-export type AmountDistribution = {
-    id: UUID | null;
+export type Range = {
+    from: string;
+    to: string;
+};
+
+export type CategoryBreakdown = {
+    category_id: UUID | null;
+    name: string | null;
+    expense_cents: number;
+    refund_cents: number;
+};
+
+export type AccountBreakdown = {
+    account_id: UUID | null;
+    name: string | null;
+    income_cents: number;
+    expense_cents: number;
+    refund_cents: number;
+};
+
+export type AccountBalance = {
+    id: UUID;
     name: string;
-    amount_cents: number;
+    currency: Currency;
+    initial_balance_cents: number;
+    balance_cents: number;
 };
 
 export type TransferSummary = {
     count: number;
-    amount_cents: number;
+    total_cents: number;
 };
 
 export type Summary = {
-    period: SummaryPeriod;
-    from: string;
-    to: string;
+    range: Range;
     income_cents: number;
     expense_cents: number;
     refund_cents: number;
     net_cents: number;
-    category_distribution: AmountDistribution[];
-    account_distribution: AmountDistribution[];
+    by_category: CategoryBreakdown[];
+    by_account: AccountBreakdown[];
     transfers: TransferSummary;
-    transactions: Paginated<Transaction>;
+    transactions: Paginated<TransactionRow>;
 };
 
 export type Dashboard = {
-    from: string;
-    to: string;
+    range: Range;
     income_cents: number;
     expense_cents: number;
     refund_cents: number;
+    net_expense_cents: number;
     net_cents: number;
-    top_expense_categories: AmountDistribution[];
-    account_balances: Account[];
-    upcoming_recurring_rules: RecurringRule[];
-    recent_transactions: Transaction[];
+    recent_transactions: TransactionRow[];
+    by_category: CategoryBreakdown[];
+    accounts: AccountBalance[];
+    account_balances: AccountBalance[];
+    upcoming_recurring: RecurringRuleSummary[];
+    recurring_reminders: RecurringRuleSummary[];
 };
 
 export type RefundInput = {
@@ -229,11 +280,6 @@ export type RefundInput = {
 };
 
 export type ReceiptUpload = {
-    image_url: string;
+    url: string;
     sha256: string;
-};
-
-export type SkipNextResult = {
-    rule: RecurringRule;
-    skipped_date: string;
 };

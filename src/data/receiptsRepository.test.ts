@@ -5,7 +5,25 @@ import {ReceiptsRepository} from "./receiptsRepository";
 
 const TOKEN = "api-token";
 const IDEMPOTENCY_KEY = "60000000-0000-4000-8000-000000000001";
+const IMPORT_LOG_ID = "80000000-0000-4000-8000-000000000001";
 const transaction = domainTestState.transactions[0];
+const transactionRow = {
+    id: transaction.id,
+    account_id: transaction.account_id,
+    category_id: transaction.category_id,
+    merchant_id: transaction.merchant_id,
+    kind: transaction.kind,
+    amount_cents: transaction.amount_cents,
+    currency: transaction.currency,
+    occurred_at: transaction.occurred_at,
+    note: transaction.note,
+    payment_method: transaction.payment_method,
+    source: transaction.source,
+    transfer_account_id: transaction.transfer_account_id,
+    image_urls: transaction.image_urls,
+    refund_of_id: transaction.refund_of_id,
+    net_amount_cents: transaction.net_amount_cents,
+};
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -13,9 +31,9 @@ afterEach(() => {
 
 describe("ReceiptsRepository", () => {
     it("uploads a supported receipt as multipart form data", async () => {
-        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {image_url: "https://example.test/receipt.png", sha256: "a".repeat(64)}});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {url: "https://example.test/receipt.png", sha256: "a".repeat(64)}});
 
-        expect(await new ReceiptsRepository(TOKEN).upload(new File(["receipt"], "receipt.png", {type: "image/png"}))).toMatchObject({ok: true});
+        expect(await new ReceiptsRepository(TOKEN).upload(new File(["receipt"], "receipt.png", {type: "image/png"}))).toMatchObject({ok: true, value: {url: "https://example.test/receipt.png"}});
         const body = request.mock.calls[0]?.[0].data;
         expect(body).toBeInstanceOf(FormData);
         expect((body as FormData).get("file")).toBeInstanceOf(File);
@@ -32,20 +50,20 @@ describe("ReceiptsRepository", () => {
 
     it("parses a receipt preview", async () => {
         const preview = {
-            confidence: 0.9,
-            parsed: {amount_cents: 1200, currency: "HKD" as const, occurred_at: "2026-09-14T16:00:00+08:00"},
-            missing_fields: [],
-            low_confidence_fields: [],
-            image_url: "https://example.test/receipt.png",
+            id: IMPORT_LOG_ID,
+            image_urls: ["https://example.test/receipt.png"],
+            sha256: "a".repeat(64),
+            status: "success" as const,
+            parsed: {amount_cents: 1200, kind: "expense" as const, occurred_at: "2026-09-14T16:00:00+08:00", merchant_name: "茶餐廳", confidence: 0.9},
         };
-        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {preview}});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: preview});
 
-        expect(await new ReceiptsRepository(TOKEN).parse(preview.image_url)).toEqual({ok: true, value: preview});
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/parse", data: {image_url: preview.image_url}}));
+        expect(await new ReceiptsRepository(TOKEN).parse(preview.image_urls[0])).toEqual({ok: true, value: preview});
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/parse", data: {image_url: preview.image_urls[0]}}));
     });
 
-    it("confirms an AI transaction with an idempotency key", async () => {
-        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transaction}});
+    it("confirms an AI transaction with the import log id and an idempotency key", async () => {
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transaction: transactionRow}});
         const input = {
             account_id: transaction.account_id,
             category_id: transaction.category_id,
@@ -54,9 +72,14 @@ describe("ReceiptsRepository", () => {
             occurred_at: transaction.occurred_at,
         };
 
-        expect(await new ReceiptsRepository(TOKEN).confirm(input, IDEMPOTENCY_KEY)).toMatchObject({ok: true});
+        expect(await new ReceiptsRepository(TOKEN).confirm(input, IMPORT_LOG_ID, IDEMPOTENCY_KEY)).toMatchObject({ok: true});
         expect(request).toHaveBeenCalledWith(
-            expect.objectContaining({method: "POST", url: "/ai/confirm", data: expect.objectContaining({source: "ai"}), headers: expect.objectContaining({"Idempotency-Key": IDEMPOTENCY_KEY})})
+            expect.objectContaining({
+                method: "POST",
+                url: "/ai/confirm",
+                data: expect.objectContaining({source: "ai", ai_import_log_id: IMPORT_LOG_ID}),
+                headers: expect.objectContaining({"Idempotency-Key": IDEMPOTENCY_KEY}),
+            })
         );
     });
 });
