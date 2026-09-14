@@ -283,3 +283,27 @@ export type ReceiptUpload = {
     url: string;
     sha256: string;
 };
+
+/* ---------- Workflow／draft state（draftStore） ---------- */
+
+export type TransactionDraft = {
+    kind: TransactionKind;
+    amount: string;
+    account_id: UUID | null;
+    transfer_account_id: UUID | null;
+    category_id: UUID | null;
+    merchant_id: UUID | null;
+    merchant_name: string;
+    occurred_at: string;
+    payment_method: string;
+    note: string;
+    image_urls: string[];
+};
+
+export type AiScanStep = "idle" | "selected" | "parsing" | "review" | "failed";
+
+export type AiScanDraft = {
+    step: AiScanStep;
+    imageUrl: string | null;
+    preview: AiPreview | null;
+};
