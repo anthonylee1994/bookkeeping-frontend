@@ -126,6 +126,8 @@ export type LocalError = {
     fields?: Record<string, string | string[]>;
 };
 
+export type LocalResult<T> = {ok: true; value: T} | {ok: false; error: LocalError};
+
 export type AiParsedFields = {
     amount_cents?: number | null;
     currency?: Currency | null;

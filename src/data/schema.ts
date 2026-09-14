@@ -5,6 +5,7 @@ const currency = z.literal("HKD");
 const dateTime = z.iso.datetime({offset: true});
 const date = z.iso.date();
 const nullableUuid = uuid.nullable();
+const imageUrl = z.union([z.string().url(), z.string().regex(/^\/(?!\/)/)]);
 
 export const authInputSchema = z.object({
     username: z.string().trim().min(1),
@@ -45,7 +46,7 @@ export const transactionInputSchema = z.object({
     payment_method: z.string().nullable().optional(),
     source: z.enum(["manual", "recurring", "ai", "import"]).default("manual"),
     transfer_account_id: nullableUuid.optional(),
-    image_urls: z.array(z.string().url()).default([]),
+    image_urls: z.array(imageUrl).default([]),
 });
 
 export const recurringRuleInputSchema = z.object({
