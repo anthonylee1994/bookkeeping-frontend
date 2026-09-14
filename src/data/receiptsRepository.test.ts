@@ -1,6 +1,6 @@
-import axios from "axios";
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {domainTestState} from "../test/domainFixtures";
+import {apiClient} from "./apiRepository";
 import {ReceiptsRepository} from "./receiptsRepository";
 
 const TOKEN = "api-token";
@@ -13,7 +13,7 @@ afterEach(() => {
 
 describe("ReceiptsRepository", () => {
     it("uploads a supported receipt as multipart form data", async () => {
-        const request = vi.spyOn(axios, "request").mockResolvedValue({data: {image_url: "https://example.test/receipt.png", sha256: "a".repeat(64)}});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {image_url: "https://example.test/receipt.png", sha256: "a".repeat(64)}});
 
         expect(await new ReceiptsRepository(TOKEN).upload(new File(["receipt"], "receipt.png", {type: "image/png"}))).toMatchObject({ok: true});
         const body = request.mock.calls[0]?.[0].data;
@@ -22,7 +22,7 @@ describe("ReceiptsRepository", () => {
     });
 
     it("rejects unsupported and oversized receipt files locally", async () => {
-        const request = vi.spyOn(axios, "request");
+        const request = vi.spyOn(apiClient, "request");
         const repository = new ReceiptsRepository(TOKEN);
 
         expect(await repository.upload(new File(["text"], "receipt.txt", {type: "text/plain"}))).toMatchObject({ok: false, error: {code: "validation"}});
@@ -38,14 +38,14 @@ describe("ReceiptsRepository", () => {
             low_confidence_fields: [],
             image_url: "https://example.test/receipt.png",
         };
-        const request = vi.spyOn(axios, "request").mockResolvedValue({data: {preview}});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {preview}});
 
         expect(await new ReceiptsRepository(TOKEN).parse(preview.image_url)).toEqual({ok: true, value: preview});
         expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/api/v1/ai/parse", data: {image_url: preview.image_url}}));
     });
 
     it("confirms an AI transaction with an idempotency key", async () => {
-        const request = vi.spyOn(axios, "request").mockResolvedValue({data: {transaction}});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transaction}});
         const input = {
             account_id: transaction.account_id,
             category_id: transaction.category_id,

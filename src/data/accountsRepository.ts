@@ -1,7 +1,13 @@
-import {accountInputSchema} from "./schema";
+import {apiDelete, apiRequest} from "./apiRepository";
+import {localSuccess, localValidation} from "./localResult";
 import {accountResponseSchema, accountsResponseSchema} from "./repositorySchemas";
-import {apiDelete, apiRequest, localValidation} from "./apiRepository";
+import {accountInputSchema} from "./schema";
 import type {Account, AccountInput, LocalResult, UUID} from "./types";
+
+function parseAccountInput(input: AccountInput): LocalResult<AccountInput> {
+    const parsed = accountInputSchema.safeParse({...input, currency: "HKD"});
+    return parsed.success ? localSuccess(parsed.data) : localValidation("帳戶資料無效");
+}
 
 export class AccountsRepository {
     readonly #token: string;
@@ -15,15 +21,15 @@ export class AccountsRepository {
     }
 
     async create(input: AccountInput): Promise<LocalResult<Account>> {
-        const parsed = accountInputSchema.safeParse({...input, currency: "HKD"});
-        if (!parsed.success) return localValidation("帳戶資料無效");
-        return apiRequest(this.#token, {method: "POST", url: "/api/v1/accounts", data: parsed.data}, accountResponseSchema);
+        const parsed = parseAccountInput(input);
+        if (!parsed.ok) return parsed;
+        return apiRequest(this.#token, {method: "POST", url: "/api/v1/accounts", data: parsed.value}, accountResponseSchema);
     }
 
     async update(id: UUID, input: AccountInput): Promise<LocalResult<Account>> {
-        const parsed = accountInputSchema.safeParse({...input, currency: "HKD"});
-        if (!parsed.success) return localValidation("帳戶資料無效");
-        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/accounts/${id}`, data: parsed.data}, accountResponseSchema);
+        const parsed = parseAccountInput(input);
+        if (!parsed.ok) return parsed;
+        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/accounts/${id}`, data: parsed.value}, accountResponseSchema);
     }
 
     async delete(id: UUID): Promise<LocalResult<true>> {

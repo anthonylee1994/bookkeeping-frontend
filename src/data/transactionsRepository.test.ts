@@ -1,6 +1,6 @@
-import axios from "axios";
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {domainTestState} from "../test/domainFixtures";
+import {apiClient} from "./apiRepository";
 import {TransactionsRepository} from "./transactionsRepository";
 import type {TransactionInput} from "./types";
 
@@ -32,7 +32,7 @@ afterEach(() => {
 
 describe("TransactionsRepository", () => {
     it("forwards filters, sorting and pagination", async () => {
-        const request = vi.spyOn(axios, "request").mockResolvedValue({data: {transactions: [transaction], meta: {page: 2, per_page: 10, total: 11, total_pages: 2}}});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transactions: [transaction], meta: {page: 2, per_page: 10, total: 11, total_pages: 2}}});
 
         const result = await new TransactionsRepository(TOKEN).list({
             from: "2026-09-01",
@@ -57,7 +57,7 @@ describe("TransactionsRepository", () => {
     });
 
     it("gets, duplicates and deletes a transaction", async () => {
-        const request = vi.spyOn(axios, "request").mockResolvedValueOnce({data: transaction}).mockResolvedValueOnce({data: {transaction}}).mockResolvedValueOnce({data: null});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValueOnce({data: transaction}).mockResolvedValueOnce({data: {transaction}}).mockResolvedValueOnce({data: null});
         const repository = new TransactionsRepository(TOKEN);
 
         expect(await repository.get(transaction.id)).toMatchObject({ok: true});
@@ -71,7 +71,7 @@ describe("TransactionsRepository", () => {
     });
 
     it("creates idempotently and keeps source out of updates", async () => {
-        const request = vi.spyOn(axios, "request").mockResolvedValue({data: {transaction}});
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transaction}});
         const repository = new TransactionsRepository(TOKEN);
 
         expect(await repository.create(expenseInput(), IDEMPOTENCY_KEY)).toMatchObject({ok: true});
@@ -81,7 +81,7 @@ describe("TransactionsRepository", () => {
     });
 
     it("validates transfer account and hidden fields before requesting", async () => {
-        const request = vi.spyOn(axios, "request");
+        const request = vi.spyOn(apiClient, "request");
         const repository = new TransactionsRepository(TOKEN);
 
         expect(await repository.create({...expenseInput(), kind: "transfer", category_id: null, transfer_account_id: account.id}, IDEMPOTENCY_KEY)).toMatchObject({
@@ -96,7 +96,7 @@ describe("TransactionsRepository", () => {
     });
 
     it("posts refunds and exposes the backend refund cap error", async () => {
-        const request = vi.spyOn(axios, "request").mockRejectedValue({response: {status: 422, data: {message: "退款金額超過可退款上限", fields: {amount_cents: ["最多可退 7000"]}}}});
+        const request = vi.spyOn(apiClient, "request").mockRejectedValue({response: {status: 422, data: {message: "退款金額超過可退款上限", fields: {amount_cents: ["最多可退 7000"]}}}});
 
         expect(await new TransactionsRepository(TOKEN).refund(transaction.id, {amount_cents: 7001, occurred_at: "2026-09-14T16:00:00+08:00"})).toEqual({
             ok: false,

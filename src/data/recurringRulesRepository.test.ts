@@ -1,6 +1,6 @@
-import axios from "axios";
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {domainTestState} from "../test/domainFixtures";
+import {apiClient} from "./apiRepository";
 import {RecurringRulesRepository} from "./recurringRulesRepository";
 
 const TOKEN = "api-token";
@@ -34,7 +34,7 @@ afterEach(() => {
 describe("RecurringRulesRepository", () => {
     it("lists, creates, updates and deletes recurring rules", async () => {
         const request = vi
-            .spyOn(axios, "request")
+            .spyOn(apiClient, "request")
             .mockResolvedValueOnce({data: {recurring_rules: domainTestState.recurringRules}})
             .mockResolvedValueOnce({data: rule})
             .mockResolvedValueOnce({data: {recurring_rule: rule}})
@@ -56,7 +56,7 @@ describe("RecurringRulesRepository", () => {
     it("calls pause, resume and skip-next action endpoints", async () => {
         const skipped = {rule, skipped_date: rule.next_run_at};
         const request = vi
-            .spyOn(axios, "request")
+            .spyOn(apiClient, "request")
             .mockResolvedValueOnce({data: rule})
             .mockResolvedValueOnce({data: {recurring_rule: rule}})
             .mockResolvedValueOnce({data: skipped});
@@ -73,13 +73,13 @@ describe("RecurringRulesRepository", () => {
     });
 
     it("maps run-now already-materialized conflicts", async () => {
-        vi.spyOn(axios, "request").mockRejectedValue({response: {status: 409, data: {code: "already_materialized"}}});
+        vi.spyOn(apiClient, "request").mockRejectedValue({response: {status: 409, data: {code: "already_materialized"}}});
 
         expect(await new RecurringRulesRepository(TOKEN).runNow(rule.id)).toEqual({ok: false, error: {code: "conflict_already_materialized", message: "今日已經產生過交易"}});
     });
 
     it("validates frequency-specific schedule fields locally", async () => {
-        const request = vi.spyOn(axios, "request");
+        const request = vi.spyOn(apiClient, "request");
         const repository = new RecurringRulesRepository(TOKEN);
 
         expect(await repository.create({...recurringInput(), frequency: "weekly", day_of_week: undefined})).toMatchObject({ok: false, error: {code: "validation"}});

@@ -1,30 +1,59 @@
 import {z} from "zod";
-import {accountSchema, aiPreviewSchema, categorySchema, merchantSchema, paginationMetaSchema, recurringRuleSchema, transactionSchema} from "./schema";
+import {accountSchema, aiPreviewSchema, categorySchema, merchantSchema, paginationMetaSchema, recurringRuleSchema, transactionSchema, userSchema, uuidSchema} from "./schema";
+import type {AuthSession} from "./types";
 
-function listResponseSchema<T extends z.ZodType>(key: string, itemSchema: T) {
+/* ---------- Envelope helper：backend 有時回裸 array／object，有時回 keyed envelope ---------- */
+
+/** `[...]` 或 `{<key>: [...]}` → `[...]` */
+export function listResponseSchema<Item>(key: string, itemSchema: z.ZodType<Item>) {
     const items = z.array(itemSchema);
-    return z.union([items, z.object({[key]: items})]).transform(value => (Array.isArray(value) ? value : value[key]));
+    return z.union([items, z.object({[key]: items}).transform(value => value[key])]);
 }
 
+/** `<item>` 或 `{<key>: <item>}` → `<item>` */
+export function itemResponseSchema<Item>(key: string, itemSchema: z.ZodType<Item>) {
+    return z.union([itemSchema, z.object({[key]: itemSchema}).transform(value => value[key])]);
+}
+
+/* ---------- Auth ---------- */
+
+export const authResponseSchema = z
+    .object({
+        token: z.string().min(1).optional(),
+        access_token: z.string().min(1).optional(),
+        user: userSchema,
+    })
+    .transform(value => ({token: value.token ?? value.access_token, user: value.user}))
+    .refine((value): value is AuthSession => value.token !== undefined, {message: "Token is required"});
+
+export const userResponseSchema = itemResponseSchema("user", userSchema);
+
+/* ---------- Domain entity ---------- */
+
 export const accountsResponseSchema = listResponseSchema("accounts", accountSchema);
-export const accountResponseSchema = z.union([accountSchema, z.object({account: accountSchema}).transform(value => value.account)]);
+export const accountResponseSchema = itemResponseSchema("account", accountSchema);
+
 export const categoriesResponseSchema = listResponseSchema("categories", categorySchema);
-export const categoryResponseSchema = z.union([categorySchema, z.object({category: categorySchema}).transform(value => value.category)]);
+export const categoryResponseSchema = itemResponseSchema("category", categorySchema);
+
 export const merchantsResponseSchema = listResponseSchema("merchants", merchantSchema);
-export const merchantResponseSchema = z.union([merchantSchema, z.object({merchant: merchantSchema}).transform(value => value.merchant)]);
-export const transactionResponseSchema = z.union([transactionSchema, z.object({transaction: transactionSchema}).transform(value => value.transaction)]);
+export const merchantResponseSchema = itemResponseSchema("merchant", merchantSchema);
+
+export const transactionResponseSchema = itemResponseSchema("transaction", transactionSchema);
+
 export const recurringRulesResponseSchema = listResponseSchema("recurring_rules", recurringRuleSchema);
-export const recurringRuleResponseSchema = z.union([recurringRuleSchema, z.object({recurring_rule: recurringRuleSchema}).transform(value => value.recurring_rule)]);
-export const aiResponseSchema = z.union([aiPreviewSchema, z.object({preview: aiPreviewSchema}).transform(value => value.preview)]);
+export const recurringRuleResponseSchema = itemResponseSchema("recurring_rule", recurringRuleSchema);
 
-export const paginatedTransactionsResponseSchema = z
-    .union([
-        z.object({data: z.array(transactionSchema), meta: paginationMetaSchema}),
-        z.object({transactions: z.array(transactionSchema), meta: paginationMetaSchema}).transform(value => ({data: value.transactions, meta: value.meta})),
-    ])
-    .transform(value => value);
+export const aiResponseSchema = itemResponseSchema("preview", aiPreviewSchema);
 
-const amountDistributionSchema = z.object({id: z.string().uuid().nullable(), name: z.string(), amount_cents: z.number().int()});
+export const paginatedTransactionsResponseSchema = z.union([
+    z.object({data: z.array(transactionSchema), meta: paginationMetaSchema}),
+    z.object({transactions: z.array(transactionSchema), meta: paginationMetaSchema}).transform(value => ({data: value.transactions, meta: value.meta})),
+]);
+
+/* ---------- Dashboard／summary ---------- */
+
+const amountDistributionSchema = z.object({id: uuidSchema.nullable(), name: z.string(), amount_cents: z.number().int()});
 const transferSummarySchema = z.object({count: z.number().int().min(0), amount_cents: z.number().int()});
 
 export const summaryResponseSchema = z.object({
@@ -53,6 +82,8 @@ export const dashboardResponseSchema = z.object({
     upcoming_recurring_rules: z.array(recurringRuleSchema),
     recent_transactions: z.array(transactionSchema),
 });
+
+/* ---------- Receipt／recurring action ---------- */
 
 export const receiptUploadResponseSchema = z.object({image_url: z.string().min(1), sha256: z.string().regex(/^[a-f\d]{64}$/i)});
 export const skipNextResponseSchema = z.object({rule: recurringRuleSchema, skipped_date: z.string()});

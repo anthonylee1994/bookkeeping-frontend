@@ -1,12 +1,11 @@
-import {z} from "zod";
-import {apiRequest, localValidation} from "./apiRepository";
+import {apiRequest} from "./apiRepository";
+import {localValidation} from "./localResult";
 import {aiResponseSchema, receiptUploadResponseSchema, transactionResponseSchema} from "./repositorySchemas";
-import {transactionInputSchema} from "./schema";
+import {transactionInputSchema, uuidSchema} from "./schema";
 import type {AiPreview, LocalResult, ReceiptUpload, Transaction, TransactionInput, UUID} from "./types";
 
 const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 const receiptTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-const uuidSchema = z.string().uuid();
 
 export class ReceiptsRepository {
     readonly #token: string;

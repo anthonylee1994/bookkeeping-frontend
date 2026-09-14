@@ -1,4 +1,5 @@
-import {apiDelete, apiRequest, localValidation} from "./apiRepository";
+import {apiDelete, apiRequest} from "./apiRepository";
+import {localValidation} from "./localResult";
 import {merchantResponseSchema, merchantsResponseSchema} from "./repositorySchemas";
 import {merchantInputSchema} from "./schema";
 import type {LocalResult, Merchant, MerchantInput, UUID} from "./types";

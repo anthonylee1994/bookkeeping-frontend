@@ -1,7 +1,13 @@
-import {apiDelete, apiRequest, localValidation} from "./apiRepository";
+import {apiDelete, apiRequest} from "./apiRepository";
+import {localSuccess, localValidation} from "./localResult";
 import {categoriesResponseSchema, categoryResponseSchema} from "./repositorySchemas";
 import {categoryInputSchema} from "./schema";
 import type {Category, CategoryInput, CategoryKind, LocalResult, UUID} from "./types";
+
+function parseCategoryInput(input: CategoryInput): LocalResult<CategoryInput> {
+    const parsed = categoryInputSchema.safeParse(input);
+    return parsed.success ? localSuccess(parsed.data) : localValidation("分類資料無效");
+}
 
 export class CategoriesRepository {
     readonly #token: string;
@@ -15,15 +21,15 @@ export class CategoriesRepository {
     }
 
     async create(input: CategoryInput): Promise<LocalResult<Category>> {
-        const parsed = categoryInputSchema.safeParse(input);
-        if (!parsed.success) return localValidation("分類資料無效");
-        return apiRequest(this.#token, {method: "POST", url: "/api/v1/categories", data: parsed.data}, categoryResponseSchema);
+        const parsed = parseCategoryInput(input);
+        if (!parsed.ok) return parsed;
+        return apiRequest(this.#token, {method: "POST", url: "/api/v1/categories", data: parsed.value}, categoryResponseSchema);
     }
 
     async update(id: UUID, input: CategoryInput): Promise<LocalResult<Category>> {
-        const parsed = categoryInputSchema.safeParse(input);
-        if (!parsed.success) return localValidation("分類資料無效");
-        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/categories/${id}`, data: parsed.data}, categoryResponseSchema);
+        const parsed = parseCategoryInput(input);
+        if (!parsed.ok) return parsed;
+        return apiRequest(this.#token, {method: "PATCH", url: `/api/v1/categories/${id}`, data: parsed.value}, categoryResponseSchema);
     }
 
     async delete(id: UUID): Promise<LocalResult<true>> {

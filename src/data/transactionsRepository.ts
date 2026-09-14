@@ -1,16 +1,8 @@
-import {z} from "zod";
-import {apiDelete, apiRequest, localValidation} from "./apiRepository";
+import {apiDelete, apiRequest} from "./apiRepository";
+import {localSuccess, localValidation} from "./localResult";
 import {paginatedTransactionsResponseSchema, transactionResponseSchema} from "./repositorySchemas";
-import {transactionInputSchema} from "./schema";
+import {refundInputSchema, transactionInputSchema, transactionUpdateInputSchema, uuidSchema} from "./schema";
 import type {LocalResult, Paginated, RefundInput, Transaction, TransactionFilters, TransactionInput, TransactionUpdateInput, UUID} from "./types";
-
-const transactionUpdateSchema = transactionInputSchema.omit({source: true});
-const refundInputSchema = z.object({
-    amount_cents: z.number().int().min(1),
-    occurred_at: z.iso.datetime({offset: true}),
-    note: z.string().nullable().optional(),
-});
-const uuidSchema = z.string().uuid();
 
 function validateKindFields(input: TransactionInput | TransactionUpdateInput): LocalResult<true> {
     if (input.kind === "transfer") {
@@ -21,7 +13,7 @@ function validateKindFields(input: TransactionInput | TransactionUpdateInput): L
     } else if (input.transfer_account_id !== undefined && input.transfer_account_id !== null) {
         return localValidation("收入或支出不可設定轉入帳戶", {transfer_account_id: "收入或支出不適用"});
     }
-    return {ok: true, value: true};
+    return localSuccess(true);
 }
 
 export class TransactionsRepository {
@@ -50,7 +42,7 @@ export class TransactionsRepository {
     }
 
     async update(id: UUID, input: TransactionUpdateInput): Promise<LocalResult<Transaction>> {
-        const parsed = transactionUpdateSchema.safeParse({...input, currency: "HKD"});
+        const parsed = transactionUpdateInputSchema.safeParse({...input, currency: "HKD"});
         if (!parsed.success) return localValidation("交易資料無效");
         const kindFields = validateKindFields(parsed.data);
         if (!kindFields.ok) return kindFields;
