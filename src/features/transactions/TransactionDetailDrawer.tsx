@@ -53,6 +53,8 @@ export const TransactionDetailDrawer = () => {
     };
 
     const close = () => navigate(ROUTES.transactions);
+    /** 交易未入 store（直接開 URL）時，退款後要更新本地 fetched 副本先見到新淨額。 */
+    const applyRefund = (original: Transaction) => setFetched(current => (current.id === original.id ? {...current, transaction: original} : current));
 
     return (
         <Drawer.Root open placement={isDesktop ? "end" : "bottom"} size={isDesktop ? "md" : "full"} onOpenChange={event => (!event.open ? close() : undefined)}>
@@ -77,7 +79,7 @@ export const TransactionDetailDrawer = () => {
                             {!isLoading && !reference.isLoading && error === null && reference.error === null && transaction !== null ? (
                                 <Stack gap="4">
                                     <TransactionDetailContent transaction={transaction} names={names} />
-                                    <TransactionDetailActions transaction={transaction} onDeleted={close} />
+                                    <TransactionDetailActions transaction={transaction} onDeleted={close} onRefunded={applyRefund} />
                                 </Stack>
                             ) : null}
                         </Drawer.Body>

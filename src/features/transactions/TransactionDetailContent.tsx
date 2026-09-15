@@ -1,8 +1,9 @@
 import React from "react";
-import {Box, Flex, Image, Link, Stack, Text} from "@chakra-ui/react";
+import {Box, Flex, Link, Stack, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {Link as RouterLink} from "react-router";
 import type {Transaction} from "@/data/types";
+import {TransactionReceiptImages} from "@/features/transactions/TransactionReceiptImages";
 import {sourceLabel} from "@/features/transactions/transactionsFormat";
 import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {toDisplayDateTime} from "@/lib/date";
@@ -75,7 +76,12 @@ export const TransactionDetailContent = ({transaction, names}: TransactionDetail
                     <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.note)}>{transaction.note}</TransactionDetailRow>
                 )}
                 <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.source)}>{sourceLabel(transaction.source)}</TransactionDetailRow>
-                {netDiffers ? <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.netAmount)}>{centsToDollars(transaction.net_amount_cents)}</TransactionDetailRow> : null}
+                {netDiffers ? (
+                    <React.Fragment>
+                        <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.originalAmount)}>{centsToDollars(transaction.amount_cents)}</TransactionDetailRow>
+                        <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.netAmount)}>{centsToDollars(transaction.net_amount_cents)}</TransactionDetailRow>
+                    </React.Fragment>
+                ) : null}
                 {transaction.refund_of_id == null ? null : (
                     <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.refundOf)}>
                         <Link asChild color="brand.fg" textDecoration="underline">
@@ -87,18 +93,7 @@ export const TransactionDetailContent = ({transaction, names}: TransactionDetail
                 <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.updatedAt)}>{toDisplayDateTime(transaction.updated_at)}</TransactionDetailRow>
             </Stack>
 
-            {transaction.image_urls.length === 0 ? null : (
-                <Box>
-                    <Text fontSize="sm" color="fg.muted" mb="2">
-                        {intl.formatMessage(messages.transactions.detail.images)}
-                    </Text>
-                    <Flex gap="2" wrap="wrap">
-                        {transaction.image_urls.map(url => (
-                            <Image key={url} src={url} alt="" boxSize="20" rounded="lg" objectFit="cover" />
-                        ))}
-                    </Flex>
-                </Box>
-            )}
+            <TransactionReceiptImages urls={transaction.image_urls} />
         </Stack>
     );
 };

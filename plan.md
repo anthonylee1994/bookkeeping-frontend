@@ -408,6 +408,8 @@ Desktop：右側 drawer。Mobile：底部 drawer（最高 92dvh）。兩者都�
 
 ## Step 14 — 交易詳情
 
+**狀態：已完成（2026-09-15）**
+
 顯示全部欄位、單據圖、source、時間、原額、淨額。
 
 Actions：改、複製、退款、刪。
@@ -418,7 +420,14 @@ Actions：改、複製、退款、刪。
 - 刪除確認提到關聯 refund；成功返列表
 - 圖片 lightbox；失效 fallback，唔無限重試
 
-**完成標準**：refund／delete／duplicate tests。
+實作備註：
+
+- `refundModel.ts`：`refundAvailability`（轉帳／退款記錄／已退晒一律 disable，並附原因文案）、`refundFormSchema(remainingCents)`（上限＝`net_amount_cents`）
+- `TransactionRefundDialog`：只喺開啟時 mount，每次開都係全新預設值（預設退全數、時間 now）；成功後 prepend 退款交易並扣減原交易 `net_amount_cents`
+- `TransactionReceiptImages`：縮圖係 button，開 lightbox dialog；`onError` 轉 fallback tile，唔會重複重試
+- 詳情有退款時同時顯示「原始金額」同「扣除退款後淨額」
+
+**完成標準（已達成）**：refund（上限 validation／成功更新淨額／transfer 同全數退款 disable）、delete、duplicate（成功轉去新詳情、失敗顯示錯誤）、圖片 lightbox 同 fallback 均有測試；Prettier、完整 Vitest（178 個）同 production build 通過。
 
 ---
 
