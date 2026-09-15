@@ -72,7 +72,7 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 - `vite.config.ts`：PWA plugin（dev 唔 enable SW）、`test.environment = "jsdom"` + setup file
 - `tsconfig.app.json`：`strict: true`；Vitest types
 - `.env.example`：`VITE_APP_ENV=development`
-- `index.html`：`lang="zh-Hant-HK"`、viewport + `viewport-fit=cover`、CSP meta（`default-src 'self'`，img 按需要）、title 用繁中
+- `index.html`：`lang="zh-Hant-HK"`、viewport + `viewport-fit=cover`、CSP meta（`default-src 'self'`，img 按需要；`connect-src` 由 `VITE_API_URL` 嘅 origin 自動補，見 `vite.config.ts` `app-csp` plugin）、title 用繁中
 - `src/index.css`：neutral-50 bg、emerald primary、touch 44px、letter-spacing 0、safe-area、`prefers-reduced-motion`
 - 建目錄：`src/{routes,components/{ui,layout},features/{auth,dashboard,transactions,receiptScan,summaries,recurringRules,accounts,categories,merchants},data,stores,hooks,lib,styles,test}`
 - 刪 Vite demo asset（`hero.png`、react/vite svg）如唔再使用
@@ -350,14 +350,16 @@ Browser back 關 modal／drawer：dialog 狀態用 URL search 或 history stack�
 
 **檔案**：`src/features/auth/*`
 
-- 欄位：username、password；註冊加確認密碼
-- Password show／hide
-- Submit disable + inline progress
-- 失敗一般化錯誤
-- 成功寫 session、redirect `returnTo` 或 `/`
-- 註冊成功等同自動登入，seed 預設帳戶／分類
+- `AuthCard`：Card 外殼（標題／描述／footer 連結）
+- `LoginForm`：RHF + Zod（`username` 必填、`password` 必填）；submit 中 disable + inline `Loader2`；失敗用 `Banner variant="error"` 顯示 repository 嘅一般化錯誤（唔透露 username 是否存在）
+- `RegisterForm`：schema 加 `confirmPassword`，`.refine` 唔一致就出 `passwordMismatch`；`password` min 8；成功只送 `{username, password}` 去 repository
+- 成功：`useAuthStore.setSession(token, user)` + toast + `navigate(returnTo ?? "/")`
+- `PasswordField`：`TextField` + `trailing` IconButton 切換 `type`（顯示／隱藏）；`TextField` 加咗 `trailing` support（input 自動加 `pr-11`）
+- `LoginPage`／`RegisterPage`：`useSearchParams` + `parseReturnTo` 驗證 `returnTo`，兩頁互相連結都保留 `returnTo`
+- Zod 訊息集中 `messages.fields.*`（module 層 `formatMessage`）
+- Seed 預設帳戶／分類由後端 `POST /auth/register` 負責；frontend 註冊成功等同登入
 
-**完成標準**：component test + 之後 E2E #1。
+**完成標準**：`src/features/auth/*.test.tsx`：空表單顯示 field errors 且唔發 request；成功登入／註冊寫 session + redirect `returnTo`（冇就 `/`）；失敗顯示一般化錯誤唔開 session；密碼 min 8；兩次密碼唔一致；show／hide 切換。（E2E #1 留 Step 20）
 
 ---
 

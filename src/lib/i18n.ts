@@ -15,7 +15,7 @@ export const messages = {
     app: {
         name: {id: "app.name", defaultMessage: "簡單記帳"},
         shortName: {id: "app.shortName", defaultMessage: "記帳"},
-        description: {id: "app.description", defaultMessage: "簡單清晰的記帳工具"},
+        description: {id: "app.description", defaultMessage: "簡單記帳"},
     },
     nav: {
         dashboard: {id: "nav.dashboard", defaultMessage: "首頁"},
@@ -49,6 +49,7 @@ export const messages = {
         storageFailed: {id: "errors.storageFailed", defaultMessage: "無法讀取或儲存本機資料"},
         conflictAlreadyMaterialized: {id: "errors.conflictAlreadyMaterialized", defaultMessage: "今日已經產生過交易"},
         inUse: {id: "errors.inUse", defaultMessage: "資料仍然被使用，暫時不可刪除"},
+        conflict: {id: "errors.conflict", defaultMessage: "操作衝突，請重新載入再試"},
     },
     validation: {
         accountInvalid: {id: "validation.accountInvalid", defaultMessage: "帳戶資料無效"},
@@ -89,7 +90,9 @@ export const messages = {
         fileTypeUnsupported: {id: "fields.fileTypeUnsupported", defaultMessage: "檔案類型不支援"},
         fileTooLarge: {id: "fields.fileTooLarge", defaultMessage: "檔案太大"},
         usernameRequired: {id: "fields.usernameRequired", defaultMessage: "用戶名稱為必填"},
+        passwordRequired: {id: "fields.passwordRequired", defaultMessage: "請輸入密碼"},
         passwordTooShort: {id: "fields.passwordTooShort", defaultMessage: "密碼最少需要 8 個字元"},
+        passwordMismatch: {id: "fields.passwordMismatch", defaultMessage: "兩次密碼唔一致"},
     },
     runtime: {
         invalidDate: {id: "runtime.invalidDate", defaultMessage: "無效日期"},
@@ -115,8 +118,14 @@ export const messages = {
         hidePassword: {id: "auth.hidePassword", defaultMessage: "隱藏密碼"},
         loginSubmit: {id: "auth.loginSubmit", defaultMessage: "登入"},
         registerSubmit: {id: "auth.registerSubmit", defaultMessage: "註冊"},
-        genericFailure: {id: "auth.genericFailure", defaultMessage: "登入資料無效"},
+        genericFailure: {id: "auth.genericFailure", defaultMessage: "用戶名稱或密碼錯誤"},
         signOut: {id: "auth.signOut", defaultMessage: "登出"},
+        loginSuccess: {id: "auth.loginSuccess", defaultMessage: "已登入"},
+        registerSuccess: {id: "auth.registerSuccess", defaultMessage: "帳戶已建立"},
+        noAccount: {id: "auth.noAccount", defaultMessage: "仲未有帳戶？"},
+        haveAccount: {id: "auth.haveAccount", defaultMessage: "已經有帳戶？"},
+        registerCta: {id: "auth.registerCta", defaultMessage: "建立帳戶"},
+        loginCta: {id: "auth.loginCta", defaultMessage: "去登入"},
     },
     transactions: {
         refundSuffix: {id: "transactions.refundSuffix", defaultMessage: "退款"},

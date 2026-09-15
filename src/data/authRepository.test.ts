@@ -1,6 +1,6 @@
 import {afterEach, describe, expect, it, vi} from "vitest";
 import {apiClient} from "./apiRepository";
-import {AUTH_FAILURE_MESSAGE, AUTH_TOKEN_STORAGE_KEY, AuthRepository} from "./authRepository";
+import {AUTH_TOKEN_STORAGE_KEY, AuthRepository} from "./authRepository";
 import type {AuthTokenStorage} from "./authRepository";
 
 const user = {id: "70000000-0000-4000-8000-000000000001", username: "Anthony", timezone: "Asia/Hong_Kong", currency: "HKD"};
@@ -54,13 +54,14 @@ describe("AuthRepository API client", () => {
         expect(request).not.toHaveBeenCalled();
     });
 
-    it("does not reveal whether a username exists when login fails", async () => {
-        vi.spyOn(apiClient, "request").mockRejectedValue({response: {status: 401}});
+    it("surfaces the backend invalid-credentials message without revealing whether a username exists", async () => {
+        const data = {error: {code: "invalid_credentials", message: "使用者名稱或密碼不正確"}};
+        vi.spyOn(apiClient, "request").mockRejectedValue({response: {status: 401, data}});
         const repository = new AuthRepository(createMemoryStorage());
 
         const missing = await repository.login({username: "Nobody", password: "correct horse"});
         const wrong = await repository.login({username: "Anthony", password: "wrong password"});
-        expect(missing).toEqual({ok: false, error: {code: "unauthorized", message: AUTH_FAILURE_MESSAGE}});
+        expect(missing).toEqual({ok: false, error: {code: "unauthorized", message: "使用者名稱或密碼不正確"}});
         expect(wrong).toEqual(missing);
     });
 

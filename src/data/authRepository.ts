@@ -1,6 +1,6 @@
 import {formatMessage, messages} from "../lib/i18n";
 import {apiRequest, publicApiRequest} from "./apiRepository";
-import {localApiFailure, localStorageFailure, localSuccess, localUnauthorized, localValidation} from "./localResult";
+import {localStorageFailure, localSuccess, localUnauthorized, localValidation} from "./localResult";
 import {authResponseSchema, userResponseSchema} from "./repositorySchemas";
 import {authInputSchema} from "./schema";
 import type {AuthInput, AuthSession, LocalResult, User} from "./types";
@@ -14,14 +14,6 @@ const AUTH_INPUT_FIELDS = {username: formatMessage(messages.fields.usernameRequi
 
 function browserStorage(): AuthTokenStorage {
     return globalThis.localStorage;
-}
-
-function normalizeAuthResult<T>(result: LocalResult<T>): LocalResult<T> {
-    if (result.ok) return result;
-    if (result.error.code === "unauthorized") return localUnauthorized(AUTH_FAILURE_MESSAGE);
-    if (result.error.code === "validation") return localValidation(formatMessage(messages.validation.loginInvalid));
-    if (result.error.code === "api_failed") return localApiFailure(formatMessage(messages.errors.apiFailedLogin));
-    return result;
 }
 
 export function getStoredAuthToken(storage?: AuthTokenStorage): string | null {
@@ -59,7 +51,7 @@ export class AuthRepository {
     }
 
     async #requestSession(path: string, input: AuthInput): Promise<LocalResult<AuthSession>> {
-        const response = normalizeAuthResult(await publicApiRequest({method: "POST", url: path, data: input}, authResponseSchema));
+        const response = await publicApiRequest({method: "POST", url: path, data: input}, authResponseSchema);
         if (!response.ok) return response;
         const stored = storeAuthToken(response.value.token, this.#storage);
         return stored.ok ? response : stored;
@@ -79,7 +71,7 @@ export class AuthRepository {
 
     async getMe(token = getStoredAuthToken(this.#storage)): Promise<LocalResult<User>> {
         if (token === null || token.trim() === "") return localUnauthorized(AUTH_FAILURE_MESSAGE);
-        return normalizeAuthResult(await apiRequest(token, {method: "GET", url: "/me"}, userResponseSchema));
+        return apiRequest(token, {method: "GET", url: "/me"}, userResponseSchema);
     }
 
     logout(): void {

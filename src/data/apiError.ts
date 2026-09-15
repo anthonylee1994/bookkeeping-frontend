@@ -1,13 +1,38 @@
 import type {AxiosError} from "axios";
 import {formatMessage, messages} from "../lib/i18n";
 import {API_FAILURE_MESSAGE, UNAUTHORIZED_MESSAGE, localError} from "./localResult";
-import type {LocalError} from "./types";
+import type {LocalError, LocalErrorCode} from "./types";
 
 type ErrorPayload = {
     code?: unknown;
     message?: unknown;
+    details?: unknown;
     fields?: unknown;
     errors?: unknown;
+};
+
+/** Backend `code` → 前端 `LocalErrorCode`。 */
+const SERVER_CODE_MAP: Record<string, LocalErrorCode> = {
+    unauthorized: "unauthorized",
+    invalid_credentials: "unauthorized",
+    not_found: "not_found",
+    validation_error: "validation",
+    account_in_use: "in_use",
+    already_materialized: "conflict_already_materialized",
+    conflict_already_materialized: "conflict_already_materialized",
+    idempotency_conflict: "conflict",
+    upstream_error: "api_failed",
+};
+
+const FALLBACK_MESSAGE: Record<LocalErrorCode, string> = {
+    validation: formatMessage(messages.errors.validation),
+    unauthorized: UNAUTHORIZED_MESSAGE,
+    not_found: formatMessage(messages.errors.notFound),
+    conflict: formatMessage(messages.errors.conflict),
+    conflict_already_materialized: formatMessage(messages.errors.conflictAlreadyMaterialized),
+    in_use: formatMessage(messages.errors.inUse),
+    storage_failed: formatMessage(messages.errors.storageFailed),
+    api_failed: API_FAILURE_MESSAGE,
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -23,24 +48,30 @@ function stringFields(value: unknown): LocalError["fields"] | undefined {
     return entries.length === 0 ? undefined : Object.fromEntries(entries);
 }
 
+/** Backend 錯誤格式係 `{error: {code, message, details?}}`；同時兼容 flat body。 */
 function errorPayload(error: AxiosError): ErrorPayload {
-    return isRecord(error.response?.data) ? error.response.data : {};
+    const data = error.response?.data;
+    if (!isRecord(data)) return {};
+    return isRecord(data.error) ? data.error : data;
 }
 
-/** 將 axios error 收窄成 UI 識處理嘅 LocalError；唔會 leak 原始 response body。 */
+function codeFromStatus(status: number | undefined): LocalErrorCode {
+    if (status === 401 || status === 403) return "unauthorized";
+    if (status === 404) return "not_found";
+    if (status === 409) return "in_use";
+    if (status === 422 || status === 400) return "validation";
+    return "api_failed";
+}
+
+/** 將 axios error 收窄成 UI 識處理嘅 `LocalError`，優先用 backend 嘅 code／message／details。 */
 export function normalizeApiError(error: unknown): LocalError {
     const axiosError = error as AxiosError;
     const status = axiosError.response?.status;
     const payload = errorPayload(axiosError);
-    const serverMessage = typeof payload.message === "string" ? payload.message : undefined;
     const serverCode = typeof payload.code === "string" ? payload.code : undefined;
+    const serverMessage = typeof payload.message === "string" ? payload.message : undefined;
+    const fields = stringFields(payload.details ?? payload.fields ?? payload.errors);
 
-    if (status === 401 || status === 403) return localError("unauthorized", UNAUTHORIZED_MESSAGE);
-    if (status === 404) return localError("not_found", serverMessage ?? formatMessage(messages.errors.notFound));
-    if (status === 409 && (serverCode === "already_materialized" || serverCode === "conflict_already_materialized")) {
-        return localError("conflict_already_materialized", serverMessage ?? formatMessage(messages.errors.conflictAlreadyMaterialized));
-    }
-    if (status === 409) return localError("in_use", serverMessage ?? formatMessage(messages.errors.inUse));
-    if (status === 422 || status === 400) return localError("validation", serverMessage ?? formatMessage(messages.errors.validation), stringFields(payload.fields ?? payload.errors));
-    return localError("api_failed", serverMessage ?? API_FAILURE_MESSAGE);
+    const code = (serverCode === undefined ? undefined : SERVER_CODE_MAP[serverCode]) ?? codeFromStatus(status);
+    return localError(code, serverMessage ?? FALLBACK_MESSAGE[code], fields);
 }

@@ -156,7 +156,7 @@ export type PaginationMeta = {
     total_pages: number;
 };
 
-export type LocalErrorCode = "validation" | "unauthorized" | "not_found" | "conflict_already_materialized" | "in_use" | "storage_failed" | "api_failed";
+export type LocalErrorCode = "validation" | "unauthorized" | "not_found" | "conflict" | "conflict_already_materialized" | "in_use" | "storage_failed" | "api_failed";
 
 export type LocalError = {
     code: LocalErrorCode;
