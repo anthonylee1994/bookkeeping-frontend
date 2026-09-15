@@ -87,11 +87,12 @@ export const SidebarNav = ({collapsed}: SidebarNavProps) => {
                                     gap="3"
                                     rounded="lg"
                                     fontSize="sm"
-                                    fontWeight="medium"
-                                    bg={isActive ? "brand.subtle" : "transparent"}
-                                    color={isActive ? "brand.fg" : "fg.muted"}
+                                    bg={isActive ? "brand.active" : "transparent"}
+                                    color={isActive ? "brand.activeFg" : "fg.muted"}
+                                    fontWeight={isActive ? "semibold" : "medium"}
                                     transition="background 150ms ease, color 150ms ease"
-                                    _hover={isActive ? undefined : {bg: "bg.subtle", color: "fg"}}
+                                    /* Hover 用半透明 brand.active，咁 selected（實色 + semibold）仲分得出。 */
+                                    _hover={isActive ? undefined : {bg: "brand.active/60", color: "brand.activeFg"}}
                                 >
                                     <Icon size="md" flexShrink="0">
                                         <ItemIcon />

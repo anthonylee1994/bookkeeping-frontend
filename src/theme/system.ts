@@ -72,6 +72,8 @@ const config = defineConfig({
                     800: {value: "#065f46"},
                     900: {value: "#064e3b"},
                     950: {value: "#022c22"},
+                    /** 柔和灰綠，唔屬於 emerald ramp（飽和度低好多），專門畀 navigation selected 底色。 */
+                    sage: {value: "#d4e8de"},
                 },
             },
             shadows: {
@@ -97,6 +99,9 @@ const config = defineConfig({
                     subtle: {value: {base: "{colors.brand.50}", _dark: "{colors.brand.950}"}},
                     emphasized: {value: {base: "{colors.brand.800}", _dark: "{colors.brand.400}"}},
                     focusRing: {value: {base: "{colors.brand.500}", _dark: "{colors.brand.400}"}},
+                    /** Navigation selected state；sidebar 同 mobile tab bar 共用，唔好各自寫死。 */
+                    active: {value: {base: "{colors.brand.sage}", _dark: "{colors.brand.900}"}},
+                    activeFg: {value: {base: "{colors.brand.800}", _dark: "{colors.brand.200}"}},
                 },
                 income: {value: {base: "{colors.emerald.600}", _dark: "{colors.emerald.400}"}},
                 expense: {value: {base: "{colors.rose.600}", _dark: "{colors.rose.400}"}},
@@ -109,6 +114,27 @@ const config = defineConfig({
                 base: {
                     letterSpacing: "tight",
                     fontWeight: "semibold",
+                },
+            },
+            /**
+             * 低調 button（ghost／outline／subtle）hover 統一用 brand.active 柔和灰綠。
+             * Solid button 唔改：實色深綠 hover 變淺綠會好突兀，照用預設嘅加深。
+             */
+            button: {
+                variants: {
+                    variant: {
+                        ghost: {
+                            _hover: {bg: "brand.active", color: "brand.activeFg"},
+                        },
+                        outline: {
+                            /* 實底而唔係透明，咁喺漸變背景上都睇得清。 */
+                            bg: "bg.panel",
+                            _hover: {bg: "brand.active", color: "brand.activeFg"},
+                        },
+                        subtle: {
+                            _hover: {bg: "brand.active", color: "brand.activeFg"},
+                        },
+                    },
                 },
             },
         },

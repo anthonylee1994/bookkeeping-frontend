@@ -21,7 +21,7 @@ export const PasswordField = ({label, error, ...props}: PasswordFieldProps) => {
             <Field.Label>{label}</Field.Label>
             <InputGroup
                 endElement={
-                    <IconButton aria-label={toggleLabel} type="button" size="xs" variant="ghost" me="-1" onClick={() => setVisible(value => !value)}>
+                    <IconButton left={1} aria-label={toggleLabel} type="button" size="xs" variant="ghost" me="-1" onClick={() => setVisible(value => !value)}>
                         {visible ? <EyeOffIcon /> : <EyeIcon />}
                     </IconButton>
                 }

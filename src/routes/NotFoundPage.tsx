@@ -37,7 +37,7 @@ export const NotFoundPage = () => {
                     <Button asChild size="xl" rounded="xl" px="8" minW="8.5rem" shadow="sm">
                         <Link to={ROUTES.dashboard}>{intl.formatMessage(messages.notFound.action)}</Link>
                     </Button>
-                    <Button variant="outline" size="xl" rounded="xl" px="8" minW="8.5rem" bg="bg.panel" onClick={goBack}>
+                    <Button variant="outline" size="xl" rounded="xl" px="8" minW="8.5rem" onClick={goBack}>
                         <ArrowLeftIcon />
                         {intl.formatMessage(messages.layout.back)}
                     </Button>

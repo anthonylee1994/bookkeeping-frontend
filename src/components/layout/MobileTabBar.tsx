@@ -21,13 +21,13 @@ export const MobileTabBar = () => {
         return (
             <NavLink key={item.to} to={item.to} end={item.to === ROUTES.dashboard}>
                 {({isActive}) => (
-                    <VStack gap="1" minH="13" justify="center" px="1" color={isActive ? "brand.fg" : "fg.muted"} transition="color 150ms ease">
-                        <Circle size="8" bg={isActive ? "brand.subtle" : "transparent"} transition="background 150ms ease">
+                    <VStack gap="1" minH="13" justify="center" px="1" color={isActive ? "brand.activeFg" : "fg.muted"} transition="color 150ms ease">
+                        <Circle size="8" bg={isActive ? "brand.active" : "transparent"} transition="background 150ms ease">
                             <Icon size="md">
                                 <ItemIcon />
                             </Icon>
                         </Circle>
-                        <Text fontSize="2xs" fontWeight="medium" truncate maxW="full">
+                        <Text fontSize="2xs" fontWeight={isActive ? "semibold" : "medium"} truncate maxW="full">
                             {intl.formatMessage(item.label)}
                         </Text>
                     </VStack>
