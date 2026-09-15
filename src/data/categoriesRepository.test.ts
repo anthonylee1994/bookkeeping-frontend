@@ -22,8 +22,8 @@ describe("CategoriesRepository", () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValueOnce({data: {category}}).mockResolvedValueOnce({data: category});
         const repository = new CategoriesRepository(TOKEN);
 
-        expect(await repository.create({name: "工資", kind: "income", position: 1})).toMatchObject({ok: true});
-        expect(await repository.update(category.id, {name: "薪金", kind: "income", position: 2})).toMatchObject({ok: true});
+        expect(await repository.create({name: "工資", kind: "income"})).toMatchObject({ok: true});
+        expect(await repository.update(category.id, {name: "薪金", kind: "income"})).toMatchObject({ok: true});
         expect(request.mock.calls.map(call => [call[0].method, call[0].url])).toEqual([
             ["POST", "/categories"],
             ["PATCH", `/categories/${category.id}`],

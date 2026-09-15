@@ -5,6 +5,7 @@ import {useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {z} from "zod";
 import {ColorPicker} from "@/components/ColorPicker";
+import {IconPicker} from "@/components/IconPicker";
 import {CategoriesRepository} from "@/data/categoriesRepository";
 import type {Category, CategoryKind} from "@/data/types";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
@@ -15,7 +16,6 @@ import {useAuthStore} from "@/stores/authStore";
 const categoryFormSchema = z.object({
     name: z.string().trim().min(1, formatMessage(messages.fields.required)),
     kind: z.enum(["income", "expense"]),
-    position: z.string().trim(),
     icon: z.string().trim(),
     color: z.string().trim(),
 });
@@ -34,18 +34,15 @@ function categoryToFormValues(category: Category): CategoryFormValues {
     return {
         name: category.name,
         kind: category.kind,
-        position: category.position.toString(),
         icon: category.icon ?? "",
         color: category.color ?? "",
     };
 }
 
 function formValuesToInput(values: CategoryFormValues) {
-    const position = parseInt(values.position);
     return {
         name: values.name,
         kind: values.kind,
-        position: isNaN(position) ? 0 : position,
         icon: values.icon === "" ? null : values.icon,
         color: values.color === "" ? null : values.color,
     };
@@ -65,7 +62,6 @@ export const CategoryFormDrawer = ({category, defaultKind, onSaved, onDeleted, o
                 ? {
                       name: "",
                       kind: defaultKind,
-                      position: "0",
                       icon: "",
                       color: FLAT_UI_COLORS[0],
                   }
@@ -73,6 +69,7 @@ export const CategoryFormDrawer = ({category, defaultKind, onSaved, onDeleted, o
     });
 
     const selectedColor = useWatch({control, name: "color"});
+    const selectedIcon = useWatch({control, name: "icon"});
     const {isDirty} = formState;
 
     const requestClose = () => {
@@ -149,12 +146,6 @@ export const CategoryFormDrawer = ({category, defaultKind, onSaved, onDeleted, o
                                             </NativeSelect.Root>
                                         </Field.Root>
 
-                                        <Field.Root required invalid={formState.errors.position !== undefined}>
-                                            <Field.Label>{intl.formatMessage(messages.categories.position)}</Field.Label>
-                                            <Input type="number" inputMode="numeric" {...register("position")} />
-                                            {formState.errors.position === undefined ? null : <Field.ErrorText>{formState.errors.position.message}</Field.ErrorText>}
-                                        </Field.Root>
-
                                         <Field.Root>
                                             <Field.Label>{intl.formatMessage(messages.categories.color)}</Field.Label>
                                             <ColorPicker value={selectedColor} onChange={color => setValue("color", color, {shouldDirty: true})} />
@@ -162,7 +153,7 @@ export const CategoryFormDrawer = ({category, defaultKind, onSaved, onDeleted, o
 
                                         <Field.Root>
                                             <Field.Label>{intl.formatMessage(messages.categories.icon)}</Field.Label>
-                                            <Input placeholder="icon" {...register("icon")} />
+                                            <IconPicker value={selectedIcon} onChange={icon => setValue("icon", icon, {shouldDirty: true})} />
                                         </Field.Root>
 
                                         {submitError === null ? null : (

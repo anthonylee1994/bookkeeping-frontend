@@ -152,7 +152,7 @@ Date（`Asia/Hong_Kong`）：
 - `loadState()`／`saveState()`：失敗回傳 `storage_failed`，不 throw 未處理 exception
 - Seed（註冊後或首次空白資料庫）：
     - 1 個現金帳戶（HKD，initial 0 或小額）
-    - 預設收入／支出分類（飲食、交通、工資等，有 icon／color／position）
+    - 預設收入／支出分類（飲食、交通、工資等，有 icon／color）
     - 數個 merchant
     - 十多筆交易（含收入、支出、轉帳）覆蓋 dashboard／filter demo
     - 1–2 條 recurring rule（active + paused）
@@ -194,7 +194,7 @@ Date（`Asia/Hong_Kong`）：
 
 ### Categories — `/api/v1/categories`
 
-- list（按 kind + position）
+- list（按 kind + created_at）
 - create／update／delete
 - 刪除：歷史交易保留，`category_id` 變為 `null`；提示文案位於 UI 層
 
@@ -520,7 +520,7 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。Actions 確�
 
 帳戶：list name／kind／icon／color／initial／HKD；CRUD；in_use 阻止刪除。
 
-分類：income／expense tabs；position numeric；刪除提示未分類。
+分類：income／expense tabs；依建立時間排列；刪除提示未分類。
 
 商戶：搜尋／建立／刪除；顯示 default category + usage；無 edit。
 

@@ -8,8 +8,8 @@ export const domainTestState: {accounts: Account[]; categories: Category[]; merc
         {id: "10000000-0000-4000-8000-000000000002", name: "銀行戶口", kind: "bank", currency: "HKD", initial_balance_cents: 0, balance_cents: 0, created_at: timestamp, updated_at: timestamp},
     ],
     categories: [
-        {id: "20000000-0000-4000-8000-000000000001", name: "工資", kind: "income", position: 1, created_at: timestamp, updated_at: timestamp},
-        {id: "20000000-0000-4000-8000-000000000002", name: "飲食", kind: "expense", position: 1, created_at: timestamp, updated_at: timestamp},
+        {id: "20000000-0000-4000-8000-000000000001", name: "工資", kind: "income", created_at: timestamp, updated_at: timestamp},
+        {id: "20000000-0000-4000-8000-000000000002", name: "飲食", kind: "expense", created_at: timestamp, updated_at: timestamp},
     ],
     merchants: [
         {id: "30000000-0000-4000-8000-000000000001", name: "街角咖啡", default_category_id: "20000000-0000-4000-8000-000000000002", usage_count: 1, created_at: timestamp, updated_at: timestamp},

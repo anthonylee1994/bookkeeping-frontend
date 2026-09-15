@@ -49,6 +49,7 @@ export const messages = {
         columnAmount: {id: "common.columnAmount", defaultMessage: "金額"},
         columnShare: {id: "common.columnShare", defaultMessage: "佔比"},
         chartCaption: {id: "common.chartCaption", defaultMessage: "圖表資料如下表；可用鍵盤方向鍵查看各分類。"},
+        noIcon: {id: "common.noIcon", defaultMessage: "不使用圖示"},
     },
     errors: {
         unauthorized: {id: "errors.unauthorized", defaultMessage: "登入已失效，請重新登入"},
@@ -299,7 +300,6 @@ export const messages = {
         createAction: {id: "categories.createAction", defaultMessage: "新增分類"},
         name: {id: "categories.name", defaultMessage: "名稱"},
         kind: {id: "categories.kind", defaultMessage: "類型"},
-        position: {id: "categories.position", defaultMessage: "排序位置"},
         icon: {id: "categories.icon", defaultMessage: "圖示"},
         color: {id: "categories.color", defaultMessage: "顏色"},
         deleteTitle: {id: "categories.deleteTitle", defaultMessage: "刪除分類？"},

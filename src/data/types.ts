@@ -25,7 +25,6 @@ export type AccountInput = {
 export type CategoryInput = {
     name: string;
     kind: CategoryKind;
-    position?: number;
     icon?: string | null;
     color?: string | null;
 };
@@ -91,9 +90,8 @@ export type Account = Omit<AccountInput, "initial_balance_cents"> & {
     balance_cents?: number;
 };
 
-export type Category = Omit<CategoryInput, "position"> & {
+export type Category = CategoryInput & {
     id: UUID;
-    position: number;
     created_at: string;
     updated_at: string;
 };

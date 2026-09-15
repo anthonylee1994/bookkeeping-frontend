@@ -53,11 +53,11 @@ export const CategoriesPage = () => {
         );
     }
 
-    const filtered = categories.filter(c => c.kind === activeKind).sort((a, b) => a.position - b.position);
+    const filtered = categories.filter(c => c.kind === activeKind);
 
     return (
         <React.Fragment>
-            <Box p={{base: 4, md: 6}} maxW="7xl" mx="auto">
+            <Box maxW="7xl" mx="auto">
                 <HStack justify="space-between" mb="6">
                     <Heading size="xl">{intl.formatMessage(messages.categories.title)}</Heading>
                     <Button size="sm" onClick={() => setDrawerCategory(null)}>
@@ -96,12 +96,7 @@ export const CategoriesPage = () => {
                                             <HStack justify="space-between">
                                                 <HStack gap="3">
                                                     {category.color === null ? null : <Box w="10" h="10" rounded="lg" bg={category.color} flexShrink={0} />}
-                                                    <Box>
-                                                        <Text fontWeight="semibold">{category.name}</Text>
-                                                        <Text fontSize="sm" color="fg.muted">
-                                                            {intl.formatMessage(messages.categories.position)} {category.position}
-                                                        </Text>
-                                                    </Box>
+                                                    <Text fontWeight="semibold">{category.name}</Text>
                                                 </HStack>
                                             </HStack>
                                         </Card.Body>
@@ -113,7 +108,9 @@ export const CategoriesPage = () => {
                 </Tabs.Root>
             </Box>
 
-            {drawerCategory === undefined ? null : <CategoryFormDrawer category={drawerCategory} defaultKind={activeKind} onSaved={handleSaved} onDeleted={handleDeleted} onClose={() => setDrawerCategory(undefined)} />}
+            {drawerCategory === undefined ? null : (
+                <CategoryFormDrawer category={drawerCategory} defaultKind={activeKind} onSaved={handleSaved} onDeleted={handleDeleted} onClose={() => setDrawerCategory(undefined)} />
+            )}
         </React.Fragment>
     );
 };

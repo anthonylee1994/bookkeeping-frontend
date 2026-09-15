@@ -5,6 +5,7 @@ import {useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {z} from "zod";
 import {ColorPicker} from "@/components/ColorPicker";
+import {IconPicker} from "@/components/IconPicker";
 import {AccountsRepository} from "@/data/accountsRepository";
 import type {Account, AccountKind} from "@/data/types";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
@@ -81,6 +82,7 @@ export const AccountFormDrawer = ({account, onSaved, onDeleted, onClose}: Accoun
     });
 
     const selectedColor = useWatch({control, name: "color"});
+    const selectedIcon = useWatch({control, name: "icon"});
     const {isDirty} = formState;
 
     const requestClose = () => {
@@ -185,7 +187,7 @@ export const AccountFormDrawer = ({account, onSaved, onDeleted, onClose}: Accoun
 
                                         <Field.Root>
                                             <Field.Label>{intl.formatMessage(messages.accounts.icon)}</Field.Label>
-                                            <Input placeholder="wallet" {...register("icon")} />
+                                            <IconPicker value={selectedIcon} onChange={icon => setValue("icon", icon, {shouldDirty: true})} />
                                         </Field.Root>
 
                                         {submitError === null ? null : (

@@ -28,7 +28,6 @@ export const accountInputSchema = z.object({
 export const categoryInputSchema = z.object({
     name: z.string().trim().min(1),
     kind: z.enum(["income", "expense"]),
-    position: z.number().int().default(0),
     icon: z.string().trim().nullish(),
     color: z.string().trim().nullish(),
 });

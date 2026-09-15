@@ -69,7 +69,7 @@ export const AccountsPage = () => {
 
     return (
         <React.Fragment>
-            <Box p={{base: 4, md: 6}} maxW="7xl" mx="auto">
+            <Box maxW="7xl" mx="auto">
                 <HStack justify="space-between" mb="6">
                     <Heading size="xl">{intl.formatMessage(messages.accounts.title)}</Heading>
                     <Button size="sm" onClick={() => setDrawerAccount(null)}>
