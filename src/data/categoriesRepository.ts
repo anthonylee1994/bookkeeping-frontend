@@ -2,11 +2,12 @@ import {apiDelete, apiRequest} from "./apiRepository";
 import {localSuccess, localValidation} from "./localResult";
 import {categoriesResponseSchema, categoryResponseSchema} from "./repositorySchemas";
 import {categoryInputSchema} from "./schema";
+import {formatMessage, messages} from "../lib/i18n";
 import type {Category, CategoryInput, CategoryKind, LocalResult, UUID} from "./types";
 
 function parseCategoryInput(input: CategoryInput): LocalResult<CategoryInput> {
     const parsed = categoryInputSchema.safeParse(input);
-    return parsed.success ? localSuccess(parsed.data) : localValidation("分類資料無效");
+    return parsed.success ? localSuccess(parsed.data) : localValidation(formatMessage(messages.validation.categoryInvalid));
 }
 
 export class CategoriesRepository {

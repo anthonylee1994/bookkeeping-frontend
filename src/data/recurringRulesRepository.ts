@@ -2,14 +2,17 @@ import {apiDelete, apiRequest} from "./apiRepository";
 import {localSuccess, localValidation} from "./localResult";
 import {recurringRuleResponseSchema, recurringRulesResponseSchema, transactionRowResponseSchema} from "./repositorySchemas";
 import {recurringRuleInputSchema} from "./schema";
+import {formatMessage, messages} from "../lib/i18n";
 import type {LocalResult, RecurringRule, RecurringRuleInput, RecurringStatus, TransactionRow, UUID} from "./types";
 
 function validateSchedule(input: RecurringRuleInput): LocalResult<true> {
-    if (input.frequency === "weekly" && input.day_of_week == null) return localValidation("每週定期交易必須選擇星期", {day_of_week: "必填"});
+    if (input.frequency === "weekly" && input.day_of_week == null)
+        return localValidation(formatMessage(messages.validation.weeklyNeedsDayOfWeek), {day_of_week: formatMessage(messages.fields.required)});
     if ((input.frequency === "monthly" || input.frequency === "yearly") && input.day_of_month == null) {
-        return localValidation("定期交易必須選擇日期", {day_of_month: "必填"});
+        return localValidation(formatMessage(messages.validation.monthlyNeedsDayOfMonth), {day_of_month: formatMessage(messages.fields.required)});
     }
-    if (input.frequency === "yearly" && input.month_of_year == null) return localValidation("每年定期交易必須選擇月份", {month_of_year: "必填"});
+    if (input.frequency === "yearly" && input.month_of_year == null)
+        return localValidation(formatMessage(messages.validation.yearlyNeedsMonthOfYear), {month_of_year: formatMessage(messages.fields.required)});
     return localSuccess(true);
 }
 
@@ -17,7 +20,7 @@ function parseRecurringRuleInput(input: RecurringRuleInput): LocalResult<Recurri
     const schedule = validateSchedule(input);
     if (!schedule.ok) return schedule;
     const parsed = recurringRuleInputSchema.safeParse({...input, currency: "HKD"});
-    return parsed.success ? localSuccess(parsed.data) : localValidation("定期交易資料無效");
+    return parsed.success ? localSuccess(parsed.data) : localValidation(formatMessage(messages.validation.recurringInvalid));
 }
 
 export class RecurringRulesRepository {

@@ -1,6 +1,7 @@
 import axios from "axios";
 import type {AxiosRequestConfig} from "axios";
 import type {ZodType} from "zod";
+import {formatMessage, messages} from "../lib/i18n";
 import {normalizeApiError} from "./apiError";
 import {localApiFailure, localFailure, localSuccess, localUnauthorized} from "./localResult";
 import type {LocalResult} from "./types";
@@ -10,7 +11,7 @@ export const apiClient = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL ?? ""}/api/v1`,
 });
 
-const INVALID_RESPONSE_MESSAGE = "服務回應格式無效";
+const INVALID_RESPONSE_MESSAGE = formatMessage(messages.validation.responseFormatInvalid);
 
 /** Backend 所有成功回應都包喺 `{data: ...}`；分頁再加 `meta`，所以有 `meta` 就唔拆。 */
 function unwrapEnvelope(body: unknown): unknown {

@@ -1,4 +1,4 @@
-import {messages} from "../lib/i18n";
+import {formatMessage, messages} from "../lib/i18n";
 import {apiRequest, publicApiRequest} from "./apiRepository";
 import {localApiFailure, localStorageFailure, localSuccess, localUnauthorized, localValidation} from "./localResult";
 import {authResponseSchema, userResponseSchema} from "./repositorySchemas";
@@ -6,11 +6,11 @@ import {authInputSchema} from "./schema";
 import type {AuthInput, AuthSession, LocalResult, User} from "./types";
 
 export const AUTH_TOKEN_STORAGE_KEY = "bookkeeping.auth.token";
-export const AUTH_FAILURE_MESSAGE = messages.auth.genericFailure;
+export const AUTH_FAILURE_MESSAGE = formatMessage(messages.auth.genericFailure);
 
 export type AuthTokenStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-const AUTH_INPUT_FIELDS = {username: "用戶名稱為必填", password: "密碼最少需要 8 個字元"};
+const AUTH_INPUT_FIELDS = {username: formatMessage(messages.fields.usernameRequired), password: formatMessage(messages.fields.passwordTooShort)};
 
 function browserStorage(): AuthTokenStorage {
     return globalThis.localStorage;
@@ -19,8 +19,8 @@ function browserStorage(): AuthTokenStorage {
 function normalizeAuthResult<T>(result: LocalResult<T>): LocalResult<T> {
     if (result.ok) return result;
     if (result.error.code === "unauthorized") return localUnauthorized(AUTH_FAILURE_MESSAGE);
-    if (result.error.code === "validation") return localValidation("請輸入有效登入資料");
-    if (result.error.code === "api_failed") return localApiFailure(messages.errors.apiFailedLogin);
+    if (result.error.code === "validation") return localValidation(formatMessage(messages.validation.loginInvalid));
+    if (result.error.code === "api_failed") return localApiFailure(formatMessage(messages.errors.apiFailedLogin));
     return result;
 }
 
@@ -34,12 +34,12 @@ export function getStoredAuthToken(storage?: AuthTokenStorage): string | null {
 }
 
 export function storeAuthToken(token: string, storage?: AuthTokenStorage): LocalResult<true> {
-    if (token.trim() === "") return localValidation("Token 無效");
+    if (token.trim() === "") return localValidation(formatMessage(messages.validation.tokenInvalid));
     try {
         (storage ?? browserStorage()).setItem(AUTH_TOKEN_STORAGE_KEY, token);
         return localSuccess(true);
     } catch {
-        return localStorageFailure("無法儲存登入資料");
+        return localStorageFailure(formatMessage(messages.validation.authStorageFailed));
     }
 }
 
@@ -67,7 +67,7 @@ export class AuthRepository {
 
     async register(input: AuthInput): Promise<LocalResult<AuthSession>> {
         const parsed = authInputSchema.safeParse(input);
-        if (!parsed.success) return localValidation("請輸入有效登入資料", AUTH_INPUT_FIELDS);
+        if (!parsed.success) return localValidation(formatMessage(messages.validation.loginInvalid), AUTH_INPUT_FIELDS);
         return this.#requestSession("/auth/register", parsed.data);
     }
 

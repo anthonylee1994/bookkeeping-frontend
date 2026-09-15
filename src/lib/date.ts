@@ -1,23 +1,22 @@
-import {HONG_KONG_OFFSET_MS, addCalendarDays, addCalendarMonths, daysInMonth, parseDate, toHongKongCalendar, toHongKongInstant} from "./calendar";
+import {addCalendarDays, addCalendarMonths, daysInMonth, parseDate, toHongKongCalendar, toHongKongInstant} from "./calendar";
 import type {DateInput} from "./calendar";
+import {formatMessage, intl, messages} from "./i18n";
 import type {SummaryPeriod} from "../data/types";
 
 export const HONG_KONG_TIME_ZONE = "Asia/Hong_Kong";
+
+const DISPLAY_DATE_OPTIONS = {year: "numeric", month: "long", day: "numeric", timeZone: HONG_KONG_TIME_ZONE} as const;
 
 export function nowIso(): string {
     return new Date().toISOString();
 }
 
 export function toDisplayDate(input: DateInput): string {
-    const {year, month, day} = toHongKongCalendar(input);
-    return `${year}年${month}月${day}日`;
+    return intl.formatDate(parseDate(input), DISPLAY_DATE_OPTIONS);
 }
 
 export function toDisplayDateTime(input: DateInput): string {
-    const shifted = new Date(parseDate(input).getTime() + HONG_KONG_OFFSET_MS);
-    const date = `${shifted.getUTCFullYear()}年${shifted.getUTCMonth() + 1}月${shifted.getUTCDate()}日`;
-    const time = `${String(shifted.getUTCHours()).padStart(2, "0")}:${String(shifted.getUTCMinutes()).padStart(2, "0")}`;
-    return `${date} ${time}`;
+    return intl.formatDate(parseDate(input), {...DISPLAY_DATE_OPTIONS, hour: "2-digit", minute: "2-digit", hour12: false});
 }
 
 export function startOfPeriod(input: DateInput, period: SummaryPeriod): Date {
@@ -45,7 +44,7 @@ export function endOfPeriod(input: DateInput, period: SummaryPeriod): Date {
 
 export function addPeriod(input: DateInput, period: SummaryPeriod, amount = 1): Date {
     if (!Number.isInteger(amount)) {
-        throw new RangeError("period amount 必須係整數");
+        throw new RangeError(formatMessage(messages.runtime.periodAmountInteger));
     }
     const date = toHongKongCalendar(input);
     if (period === "monthly") {

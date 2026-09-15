@@ -2,11 +2,12 @@ import {apiDelete, apiRequest} from "./apiRepository";
 import {localSuccess, localValidation} from "./localResult";
 import {accountResponseSchema, accountsResponseSchema} from "./repositorySchemas";
 import {accountInputSchema} from "./schema";
+import {formatMessage, messages} from "../lib/i18n";
 import type {Account, AccountInput, LocalResult, UUID} from "./types";
 
 function parseAccountInput(input: AccountInput): LocalResult<AccountInput> {
     const parsed = accountInputSchema.safeParse({...input, currency: "HKD"});
-    return parsed.success ? localSuccess(parsed.data) : localValidation("帳戶資料無效");
+    return parsed.success ? localSuccess(parsed.data) : localValidation(formatMessage(messages.validation.accountInvalid));
 }
 
 export class AccountsRepository {

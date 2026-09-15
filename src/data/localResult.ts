@@ -1,10 +1,10 @@
-import {messages} from "../lib/i18n";
+import {formatMessage, messages} from "../lib/i18n";
 import type {LocalError, LocalErrorCode, LocalResult} from "./types";
 
 /** 未登入／token 失效時嘅統一文案，API layer 同 auth layer 共用。 */
-export const UNAUTHORIZED_MESSAGE = messages.errors.unauthorized;
+export const UNAUTHORIZED_MESSAGE = formatMessage(messages.errors.unauthorized);
 /** 網絡或非預期錯誤嘅統一文案。 */
-export const API_FAILURE_MESSAGE = messages.errors.apiFailed;
+export const API_FAILURE_MESSAGE = formatMessage(messages.errors.apiFailed);
 
 /** Repository 只回 LocalResult、唔 throw；呢個 module 集中所有 result／error 建構，避免每個 repository 自己砌 object literal。 */
 export function localError(code: LocalErrorCode, message: string, fields?: LocalError["fields"]): LocalError {
@@ -31,6 +31,6 @@ export function localApiFailure<T>(message: string = API_FAILURE_MESSAGE): Local
     return localFailure<T>(localError("api_failed", message));
 }
 
-export function localStorageFailure<T>(message: string = messages.errors.storageFailed): LocalResult<T> {
+export function localStorageFailure<T>(message: string = formatMessage(messages.errors.storageFailed)): LocalResult<T> {
     return localFailure<T>(localError("storage_failed", message));
 }

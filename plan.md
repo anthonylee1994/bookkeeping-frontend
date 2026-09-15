@@ -69,7 +69,7 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 
 **做：**
 
-- 安裝：`react-router`、`zustand`、`react-hook-form`、`@hookform/resolvers`、`zod`、`lucide-react`、`recharts`、`uuid`、`vite-plugin-pwa`、`vitest`、`@testing-library/react`、`jsdom`、`@playwright/test`
+- 安裝：`react-router`、`zustand`、`react-hook-form`、`@hookform/resolvers`、`zod`、`react-intl`、`lucide-react`、`recharts`、`uuid`、`vite-plugin-pwa`、`vitest`、`@testing-library/react`、`jsdom`、`@playwright/test`
 - `vite.config.ts`：PWA plugin（dev 唔 enable SW）、alias 如需要
 - `tsconfig.app.json`：`strict: true`；Vitest types
 - `.env.example`：`VITE_APP_ENV=development`
@@ -253,15 +253,17 @@ Date（`Asia/Hong_Kong`）：
 
 ---
 
-## Step 7 — URL helpers、i18n 字串、共用 hooks
+## Step 7 — URL helpers、i18n（react-intl）、共用 hooks
 
-**檔案**：`src/lib/searchParams.ts`、`src/lib/i18n.ts`（或 `messages/zh-HK.ts`）、`src/hooks/useOffline.ts`、`useMediaQuery.ts`、`useToast.ts`
+**檔案**：`src/lib/searchParams.ts`、`src/lib/i18n.ts`、`src/main.tsx`、`src/hooks/useOffline.ts`、`useMediaQuery.ts`、`useToast.ts`
 
 - Transaction filter serialize／parse：`from`、`to`、`kind`、`account_id`、`category_id`、`merchant_id`、`q`、`min`、`max`、`sort`、`order`、`page`、`per_page`
 - Summary：`period`、`date`、`page`
 - `returnTo`：只接受站內 path（`/` 開頭、唔得 `//`、唔得 protocol）
-- 文案全部繁中，集中一處，MVP 無切換器
-- Unit test：URL parse／serialize round-trip、open redirect reject
+- i18n 用 `react-intl`：`main.tsx` 用 `<IntlProvider>` 包住 app；locale 固定 `zh-HK`，MVP 無切換器
+- 文案集中 `src/lib/i18n.ts`：每個 leaf 係 `MessageDescriptor`（`id` + `defaultMessage`），經 `flattenMessages` 砌成 `intlMessages` catalog 畀 `IntlProvider`
+- component 內用 `useIntl()`／`<FormattedMessage>`；非 React context（data layer）用 module-level `intl` 嘅 `formatMessage()`
+- Unit test：URL parse／serialize round-trip、open redirect reject、placeholder 插值、missing id fallback `defaultMessage`、catalog flatten
 
 ---
 

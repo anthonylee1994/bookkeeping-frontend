@@ -1,5 +1,6 @@
 import {addCalendarDays, addCalendarMonths, assertPositiveInteger, compareCalendarDates, daysInMonth, parseCalendarDate, toHongKongCalendar} from "./calendar";
 import type {CalendarDate, DateInput} from "./calendar";
+import {formatMessage, messages} from "./i18n";
 import type {RecurringFrequency} from "../data/types";
 
 export type NextRunRule = {
@@ -21,7 +22,7 @@ function formatHongKongIso(date: CalendarDate): string {
 
 function firstWeeklyRun(start: CalendarDate, dayOfWeek: number): CalendarDate {
     if (!Number.isInteger(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
-        throw new RangeError("day_of_week 必須係 0 至 6");
+        throw new RangeError(formatMessage(messages.runtime.dayOfWeekRange));
     }
     const startDayOfWeek = new Date(Date.UTC(start.year, start.month - 1, start.day)).getUTCDay();
     return addCalendarDays(start, (dayOfWeek - startDayOfWeek + 7) % 7);
@@ -30,7 +31,7 @@ function firstWeeklyRun(start: CalendarDate, dayOfWeek: number): CalendarDate {
 function firstMonthlyRun(start: CalendarDate, dayOfMonth: number): CalendarDate {
     assertPositiveInteger(dayOfMonth, "day_of_month");
     if (dayOfMonth > 31) {
-        throw new RangeError("day_of_month 必須係 1 至 31");
+        throw new RangeError(formatMessage(messages.runtime.dayOfMonthRange));
     }
     const candidate = {...start, day: Math.min(dayOfMonth, daysInMonth(start.year, start.month))};
     return compareCalendarDates(candidate, start) >= 0 ? candidate : addCalendarMonths(start, 1, dayOfMonth);
@@ -38,11 +39,11 @@ function firstMonthlyRun(start: CalendarDate, dayOfMonth: number): CalendarDate 
 
 function firstYearlyRun(start: CalendarDate, monthOfYear: number, dayOfMonth: number): CalendarDate {
     if (!Number.isInteger(monthOfYear) || monthOfYear < 1 || monthOfYear > 12) {
-        throw new RangeError("month_of_year 必須係 1 至 12");
+        throw new RangeError(formatMessage(messages.runtime.monthOfYearRange));
     }
     assertPositiveInteger(dayOfMonth, "day_of_month");
     if (dayOfMonth > 31) {
-        throw new RangeError("day_of_month 必須係 1 至 31");
+        throw new RangeError(formatMessage(messages.runtime.dayOfMonthRange));
     }
     const candidate = {year: start.year, month: monthOfYear, day: Math.min(dayOfMonth, daysInMonth(start.year, monthOfYear))};
     if (compareCalendarDates(candidate, start) >= 0) {

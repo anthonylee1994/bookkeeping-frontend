@@ -2,16 +2,21 @@ import {apiDelete, apiRequest} from "./apiRepository";
 import {localSuccess, localValidation} from "./localResult";
 import {paginatedTransactionsResponseSchema, transactionResponseSchema} from "./repositorySchemas";
 import {refundInputSchema, transactionInputSchema, transactionUpdateInputSchema, uuidSchema} from "./schema";
+import {formatMessage, messages} from "../lib/i18n";
 import type {LocalResult, Paginated, RefundInput, Transaction, TransactionFilters, TransactionInput, TransactionUpdateInput, UUID} from "./types";
 
 function validateKindFields(input: TransactionInput | TransactionUpdateInput): LocalResult<true> {
     if (input.kind === "transfer") {
-        if (input.transfer_account_id === undefined || input.transfer_account_id === null) return localValidation("轉帳必須選擇轉入帳戶", {transfer_account_id: "必填"});
-        if (input.transfer_account_id === input.account_id) return localValidation("轉出同轉入帳戶不可相同", {transfer_account_id: "不可與轉出帳戶相同"});
-        if (input.category_id !== undefined && input.category_id !== null) return localValidation("轉帳不可設定分類", {category_id: "轉帳不適用"});
-        if (input.merchant_id !== undefined && input.merchant_id !== null) return localValidation("轉帳不可設定商戶", {merchant_id: "轉帳不適用"});
+        if (input.transfer_account_id === undefined || input.transfer_account_id === null)
+            return localValidation(formatMessage(messages.validation.transferAccountRequired), {transfer_account_id: formatMessage(messages.fields.required)});
+        if (input.transfer_account_id === input.account_id)
+            return localValidation(formatMessage(messages.validation.transferSameAccount), {transfer_account_id: formatMessage(messages.fields.transferSameAsSource)});
+        if (input.category_id !== undefined && input.category_id !== null)
+            return localValidation(formatMessage(messages.validation.transferCategoryNotAllowed), {category_id: formatMessage(messages.fields.transferNotApplicable)});
+        if (input.merchant_id !== undefined && input.merchant_id !== null)
+            return localValidation(formatMessage(messages.validation.transferMerchantNotAllowed), {merchant_id: formatMessage(messages.fields.transferNotApplicable)});
     } else if (input.transfer_account_id !== undefined && input.transfer_account_id !== null) {
-        return localValidation("收入或支出不可設定轉入帳戶", {transfer_account_id: "收入或支出不適用"});
+        return localValidation(formatMessage(messages.validation.transferAccountNotAllowed), {transfer_account_id: formatMessage(messages.fields.incomeExpenseNotApplicable)});
     }
     return localSuccess(true);
 }
@@ -38,9 +43,9 @@ export class TransactionsRepository {
     }
 
     async create(input: TransactionInput, idempotencyKey: UUID): Promise<LocalResult<Transaction>> {
-        if (!uuidSchema.safeParse(idempotencyKey).success) return localValidation("Idempotency key 無效");
+        if (!uuidSchema.safeParse(idempotencyKey).success) return localValidation(formatMessage(messages.validation.idempotencyKeyInvalid));
         const parsed = transactionInputSchema.safeParse({...input, currency: "HKD"});
-        if (!parsed.success) return localValidation("交易資料無效");
+        if (!parsed.success) return localValidation(formatMessage(messages.validation.transactionInvalid));
         const kindFields = validateKindFields(parsed.data);
         if (!kindFields.ok) return kindFields;
         return apiRequest(this.#token, {method: "POST", url: "/transactions", data: parsed.data, headers: {"Idempotency-Key": idempotencyKey}}, transactionResponseSchema);
@@ -48,7 +53,7 @@ export class TransactionsRepository {
 
     async update(id: UUID, input: TransactionUpdateInput): Promise<LocalResult<Transaction>> {
         const parsed = transactionUpdateInputSchema.safeParse({...input, currency: "HKD"});
-        if (!parsed.success) return localValidation("交易資料無效");
+        if (!parsed.success) return localValidation(formatMessage(messages.validation.transactionInvalid));
         const kindFields = validateKindFields(parsed.data);
         if (!kindFields.ok) return kindFields;
         return apiRequest(this.#token, {method: "PATCH", url: `/transactions/${id}`, data: parsed.data}, transactionResponseSchema);
@@ -60,7 +65,7 @@ export class TransactionsRepository {
 
     async refund(id: UUID, input: RefundInput): Promise<LocalResult<Transaction>> {
         const parsed = refundInputSchema.safeParse(input);
-        if (!parsed.success) return localValidation("退款資料無效");
+        if (!parsed.success) return localValidation(formatMessage(messages.validation.refundInvalid));
         return apiRequest(this.#token, {method: "POST", url: `/transactions/${id}/refund`, data: parsed.data}, transactionResponseSchema);
     }
 

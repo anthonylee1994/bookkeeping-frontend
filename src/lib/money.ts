@@ -1,3 +1,4 @@
+import {formatMessage, messages} from "./i18n";
 import type {TransactionKind} from "../data/types";
 
 export type MoneyErrorCode = "invalid_format" | "not_positive" | "too_large";
@@ -21,7 +22,7 @@ function moneyError(code: MoneyErrorCode, message: string): MoneyError {
 
 function assertValidCents(cents: number): void {
     if (!Number.isSafeInteger(cents)) {
-        throw new RangeError("金額必須係安全整數 cents");
+        throw new RangeError(formatMessage(messages.runtime.centsNotSafeInteger));
     }
 }
 
@@ -35,7 +36,7 @@ export function dollarsToCents(input: string): number | MoneyError {
     const match = /^(?:0|[1-9]\d{0,2}(?:,\d{3})*|[1-9]\d*)(?:\.(\d{1,2}))?$/.exec(value);
 
     if (match === null) {
-        return moneyError("invalid_format", "請輸入有效金額，最多兩位小數");
+        return moneyError("invalid_format", formatMessage(messages.validation.amountInvalidFormat));
     }
 
     const normalized = value.replaceAll(",", "");
@@ -43,15 +44,15 @@ export function dollarsToCents(input: string): number | MoneyError {
     const dollars = Number(dollarPart);
 
     if (!Number.isSafeInteger(dollars) || dollars > MAX_SAFE_DOLLARS) {
-        return moneyError("too_large", "金額太大");
+        return moneyError("too_large", formatMessage(messages.validation.amountTooLarge));
     }
 
     const cents = dollars * 100 + Number(decimalPart.padEnd(2, "0"));
     if (!Number.isSafeInteger(cents)) {
-        return moneyError("too_large", "金額太大");
+        return moneyError("too_large", formatMessage(messages.validation.amountTooLarge));
     }
     if (cents === 0) {
-        return moneyError("not_positive", "金額必須大過零");
+        return moneyError("not_positive", formatMessage(messages.validation.amountNotPositive));
     }
 
     return cents;
@@ -70,7 +71,7 @@ export function formatSignedAmount({cents, kind, isRefund = false}: SignedAmount
 
     const amount = centsToDollars(Math.abs(cents));
     if (isRefund) {
-        return `+${amount} 退款`;
+        return `+${amount} ${formatMessage(messages.transactions.refundSuffix)}`;
     }
     if (kind === "income") {
         return `+${amount}`;

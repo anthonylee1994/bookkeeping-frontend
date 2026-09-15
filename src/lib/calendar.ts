@@ -1,3 +1,5 @@
+import {formatMessage, messages} from "./i18n";
+
 export const HONG_KONG_OFFSET_MS = 8 * 60 * 60 * 1000;
 
 export type DateInput = Date | string | number;
@@ -11,7 +13,7 @@ export type CalendarDate = {
 export function parseDate(input: DateInput): Date {
     const value = input instanceof Date ? new Date(input.getTime()) : new Date(input);
     if (Number.isNaN(value.getTime())) {
-        throw new RangeError("無效日期");
+        throw new RangeError(formatMessage(messages.runtime.invalidDate));
     }
     return value;
 }
@@ -19,13 +21,13 @@ export function parseDate(input: DateInput): Date {
 export function parseCalendarDate(input: string): CalendarDate {
     const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input);
     if (match === null) {
-        throw new RangeError("日期必須使用 YYYY-MM-DD 格式");
+        throw new RangeError(formatMessage(messages.runtime.isoFormatRequired));
     }
 
     const result = {year: Number(match[1]), month: Number(match[2]), day: Number(match[3])};
     const test = new Date(Date.UTC(result.year, result.month - 1, result.day));
     if (test.getUTCFullYear() !== result.year || test.getUTCMonth() !== result.month - 1 || test.getUTCDate() !== result.day) {
-        throw new RangeError("無效日期");
+        throw new RangeError(formatMessage(messages.runtime.invalidDate));
     }
     return result;
 }
@@ -62,6 +64,6 @@ export function compareCalendarDates(left: CalendarDate, right: CalendarDate): n
 
 export function assertPositiveInteger(value: number, name: string): void {
     if (!Number.isInteger(value) || value < 1) {
-        throw new RangeError(`${name} 必須係正整數`);
+        throw new RangeError(formatMessage(messages.runtime.positiveInteger, {name}));
     }
 }

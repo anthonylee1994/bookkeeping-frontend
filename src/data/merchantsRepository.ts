@@ -2,6 +2,7 @@ import {apiDelete, apiRequest} from "./apiRepository";
 import {localValidation} from "./localResult";
 import {merchantResponseSchema, merchantsResponseSchema} from "./repositorySchemas";
 import {merchantInputSchema} from "./schema";
+import {formatMessage, messages} from "../lib/i18n";
 import type {LocalResult, Merchant, MerchantInput, UUID} from "./types";
 
 export class MerchantsRepository {
@@ -17,7 +18,7 @@ export class MerchantsRepository {
 
     async create(input: MerchantInput): Promise<LocalResult<Merchant>> {
         const parsed = merchantInputSchema.safeParse(input);
-        if (!parsed.success) return localValidation("商戶資料無效");
+        if (!parsed.success) return localValidation(formatMessage(messages.validation.merchantInvalid));
         return apiRequest(this.#token, {method: "POST", url: "/merchants", data: parsed.data}, merchantResponseSchema);
     }
 
