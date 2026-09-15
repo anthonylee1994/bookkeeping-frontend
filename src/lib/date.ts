@@ -1,5 +1,5 @@
-import {addCalendarDays, addCalendarMonths, daysInMonth, parseDate, toHongKongCalendar, toHongKongInstant} from "./calendar";
-import type {DateInput} from "./calendar";
+import {addCalendarDays, addCalendarMonths, daysInMonth, parseCalendarDate, parseDate, toHongKongCalendar, toHongKongInstant} from "./calendar";
+import type {CalendarDate, DateInput} from "./calendar";
 import {formatMessage, intl, messages} from "./i18n";
 import type {SummaryPeriod} from "../data/types";
 
@@ -51,4 +51,28 @@ export function addPeriod(input: DateInput, period: SummaryPeriod, amount = 1): 
         return toHongKongInstant(addCalendarMonths(date, amount));
     }
     return toHongKongInstant(addCalendarDays(date, amount * (period === "weekly" ? 7 : 1)));
+}
+
+/** 香港時區嘅今日，格式 `YYYY-MM-DD`。 */
+export function todayDate(): string {
+    return toIsoDate(new Date());
+}
+
+/** 將任何 datetime 轉做香港時區嘅 `YYYY-MM-DD`（畀 URL filter 用）。 */
+export function toIsoDate(input: DateInput): string {
+    return formatCalendarDate(toHongKongCalendar(input));
+}
+
+/** 以香港日曆加減月份，回 `YYYY-MM-DD`；月底會 clamp 到目標月份最後一日。 */
+export function addMonthsToDate(date: string, amount: number): string {
+    return formatCalendarDate(addCalendarMonths(parseCalendarDate(date), amount));
+}
+
+/** 顯示月份標題，例如 `2026年9月`。 */
+export function toDisplayMonth(input: DateInput): string {
+    return intl.formatDate(parseDate(input), {year: "numeric", month: "long", timeZone: HONG_KONG_TIME_ZONE});
+}
+
+function formatCalendarDate({year, month, day}: CalendarDate): string {
+    return `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }

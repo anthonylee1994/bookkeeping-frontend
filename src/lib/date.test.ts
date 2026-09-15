@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
-import {addPeriod, endOfPeriod, nowIso, startOfPeriod, toDisplayDate, toDisplayDateTime} from "./date";
+import {addMonthsToDate, addPeriod, endOfPeriod, nowIso, startOfPeriod, toDisplayDate, toDisplayDateTime, toDisplayMonth, toIsoDate, todayDate} from "./date";
 
 describe("Hong Kong date formatting", () => {
     it("formats across the UTC to Hong Kong day boundary", () => {
@@ -33,5 +33,31 @@ describe("period boundaries", () => {
         expect(addPeriod("2026-01-31T12:00:00+08:00", "daily").toISOString()).toBe("2026-01-31T16:00:00.000Z");
         expect(addPeriod("2026-01-31T12:00:00+08:00", "weekly").toISOString()).toBe("2026-02-06T16:00:00.000Z");
         expect(addPeriod("2024-01-31T12:00:00+08:00", "monthly").toISOString()).toBe("2024-02-28T16:00:00.000Z");
+    });
+});
+
+describe("Hong Kong date-string helpers", () => {
+    it("converts instants to Hong Kong ISO dates across the day boundary", () => {
+        expect(toIsoDate("2026-08-31T15:59:59Z")).toBe("2026-08-31");
+        expect(toIsoDate("2026-08-31T16:00:00Z")).toBe("2026-09-01");
+    });
+
+    it("returns today in Hong Kong time", () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-09-14T15:59:59.000Z"));
+        expect(todayDate()).toBe("2026-09-14");
+        vi.setSystemTime(new Date("2026-09-14T16:00:00.000Z"));
+        expect(todayDate()).toBe("2026-09-15");
+        vi.useRealTimers();
+    });
+
+    it("adds months and clamps month-end dates", () => {
+        expect(addMonthsToDate("2026-01-31", 1)).toBe("2026-02-28");
+        expect(addMonthsToDate("2026-03-31", -1)).toBe("2026-02-28");
+        expect(addMonthsToDate("2026-09-14", 1)).toBe("2026-10-14");
+    });
+
+    it("formats the display month", () => {
+        expect(toDisplayMonth("2026-09-14")).toBe("2026年9月");
     });
 });

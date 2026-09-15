@@ -106,17 +106,6 @@ export const SidebarNav = ({collapsed}: SidebarNavProps) => {
                     );
                 })}
             </Stack>
-
-            {username === undefined ? null : (
-                <HStack borderTopWidth="1px" borderColor="border" p="3" gap="2.5" justify={collapsed ? "center" : "flex-start"}>
-                    <Circle size="9" bg="bg.subtle" color="fg.muted" fontSize="sm" fontWeight="medium" textTransform="uppercase" flexShrink="0" aria-hidden>
-                        {username.slice(0, 1)}
-                    </Circle>
-                    <Text fontSize="sm" truncate srOnly={collapsed}>
-                        {username}
-                    </Text>
-                </HStack>
-            )}
         </Flex>
     );
 };

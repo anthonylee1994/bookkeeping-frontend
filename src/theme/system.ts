@@ -127,9 +127,10 @@ const config = defineConfig({
                             _hover: {bg: "brand.active", color: "brand.activeFg"},
                         },
                         outline: {
-                            /* 實底而唔係透明，咁喺漸變背景上都睇得清。 */
+                            /* 實底而唔係透明，咁喺漸變背景上都睇得清；border 跟文字色。 */
                             bg: "bg.panel",
-                            _hover: {bg: "brand.active", color: "brand.activeFg"},
+                            borderColor: "colorPalette.fg",
+                            _hover: {bg: "brand.active", color: "brand.activeFg", borderColor: "brand.activeFg"},
                         },
                         subtle: {
                             _hover: {bg: "brand.active", color: "brand.activeFg"},

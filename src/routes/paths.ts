@@ -14,3 +14,8 @@ export const ROUTES = {
     settingsCategories: "/settings/categories",
     settingsMerchants: "/settings/merchants",
 } as const;
+
+/** 交易詳情 URL；集中喺度，避免各 feature 自己砌 path。 */
+export function transactionDetailPath(id: string): string {
+    return `/transactions/${id}`;
+}
