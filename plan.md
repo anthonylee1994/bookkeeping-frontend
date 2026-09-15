@@ -46,6 +46,7 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 5. **圖片唔 persist base64**。Preview 用 object URL，unmount／logout 要 revoke。Fixture 圖片用細小 public asset。
 6. **AI parse 用 deterministic fixture**，可按檔名／hash 選成功或失敗 mock。
 7. **`tsconfig` 開 `strict`**。`erasableSyntaxOnly` 已開，用 union type 唔用 enum。Type-only import 用 `import type`。
+8. **UI primitives 用 shadcn/ui**（Radix + Tailwind v4 style `radix-nova`）：`src/components/ui/` 直接放 shadcn 生成嘅 component（已統一成專案 convention），專案自建嘅再 compose 上去。`@/*` alias → `src/*`。
 
 ---
 
@@ -70,7 +71,9 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 **做：**
 
 - 安裝：`react-router`、`zustand`、`react-hook-form`、`@hookform/resolvers`、`zod`、`react-intl`、`lucide-react`、`recharts`、`uuid`、`vite-plugin-pwa`、`vitest`、`@testing-library/react`、`jsdom`、`@playwright/test`
-- `vite.config.ts`：PWA plugin（dev 唔 enable SW）、alias 如需要
+- shadcn UI 依賴（Step 8 用）：`radix-ui`、`class-variance-authority`、`cn`、`tw-animate-css`、`shadcn`（CLI + `shadcn/tailwind.css`）、`@testing-library/jest-dom`、`@testing-library/user-event`
+- 路徑 alias：`@/*` → `src/*`（`tsconfig.json`、`tsconfig.app.json`、`vite.config.ts`）
+- `vite.config.ts`：PWA plugin（dev 唔 enable SW）、`test.environment = "jsdom"` + setup file
 - `tsconfig.app.json`：`strict: true`；Vitest types
 - `.env.example`：`VITE_APP_ENV=development`
 - `index.html`：`lang="zh-Hant-HK"`、viewport + `viewport-fit=cover`、CSP meta（`default-src 'self'`，img 按需要）、title 用繁中
@@ -267,22 +270,43 @@ Date（`Asia/Hong_Kong`）：
 
 ---
 
-## Step 8 — UI primitives
+## Step 8 — UI primitives（shadcn + Tailwind）
 
-`src/components/ui/`：Button、IconButton、TextField、Select、Textarea、Checkbox、SegmentedControl、Tabs、Dialog、Drawer、BottomSheet、Toast、Banner、Skeleton、EmptyState、Badge、Amount、Pagination、ConfirmDialog、Card、Table。
+用 **shadcn/ui**（Radix primitives + Tailwind v4）做基礎，專案自建嘅再 compose 上去。
 
-規則：
+**基建**
 
-- radius：input／button 6px，card ≤ 8px
+- `components.json`（shadcn CLI，style `radix-nova`）；加 component：`pnpm dlx shadcn@latest add <name>`
+- `src/lib/utils.ts`：`cn()`（`cn` package）
+- `src/index.css`：shadcn semantic tokens（`:root` + `@theme inline`）；primary `emerald-700`、ring `emerald-500`；另 map `income`／`expense`／`transfer`／`refund` 做 `text-income` 等 utility；radius control 6px、card 8px
+- 測試：Vitest `jsdom`、`pool: "vmThreads"`（jsdom 每個 worker 只建一次）、`src/test/setup.ts`（jest-dom、matchMedia／ResizeObserver／pointer-capture stubs）、`src/test/renderWithIntl.tsx` 包 `IntlProvider`
+
+**Components**（`src/components/ui/`）
+
+- shadcn 生成：Button、Select、Textarea、Checkbox、Tabs、Dialog、Skeleton、Badge、Card、Table、Pagination、Label、RadioGroup、Tooltip
+- 專案自建（compose shadcn／radix）：
+    - `IconButton`：強制 `label`（accessible name）+ tooltip
+    - `TextField`：label + error／hint；error 用 `aria-describedby`、`role="alert"`、`aria-invalid`
+    - `SegmentedControl`：Radix RadioGroup，`radiogroup`／`radio` ARIA、keyboard 左右鍵
+    - `Drawer`（右側）／`BottomSheet`（底部）：由 `Sheet` 包
+    - `ConfirmDialog`：`AlertDialog`（可 `destructive`）
+    - `Toast`／`Toaster`：讀 `uiStore` toast queue；`aria-live="polite"`，error `role="alert"`
+    - `Banner`：info／success／warning／error；error 用 `role="alert"`
+    - `EmptyState`、`Amount`（用 `lib/money.ts` + kind tone）
+- shadcn 檔案由 CLI 生成後統一改成專案 convention：`export const` arrow component、`import React` 第一行、移除 `"use client"`、可見字串走 i18n（`useIntl()`／`messages`）
+
+**規則**（spec 2.2／10）
+
+- radius：input／button 6px，card 8px
 - primary `emerald-700`，focus ring `emerald-500`
 - 收入 emerald／支出 rose／轉帳 blue／退款 amber，**同時有正負號或文字**
 - touch ≥ 44px；body ≥ 16px；secondary ≥ 14px
 - icon-only 要 `aria-label` + tooltip
-- Dialog：focus trap、Escape、關閉後 focus 返觸發者；body 先 scroll
+- Dialog／Sheet：focus trap、Escape、關閉後 focus 返觸發者；body 先 scroll
 - Toast：`aria-live="polite"`；阻塞錯誤 `role="alert"`
 - Segmented control／tabs 用正確 ARIA
 
-**完成標準**：幾個 primitive 有 RTL 測試（dialog escape、field error `aria-describedby`）。
+**完成標準**：RTL tests（`src/components/ui/*.test.tsx`）：Dialog Escape + focus return、TextField `aria-describedby`、SegmentedControl radiogroup、Amount tone、Toaster live region。
 
 ---
 

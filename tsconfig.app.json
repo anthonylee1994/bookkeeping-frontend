@@ -9,6 +9,11 @@
         "skipLibCheck": true,
         "strict": true,
 
+        /* Path alias（shadcn） */
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+
         /* Bundler mode */
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,

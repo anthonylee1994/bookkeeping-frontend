@@ -121,6 +121,14 @@ export const messages = {
     transactions: {
         refundSuffix: {id: "transactions.refundSuffix", defaultMessage: "退款"},
     },
+    pagination: {
+        label: {id: "pagination.label", defaultMessage: "分頁"},
+        previous: {id: "pagination.previous", defaultMessage: "上一頁"},
+        next: {id: "pagination.next", defaultMessage: "下一頁"},
+        morePages: {id: "pagination.morePages", defaultMessage: "更多頁數"},
+        goToPrevious: {id: "pagination.goToPrevious", defaultMessage: "去上一頁"},
+        goToNext: {id: "pagination.goToNext", defaultMessage: "去下一頁"},
+    },
 } as const;
 
 export type Messages = typeof messages;
