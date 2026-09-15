@@ -137,6 +137,7 @@ export const aiPreviewSchema = z.object({
     sha256: z.string(),
     status: z.enum(["success", "partial", "failed"]),
     parsed: aiParsedFieldsSchema.nullable(),
+    suggested_category_id: uuidSchema.nullish(),
     raw_response: z.string().nullish(),
     error: z.string().nullish(),
     tokens_in: z.number().nullish(),

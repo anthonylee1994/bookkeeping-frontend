@@ -62,16 +62,30 @@ export function missingReviewFields(preview: AiPreview): ScanReviewField[] {
     return missing;
 }
 
+/**
+ * Backend 已經用當前用戶嘅分類將 AI hint resolve 做 category id，優先信佢；
+ * 冇（例如舊 cache 或 hint 對唔到）先退返落前端按名比對。
+ */
+function findSuggestedCategory(preview: AiPreview, categories: Category[], kind: ScanReviewValues["kind"]): Category | null {
+    const suggestedId = preview.suggested_category_id;
+    if (suggestedId != null) {
+        const match = categories.find(item => item.id === suggestedId && item.kind === kind);
+        if (match !== undefined) return match;
+    }
+    return findByName(
+        categories.filter(item => item.kind === kind),
+        preview.parsed?.category_hint
+    );
+}
+
 /** 解析結果只做建議：對唔到名嘅商戶／分類留空，唔會亂猜。 */
 export function previewToReviewValues(preview: AiPreview, reference: ScanReference): ScanReviewValues {
     const parsed = preview.parsed;
     const kind = parsed?.kind ?? "expense";
     const merchant = findByName(reference.merchants, parsed?.merchant_name);
     const category =
-        findByName(
-            reference.categories.filter(item => item.kind === kind),
-            parsed?.category_hint
-        ) ?? (merchant?.default_category_id != null ? (reference.categories.find(item => item.id === merchant.default_category_id && item.kind === kind) ?? null) : null);
+        findSuggestedCategory(preview, reference.categories, kind) ??
+        (merchant?.default_category_id != null ? (reference.categories.find(item => item.id === merchant.default_category_id && item.kind === kind) ?? null) : null);
 
     return {
         kind,

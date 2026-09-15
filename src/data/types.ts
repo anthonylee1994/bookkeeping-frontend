@@ -180,6 +180,7 @@ export type AiPreview = {
     sha256: string;
     status: "success" | "partial" | "failed";
     parsed: AiParsedFields | null;
+    suggested_category_id?: UUID | null;
     raw_response?: string | null;
     error?: string | null;
     tokens_in?: number | null;

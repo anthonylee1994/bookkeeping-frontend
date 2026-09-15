@@ -5,8 +5,8 @@ import type {AiParsedFields, AiPreview} from "@/data/types";
 
 const reference = {accounts: domainTestState.accounts, categories: domainTestState.categories, merchants: domainTestState.merchants};
 
-function preview(parsed: AiParsedFields | null, status: AiPreview["status"] = "success"): AiPreview {
-    return {id: "80000000-0000-4000-8000-000000000001", image_urls: ["https://example.test/receipt.png"], sha256: "a".repeat(64), status, parsed};
+function preview(parsed: AiParsedFields | null, status: AiPreview["status"] = "success", suggestedCategoryId: string | null = null): AiPreview {
+    return {id: "80000000-0000-4000-8000-000000000001", image_urls: ["https://example.test/receipt.png"], sha256: "a".repeat(64), status, parsed, suggested_category_id: suggestedCategoryId};
 }
 
 describe("scanModel flags", () => {
@@ -37,6 +37,18 @@ describe("previewToReviewValues", () => {
             occurredAt: "2026-09-14T16:00",
             note: "咖啡",
         });
+    });
+
+    it("prefers the backend-resolved category id over the category hint", () => {
+        const values = previewToReviewValues(preview({amount_cents: 1250, kind: "expense", category_hint: "唔存在"}, "success", domainTestState.categories[1].id), reference);
+
+        expect(values.categoryId).toBe(domainTestState.categories[1].id);
+    });
+
+    it("ignores a suggested category whose kind does not match", () => {
+        const values = previewToReviewValues(preview({amount_cents: 1250, kind: "expense"}, "success", domainTestState.categories[0].id), reference);
+
+        expect(values.categoryId).toBe("");
     });
 
     it("leaves unmatched merchants and categories blank instead of guessing", () => {
