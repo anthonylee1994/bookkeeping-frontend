@@ -488,14 +488,28 @@ Period segmented：日／週／月。上一期／下一期。URL：`period`、`d
 
 ## Step 17 — 定期交易 `/recurring-rules`
 
+**狀態：已完成（2026-09-15）**
+
 Tabs：active／paused／ended。Create／edit 欄位跟 spec 5.8。Actions 確認文案：
 
 - run now 成功顯示新交易入口
-- already_materialized →「今日已經產生過交易」
+- already_materialized →「今日已產生過交易」
 - skip next 列出日期
 - 刪除只刪 rule
 
-**完成標準**：pause／resume／run now／skip 測試。
+完成內容：狀態 tabs、每張卡顯示類型、金額、頻率、下次執行、帳戶／分類／商戶同狀態；create／edit drawer（kind、金額、帳戶、分類、商戶、備註、頻率、間隔、週／月／年相關日期、開始日、可選結束日）；pause／resume／run now／skip next／edit／delete。
+
+實作備註：
+
+- 狀態 tab 用 Chakra `Tabs`，同步 URL `status`（`parseRecurringStatus`／`serializeRecurringStatus`，預設 `active`）；`useRecurringRules` 以 `status`＋reload token 做 request key，切 tab 即清舊數據
+- `recurringRuleModel.ts`：`formValuesToInput` 用 `lib/schedule.nextRunAt` 由開始日計出香港時區 ISO `next_run_at`；編輯時若排程欄位冇改，保留原本 `next_run_at`，免得重算成過去日期而觸發重複入帳
+- Zod schema 做頻率對應欄位驗證（weekly 要 `day_of_week`、monthly／yearly 要 `day_of_month`、yearly 要 `month_of_year`）、間隔正整數、結束日不早於開始日
+- `runNow` 成功顯示「已產生交易」同連去新交易詳情嘅入口；`conflict_already_materialized` 直接顯示 repository 嘅「今日已產生過交易」訊息
+- `skip next` 確認文案列出 `next_run_at` 日期；刪除文案講明只刪 rule、已產生交易會保留
+- 新增／修改用右側（desktop）／底部（mobile）drawer；有未儲存改動離開時先確認（`useBlocker`＋drawer 內 confirm dialog）
+- Create 預設選第一帳戶；跑完動作後 reload 清單，新增／修改成功會自動切去該 rule 狀態嘅 tab
+
+**完成標準（已達成）**：pause／resume／run now（成功入口同 already_materialized）／skip next 日期／delete 文案、tab 切換、empty state、schedule 描述同 `next_run_at` 計算均有測試；Prettier、完整 Vitest（212 個）同 production build 通過。
 
 ---
 

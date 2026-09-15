@@ -1,15 +1,17 @@
 import {dateSchema, uuidSchema} from "../data/schema";
-import type {SortOrder, SummaryPeriod, TransactionFilters, TransactionKind, TransactionSortField} from "../data/types";
+import type {RecurringStatus, SortOrder, SummaryPeriod, TransactionFilters, TransactionKind, TransactionSortField} from "../data/types";
 
 const TRANSACTION_KINDS: readonly TransactionKind[] = ["income", "expense", "transfer"];
 const TRANSACTION_SORT_FIELDS: readonly TransactionSortField[] = ["occurred_at", "amount_cents", "created_at"];
 const SORT_ORDERS: readonly SortOrder[] = ["asc", "desc"];
 const SUMMARY_PERIODS: readonly SummaryPeriod[] = ["daily", "weekly", "monthly"];
+const RECURRING_STATUSES: readonly RecurringStatus[] = ["active", "paused", "ended"];
 
 export const DEFAULT_PER_PAGE = 25;
 export const MAX_PER_PAGE = 100;
 
 export const DEFAULT_SUMMARY_PERIOD: SummaryPeriod = "monthly";
+export const DEFAULT_RECURRING_STATUS: RecurringStatus = "active";
 
 export type SummaryParams = {
     period: SummaryPeriod;
@@ -134,6 +136,17 @@ export function serializeSummaryParams(params: SummaryParams): URLSearchParams {
     appendValue(search, "date", params.date);
     appendValue(search, "page", params.page);
     return search;
+}
+
+/* ---------- Recurring rules 狀態 tab ---------- */
+
+/** 由 URL query 還原定期交易狀態 tab；無效值回預設 `active`。 */
+export function parseRecurringStatus(input: URLSearchParams | string): RecurringStatus {
+    return readEnum(asSearchParams(input), "status", RECURRING_STATUSES) ?? DEFAULT_RECURRING_STATUS;
+}
+
+export function serializeRecurringStatus(status: RecurringStatus): URLSearchParams {
+    return new URLSearchParams({status});
 }
 
 /* ---------- returnTo（防 open redirect） ---------- */

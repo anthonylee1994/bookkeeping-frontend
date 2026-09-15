@@ -1,6 +1,6 @@
 import {describe, expect, it} from "vitest";
 import type {TransactionFilters} from "../data/types";
-import {parseReturnTo, parseSummaryParams, parseTransactionFilters, serializeSummaryParams, serializeTransactionFilters} from "./searchParams";
+import {parseRecurringStatus, parseReturnTo, parseSummaryParams, parseTransactionFilters, serializeRecurringStatus, serializeSummaryParams, serializeTransactionFilters} from "./searchParams";
 
 const accountId = "10000000-0000-4000-8000-000000000001";
 const categoryId = "20000000-0000-4000-8000-000000000002";
@@ -62,6 +62,17 @@ describe("summary search params", () => {
 
     it("drops invalid date and page", () => {
         expect(parseSummaryParams("period=daily&date=2026-02-30&page=-1")).toEqual({period: "daily"});
+    });
+});
+
+describe("recurring status search params", () => {
+    it("round-trips a valid status", () => {
+        expect(parseRecurringStatus(serializeRecurringStatus("paused"))).toBe("paused");
+    });
+
+    it("defaults to active and drops invalid status values", () => {
+        expect(parseRecurringStatus("")).toBe("active");
+        expect(parseRecurringStatus("status=archived")).toBe("active");
     });
 });
 
