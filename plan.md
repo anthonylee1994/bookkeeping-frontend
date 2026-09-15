@@ -479,7 +479,7 @@ Period segmented：日／週／月。上一期／下一期。URL：`period`、`d
 - 分類分佈唔用 tab：收入同支出各自一張 `CategoryBreakdownChart` 卡；dashboard 同 summaries 共用（dashboard 照舊 lazy load）
 - Back-end `summaries#by_category` 同 `dashboard#category_breakdown` 都改為 group 非轉帳交易並回 `income_cents` + `expense_cents`；dashboard 由 frontend 自行取每種 Top 5
 - 抽出共用 `components/layout/SectionCard`（原本 dashboard `DashboardSection`）、`components/SummaryTotalsGrid`（dashboard／summaries 三格數字）同 `lib/categoryBreakdown`（原本 dashboard `dashboardFormat`，`rankCategories` 支援收入／支出）
-- Mobile 排版：淨額橫跨兩格、收入／支出各佔一格；金額用 `clamp()` 隨 viewport 縮放，避免窄機（320px）斷行；期間導覽 label 同日期 picker 喺 mobile 上下分開；`SectionCard` padding 收窄（base 4／md 6）；列表金額 `nowrap` + `flexShrink="0"`，長備註會 truncate 而唔會逼爆金額；dashboard 月份導覽 mobile 撐滿一行（`PageHeader` 加 `actionsFullWidth`，desktop 維持右上角）
+- Mobile 排版：淨額橫跨兩格、收入／支出各佔一格（三格只喺 md 以上）；金額用 `clamp()` 隨 viewport 縮放，避免窄機（320px）斷行；期間導覽 label 同日期 picker 喺 mobile 上下分開；`SectionCard` padding 收窄（base 4／md 6）；列表金額 `nowrap` + `flexShrink="0"`，長備註會 truncate 而唔會逼爆金額；dashboard 月份導覽 mobile 撐滿一行（`PageHeader` 加 `actionsFullWidth`，desktop 維持右上角）
 - Recharts v3 `PieChart` 內建 accessibility layer：圖表可鍵盤 focus ＋ 方向鍵郁 tooltip；旁邊附完整資料表同 caption
 
 **完成標準（已達成）**：週報範圍一至日（`periodRange` 測試）、轉帳獨立唔入收支（fixture transfers 20000 但 net 照係 income−expense）、dashboard 同 summaries 各有收入／支出兩張分類卡、period／date／page URL 同步、換期間／日期同分頁重新 fetch、錯誤重試，全部有測試；Prettier、完整 Vitest（193 個）同 production build 通過（後端 `phase6_spec` 亦通過）。

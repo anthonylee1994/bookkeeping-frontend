@@ -36,12 +36,12 @@ export const SummaryTotalsGrid = ({netCents, incomeCents, expenseCents, netLabel
     ];
 
     return (
-        <SimpleGrid columns={{base: 2, sm: 3}} gap="3">
+        <SimpleGrid columns={{base: 2, md: 3}} gap="3">
             {tiles.map(tile => (
                 <Box
                     key={tile.key}
                     minW="0"
-                    gridColumn={tile.wide === true ? {base: "span 2", sm: "auto"} : undefined}
+                    gridColumn={tile.wide === true ? {base: "span 2", md: "auto"} : undefined}
                     bg="bg.panel"
                     borderWidth="1px"
                     borderColor="border"
