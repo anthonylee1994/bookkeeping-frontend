@@ -1,14 +1,6 @@
 import {Button, HStack, Icon} from "@chakra-ui/react";
 import {CheckIcon} from "lucide-react";
-import {FLAT_UI_COLORS} from "@/lib/colors";
-
-function isLightColor(hex: string): boolean {
-    const value = hex.replace("#", "");
-    const red = parseInt(value.slice(0, 2), 16);
-    const green = parseInt(value.slice(2, 4), 16);
-    const blue = parseInt(value.slice(4, 6), 16);
-    return (0.299 * red + 0.587 * green + 0.114 * blue) / 255 > 0.6;
-}
+import {FLAT_UI_COLORS, isLightColor} from "@/lib/colors";
 
 type ColorPickerProps = {
     value: string;

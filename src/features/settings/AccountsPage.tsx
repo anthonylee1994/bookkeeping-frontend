@@ -1,10 +1,12 @@
 import React from "react";
-import {Alert, Box, Button, Card, HStack, Heading, Stack, Text} from "@chakra-ui/react";
+import {Alert, Box, Button, Card, Center, HStack, Heading, Stack, Text} from "@chakra-ui/react";
+import {Icon as IconifyIcon} from "@iconify/react";
 import {PlusIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import type {Account} from "@/data/types";
 import {AccountFormDrawer} from "@/features/settings/AccountFormDrawer";
 import {useDomainReference} from "@/hooks/useDomainReference";
+import {isLightColor} from "@/lib/colors";
 import {messages} from "@/lib/i18n";
 import {useAppStore} from "@/stores/appStore";
 
@@ -95,26 +97,35 @@ export const AccountsPage = () => {
                     </Card.Root>
                 ) : (
                     <Stack gap="3">
-                        {accounts.map(account => (
-                            <Card.Root key={account.id} cursor="pointer" onClick={() => setDrawerAccount(account)} _hover={{bg: "brand.active"}}>
-                                <Card.Body>
-                                    <HStack justify="space-between">
-                                        <HStack gap="3">
-                                            {account.color === null ? null : <Box w="10" h="10" rounded="lg" bg={account.color} flexShrink={0} />}
-                                            <Box>
-                                                <Text fontWeight="semibold">{account.name}</Text>
-                                                <Text fontSize="sm" color="fg.muted">
-                                                    {kindLabel(account.kind)} · {account.currency}
-                                                </Text>
-                                            </Box>
+                        {accounts.map(account => {
+                            const icon = account.icon ?? null;
+                            const color = account.color ?? null;
+                            const tone = color === null ? "fg" : isLightColor(color) ? "gray.800" : "white";
+                            return (
+                                <Card.Root key={account.id} cursor="pointer" onClick={() => setDrawerAccount(account)} _hover={{bg: "brand.active"}}>
+                                    <Card.Body>
+                                        <HStack justify="space-between">
+                                            <HStack gap="3">
+                                                {icon === null && color === null ? null : (
+                                                    <Center w="10" h="10" rounded="lg" bg={color ?? "bg.subtle"} color={tone} flexShrink={0}>
+                                                        {icon === null ? null : <IconifyIcon icon={icon} width="22" height="22" />}
+                                                    </Center>
+                                                )}
+                                                <Box>
+                                                    <Text fontWeight="semibold">{account.name}</Text>
+                                                    <Text fontSize="sm" color="fg.muted">
+                                                        {kindLabel(account.kind)} · {account.currency}
+                                                    </Text>
+                                                </Box>
+                                            </HStack>
+                                            <Text fontWeight="semibold" fontVariantNumeric="tabular-nums">
+                                                HK$ {((account.balance_cents ?? account.initial_balance_cents) / 100).toFixed(2)}
+                                            </Text>
                                         </HStack>
-                                        <Text fontWeight="semibold" fontVariantNumeric="tabular-nums">
-                                            HK$ {((account.balance_cents ?? account.initial_balance_cents) / 100).toFixed(2)}
-                                        </Text>
-                                    </HStack>
-                                </Card.Body>
-                            </Card.Root>
-                        ))}
+                                    </Card.Body>
+                                </Card.Root>
+                            );
+                        })}
                     </Stack>
                 )}
             </Box>

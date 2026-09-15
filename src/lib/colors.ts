@@ -21,3 +21,12 @@ export const FLAT_UI_COLORS = [
     "#95a5a6",
     "#7f8c8d",
 ];
+
+/** 依相對亮度判斷淺色，用來為色塊上的內容（tick／圖示）選對比色。 */
+export function isLightColor(hex: string): boolean {
+    const value = hex.replace("#", "");
+    const red = parseInt(value.slice(0, 2), 16);
+    const green = parseInt(value.slice(2, 4), 16);
+    const blue = parseInt(value.slice(4, 6), 16);
+    return (0.299 * red + 0.587 * green + 0.114 * blue) / 255 > 0.6;
+}

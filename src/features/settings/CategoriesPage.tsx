@@ -1,10 +1,12 @@
 import React from "react";
-import {Alert, Box, Button, Card, HStack, Heading, Stack, Tabs, Text} from "@chakra-ui/react";
+import {Alert, Box, Button, Card, Center, HStack, Heading, Stack, Tabs, Text} from "@chakra-ui/react";
+import {Icon as IconifyIcon} from "@iconify/react";
 import {PlusIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import type {Category, CategoryKind} from "@/data/types";
 import {CategoryFormDrawer} from "@/features/settings/CategoryFormDrawer";
 import {useDomainReference} from "@/hooks/useDomainReference";
+import {isLightColor} from "@/lib/colors";
 import {messages} from "@/lib/i18n";
 import {useAppStore} from "@/stores/appStore";
 
@@ -90,18 +92,27 @@ export const CategoriesPage = () => {
                             </Card.Root>
                         ) : (
                             <Stack gap="3">
-                                {filtered.map(category => (
-                                    <Card.Root key={category.id} cursor="pointer" onClick={() => setDrawerCategory(category)} _hover={{bg: "brand.active"}}>
-                                        <Card.Body>
-                                            <HStack justify="space-between">
-                                                <HStack gap="3">
-                                                    {category.color === null ? null : <Box w="10" h="10" rounded="lg" bg={category.color} flexShrink={0} />}
-                                                    <Text fontWeight="semibold">{category.name}</Text>
+                                {filtered.map(category => {
+                                    const icon = category.icon ?? null;
+                                    const color = category.color ?? null;
+                                    const tone = color === null ? "fg" : isLightColor(color) ? "gray.800" : "white";
+                                    return (
+                                        <Card.Root key={category.id} cursor="pointer" onClick={() => setDrawerCategory(category)} _hover={{bg: "brand.active"}}>
+                                            <Card.Body>
+                                                <HStack justify="space-between">
+                                                    <HStack gap="3">
+                                                        {icon === null && color === null ? null : (
+                                                            <Center w="10" h="10" rounded="lg" bg={color ?? "bg.subtle"} color={tone} flexShrink={0}>
+                                                                {icon === null ? null : <IconifyIcon icon={icon} width="22" height="22" />}
+                                                            </Center>
+                                                        )}
+                                                        <Text fontWeight="semibold">{category.name}</Text>
+                                                    </HStack>
                                                 </HStack>
-                                            </HStack>
-                                        </Card.Body>
-                                    </Card.Root>
-                                ))}
+                                            </Card.Body>
+                                        </Card.Root>
+                                    );
+                                })}
                             </Stack>
                         )}
                     </Box>
