@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 import {MemoryRouter, Route, Routes} from "react-router";
 import {LoginForm} from "@/features/auth/LoginForm";
 import {useAuthStore} from "@/stores/authStore";
-import {useUiStore} from "@/stores/uiStore";
 import {renderWithIntl} from "@/test/renderWithIntl";
 import type {AuthSession} from "@/data/types";
 
@@ -41,7 +40,6 @@ beforeEach(() => {
     localStorage.clear();
     loginMock.mockReset();
     useAuthStore.setState({token: null, user: null, hydrated: false});
-    useUiStore.setState({toasts: []});
 });
 
 describe("LoginForm", () => {

@@ -7,7 +7,6 @@ import type {Transaction} from "@/data/types";
 import {TransactionForm} from "@/features/transactions/TransactionForm";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
-import {useUiStore} from "@/stores/uiStore";
 import {domainTestState} from "@/test/domainFixtures";
 import {renderWithIntl} from "@/test/renderWithIntl";
 
@@ -65,7 +64,6 @@ beforeEach(() => {
     merchantSearchMock.mockResolvedValue({ok: true, value: domainTestState.merchants});
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
     useAppStore.getState().resetAppState();
-    useUiStore.setState({toasts: []});
 });
 
 describe("TransactionForm", () => {

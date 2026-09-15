@@ -6,7 +6,6 @@ import {MemoryRouter, Route, Routes} from "react-router";
 import {TransactionDetailDrawer} from "@/features/transactions/TransactionDetailDrawer";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
-import {useUiStore} from "@/stores/uiStore";
 import {domainTestState} from "@/test/domainFixtures";
 import {renderWithIntl} from "@/test/renderWithIntl";
 
@@ -24,7 +23,6 @@ vi.mock("@/data/transactionsRepository", () => ({
 beforeEach(() => {
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
     useAppStore.setState({...domainTestState, referenceLoaded: true});
-    useUiStore.setState({toasts: []});
     deleteMock.mockReset();
     getMock.mockReset().mockResolvedValue({ok: true, value: transaction});
 });
@@ -69,6 +67,5 @@ describe("TransactionDetailDrawer", () => {
         expect(await screen.findByText("TRANSACTION LIST")).toBeInTheDocument();
         expect(deleteMock).toHaveBeenCalledWith(transaction.id);
         expect(useAppStore.getState().transactions).not.toContainEqual(transaction);
-        expect(useUiStore.getState().toasts.at(-1)?.message).toBe("交易已刪除");
     });
 });

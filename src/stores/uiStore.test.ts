@@ -18,7 +18,6 @@ describe("ui store", () => {
             isMobileNavOpen: false,
             activeDialog: null,
             isOffline: false,
-            toasts: [],
             installPrompt: "unavailable",
         });
     });
@@ -34,20 +33,6 @@ describe("ui store", () => {
         state.setActiveDialog(null);
 
         expect(useUiStore.getState()).toMatchObject({isMobileNavOpen: false, activeDialog: null});
-    });
-
-    it("queues and dismisses toasts", () => {
-        const first = useUiStore.getState().pushToast({kind: "success", message: "已儲存"});
-        const second = useUiStore.getState().pushToast({kind: "error", message: "儲存失敗"});
-
-        expect(useUiStore.getState().toasts).toEqual([
-            {id: first, kind: "success", message: "已儲存"},
-            {id: second, kind: "error", message: "儲存失敗"},
-        ]);
-
-        useUiStore.getState().dismissToast(first);
-
-        expect(useUiStore.getState().toasts).toEqual([{id: second, kind: "error", message: "儲存失敗"}]);
     });
 
     it("tracks offline state from browser network events", () => {
@@ -79,7 +64,6 @@ describe("ui store", () => {
         state.setMobileNavOpen(true);
         state.setActiveDialog("confirm");
         state.setOffline(true);
-        state.pushToast({kind: "info", message: "提示"});
         state.setInstallPrompt("available");
 
         state.resetUiState();
@@ -88,7 +72,6 @@ describe("ui store", () => {
             isMobileNavOpen: false,
             activeDialog: null,
             isOffline: false,
-            toasts: [],
             installPrompt: "unavailable",
         });
     });

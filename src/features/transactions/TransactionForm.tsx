@@ -10,7 +10,6 @@ import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
 import {MerchantAutocomplete} from "@/features/transactions/MerchantAutocomplete";
 import {emptyTransactionFormValues, formValuesToInput, transactionFormSchema, transactionToFormValues} from "@/features/transactions/TransactionFormModel";
 import type {TransactionFormValues} from "@/features/transactions/TransactionFormModel";
-import {useToast} from "@/hooks/useToast";
 import {messages} from "@/lib/i18n";
 import {createId} from "@/lib/id";
 import {ROUTES, transactionDetailPath} from "@/routes/paths";
@@ -29,7 +28,6 @@ const KINDS: TransactionKind[] = ["income", "expense", "transfer"];
 export const TransactionForm = ({transaction, accounts, categories, merchants}: TransactionFormProps) => {
     const intl = useIntl();
     const navigate = useNavigate();
-    const toast = useToast();
     const token = useAuthStore(state => state.token);
     const [idempotencyKey] = React.useState(createId);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
@@ -92,7 +90,6 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         const next = transaction === null ? [result.value, ...current] : current.map(item => (item.id === result.value.id ? result.value : item));
         useAppStore.getState().setTransactions(next, useAppStore.getState().transactionsMeta);
         reset(transactionToFormValues(result.value));
-        toast.pushToast({kind: "success", message: intl.formatMessage(transaction === null ? messages.transactions.form.created : messages.transactions.form.saved)});
         navigate(transactionDetailPath(result.value.id), {replace: true});
     });
 

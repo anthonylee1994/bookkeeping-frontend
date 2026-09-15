@@ -243,7 +243,7 @@ Date（`Asia/Hong_Kong`）：
 
 - `appStore`：accounts／categories／merchants／transactions／recurringRules、loading／error。Persist domain 到 `localStorage`（或 repository 自己 persist，store 只係 memory mirror——選 **repository persist，store 由 repository 寫入後 setState**，避免雙重 cache）
 - Selectors 只訂閱需要 slice：`useAppStore(s => s.transactions)`
-- `uiStore`（唔 persist）：`isMobileNavOpen`、`activeDialog`、`isOffline`、toast queue、install prompt 狀態
+- `uiStore`（唔 persist）：`isMobileNavOpen`、`activeDialog`、`isOffline`、install prompt 狀態；全 app 不使用 toast
 - `isOffline`：`navigator.onLine` + online／offline events
 - `draftStore` persist `sessionStorage`：`transactionDraft`、`aiScan`（step、imageUrl string、preview）。**File／Blob／object URL 唔 persist**
 - Logout：原子 `clearSession` + `resetDrafts` + revoke object URLs + navigate `/login`
@@ -254,7 +254,7 @@ Date（`Asia/Hong_Kong`）：
 
 ## Step 7 — URL helpers、i18n（react-intl）、共用 hooks
 
-**檔案**：`src/lib/searchParams.ts`、`src/lib/i18n.ts`、`src/main.tsx`、`src/hooks/useOffline.ts`、`useMediaQuery.ts`、`useToast.ts`
+**檔案**：`src/lib/searchParams.ts`、`src/lib/i18n.ts`、`src/main.tsx`、`src/hooks/useOffline.ts`、`useMediaQuery.ts`
 
 - Transaction filter serialize／parse：`from`、`to`、`kind`、`account_id`、`category_id`、`merchant_id`、`q`、`min`、`max`、`sort`、`order`、`page`、`per_page`
 - Summary：`period`、`date`、`page`
@@ -275,7 +275,7 @@ Date（`Asia/Hong_Kong`）：
 - `components.json`（shadcn CLI，style `radix-nova`）；加 component：`pnpm dlx shadcn@latest add <name>`
 - `src/lib/utils.ts`：`cn()`（`cn` package）
 - `src/index.css`：shadcn semantic tokens（`:root` + `@theme inline`）；primary `emerald-700`、ring `emerald-500`；另 map `income`／`expense`／`transfer`／`refund` 做 `text-income` 等 utility；radius control 6px、card 8px
-- 測試：Vitest `jsdom`、`pool: "vmThreads"`（jsdom 每個 worker 只建一次）、`src/test/setup.ts`（jest-dom、matchMedia／ResizeObserver／pointer-capture stubs）、`src/test/renderWithIntl.tsx` 包 `IntlProvider`
+- 測試：Vitest `jsdom`、`pool: "vmThreads"`（jsdom 每個 worker 只建一次）、`src/test/setup.ts`（jest-dom、matchMedia／ResizeObserver／pointer-capture stubs）、`src/test/renderWithIntl.ts` 包 `IntlProvider`
 
 **Components**（`src/components/ui/`）
 
@@ -286,7 +286,6 @@ Date（`Asia/Hong_Kong`）：
     - `SegmentedControl`：Radix RadioGroup，`radiogroup`／`radio` ARIA、keyboard 左右鍵
     - `Drawer`（右側）／`BottomSheet`（底部）：由 `Sheet` 包
     - `ConfirmDialog`：`AlertDialog`（可 `destructive`）
-    - `Toast`／`Toaster`：讀 `uiStore` toast queue；`aria-live="polite"`，error `role="alert"`
     - `Banner`：info／success／warning／error；error 用 `role="alert"`
     - `EmptyState`、`Amount`（用 `lib/money.ts` + kind tone）
 - shadcn 檔案由 CLI 生成後統一改成專案 convention：`export const` arrow component、`import React` 第一行、移除 `"use client"`、可見字串走 i18n（`useIntl()`／`messages`）
@@ -299,10 +298,9 @@ Date（`Asia/Hong_Kong`）：
 - touch ≥ 44px；body ≥ 16px；secondary ≥ 14px
 - icon-only 要 `aria-label` + tooltip
 - Dialog／Sheet：focus trap、Escape、關閉後 focus 返觸發者；body 先 scroll
-- Toast：`aria-live="polite"`；阻塞錯誤 `role="alert"`
 - Segmented control／tabs 用正確 ARIA
 
-**完成標準**：RTL tests（`src/components/ui/*.test.tsx`）：Dialog Escape + focus return、TextField `aria-describedby`、SegmentedControl radiogroup、Amount tone、Toaster live region。
+**完成標準**：RTL tests（`src/components/ui/*.test.tsx`）：Dialog Escape + focus return、TextField `aria-describedby`、SegmentedControl radiogroup、Amount tone。
 
 ---
 
@@ -353,7 +351,7 @@ Browser back 關 modal／drawer：dialog 狀態用 URL search 或 history stack�
 - `AuthCard`：Card 外殼（標題／描述／footer 連結）
 - `LoginForm`：RHF + Zod（`username` 必填、`password` 必填）；submit 中 disable + inline `Loader2`；失敗用 `Banner variant="error"` 顯示 repository 嘅一般化錯誤（唔透露 username 是否存在）
 - `RegisterForm`：schema 加 `confirmPassword`，`.refine` 唔一致就出 `passwordMismatch`；`password` min 8；成功只送 `{username, password}` 去 repository
-- 成功：`useAuthStore.setSession(token, user)` + toast + `navigate(returnTo ?? "/")`
+- 成功：`useAuthStore.setSession(token, user)` + `navigate(returnTo ?? "/")`，不顯示 toast
 - `PasswordField`：`TextField` + `trailing` IconButton 切換 `type`（顯示／隱藏）；`TextField` 加咗 `trailing` support（input 自動加 `pr-11`）
 - `LoginPage`／`RegisterPage`：`useSearchParams` + `parseReturnTo` 驗證 `returnTo`，兩頁互相連結都保留 `returnTo`
 - Zod 訊息集中 `messages.fields.*`（module 層 `formatMessage`）
@@ -398,7 +396,7 @@ Segmented control 切 kind，欄位表跟 spec 5.4。
 - Edit 唔改 source、唔設 refund_of_id
 - Dirty leave：`useBlocker` 確認
 - 離線：spec 5.4 寫 disable submit，但 8.3 寫 CRUD 離線照常。**跟 8.3**：離線仍可本地寫入；5.4 嘅「disable」理解為唔做假網絡 retry。Banner 提示資料只在本機。
-- 成功 toast，同步所有 view
+- 成功後同步所有 view；全 app 不顯示 toast
 - 新增交易預設選取帳戶列表第一個帳戶；修改交易保留原有帳戶
 - Segmented control 未選中狀態用 neutral 灰底／灰色 hover；active 狀態用品牌深綠
 
@@ -484,7 +482,7 @@ Tabs：active／paused／ended。Create／edit 欄位跟 spec 5.8。Actions 確�
 - Manifest 繁中 name／short_name；`display: standalone`；`start_url`／`scope` `/`；theme 同 header；192／512 maskable + apple touch（正式 bitmap，唔用 Vite logo）
 - SW：precache JS／CSS／fonts／icons／offline shell；navigation Network First + timeout → shell
 - Domain data **唔入 Cache Storage**
-- 新版本 toast「有新版本／重新載入」；dirty form 唔 auto reload
+- 新版本用頁內 banner 顯示「有新版本／重新載入」；dirty form 唔 auto reload
 - `beforeinstallprompt`：有互動同使用一段時間先出一次；dismiss 唔再煩
 - iOS Safari 非 standalone：短「加入主畫面」指引
 - Production 先 enable SW（localhost 可）

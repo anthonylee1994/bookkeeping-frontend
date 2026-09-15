@@ -5,7 +5,6 @@ import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
-import {useToast} from "@/hooks/useToast";
 import {messages} from "@/lib/i18n";
 import {transactionEditPath} from "@/routes/paths";
 import {useAppStore} from "@/stores/appStore";
@@ -18,7 +17,6 @@ type TransactionDetailActionsProps = {
 
 export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDetailActionsProps) => {
     const intl = useIntl();
-    const toast = useToast();
     const token = useAuthStore(state => state.token);
     const [confirmOpen, setConfirmOpen] = React.useState(false);
     const [isDeleting, setDeleting] = React.useState(false);
@@ -41,7 +39,6 @@ export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDe
             store.transactionsMeta
         );
         setConfirmOpen(false);
-        toast.pushToast({kind: "success", message: intl.formatMessage(messages.transactions.detail.deleted)});
         onDeleted();
     };
 
