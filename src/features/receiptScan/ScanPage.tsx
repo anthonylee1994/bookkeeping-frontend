@@ -229,7 +229,7 @@ export const ScanPage = () => {
     })();
 
     return (
-        <Stack gap="5">
+        <Stack gap="5" w="full" maxW="3xl" mx="auto">
             <PageHeader title={intl.formatMessage(messages.scan.title)} description={intl.formatMessage(messages.scan.description)} />
 
             {reference.accounts.length === 0 && !reference.isLoading ? (
