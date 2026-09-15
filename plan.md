@@ -377,7 +377,7 @@ Loading：同 layout 尺寸 skeleton。
 
 URL 同步全部 filter／sort／page。Mobile list row；desktop table。Refund badge；原交易顯示 `net_amount_cents`。Skeleton 固定高。無結果：清 filter。換頁 scroll 去列表頂。`per_page` desktop 25／50／100。
 
-點 row：mobile 去 `/transactions/:id`；desktop 開右側 panel，保留 scroll。
+點 row：所有 viewport 都去 `/transactions/:id`；route 保留交易列表做背景，mobile 開底部 drawer、desktop 開右側 drawer。
 
 **完成標準**：reload 還原 query；integration test。
 

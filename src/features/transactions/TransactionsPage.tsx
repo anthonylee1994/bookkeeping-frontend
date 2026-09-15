@@ -9,7 +9,6 @@ import type {SortOrder, Transaction, TransactionFilters, TransactionSortField} f
 import {TransactionFilterChips} from "@/features/transactions/TransactionFilterChips";
 import {TransactionFiltersPanel} from "@/features/transactions/TransactionFiltersPanel";
 import {TransactionList} from "@/features/transactions/TransactionList";
-import {TransactionPanel} from "@/features/transactions/TransactionPanel";
 import {TransactionsSummaryBar} from "@/features/transactions/TransactionsSummaryBar";
 import {TransactionsTable} from "@/features/transactions/TransactionsTable";
 import {matchQuickRange, quickRangeToFilters} from "@/features/transactions/transactionQuickRanges";
@@ -41,7 +40,6 @@ export const TransactionsPage = () => {
     const perPage = filters.per_page ?? DEFAULT_PER_PAGE;
     const queryFilters: TransactionFilters = {...filters, sort, order, per_page: perPage, page: filters.page ?? 1};
     const {page, isLoading, error, reload} = useTransactions(queryFilters);
-    const selectedId = searchParams.get("selected");
 
     const names: TransactionNameMaps = {
         accounts: React.useMemo(() => new Map(reference.accounts.map(account => [account.id, account.name])), [reference.accounts]),
@@ -88,25 +86,8 @@ export const TransactionsPage = () => {
     };
 
     const openTransaction = (transaction: Transaction) => {
-        if (isDesktop) {
-            const next = serializeTransactionFilters(filters);
-            next.set("selected", transaction.id);
-            setSearchParams(next);
-            return;
-        }
         navigate(transactionDetailPath(transaction.id));
     };
-
-    const closePanel = () => {
-        setSearchParams(serializeTransactionFilters(filters));
-    };
-
-    const closeDeletedPanel = () => {
-        closePanel();
-        reload();
-    };
-
-    const selectedTransaction = selectedId === null ? null : (page?.data.find(transaction => transaction.id === selectedId) ?? null);
     const activeFilterCount = countActiveFilters(filters);
     const chips = describeActiveFilters(filters, names);
     /** Mobile list 冇日期欄，靠分組顯示日期；但只有按日期排序時分組才有意義。 */
@@ -237,8 +218,6 @@ export const TransactionsPage = () => {
                 <Box id="transaction-list-top" />
                 {renderBody()}
             </Stack>
-
-            {isDesktop ? <TransactionPanel transaction={selectedTransaction} names={names} isOpen={selectedTransaction !== null} onClose={closePanel} onDeleted={closeDeletedPanel} /> : null}
         </React.Fragment>
     );
 };

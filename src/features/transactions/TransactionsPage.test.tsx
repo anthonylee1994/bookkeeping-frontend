@@ -94,7 +94,15 @@ function renderTransactions(entry = "/transactions"): void {
                         </React.Fragment>
                     }
                 />
-                <Route path="/transactions/:id" element={<div>DETAIL</div>} />
+                <Route
+                    path="/transactions/:id"
+                    element={
+                        <React.Fragment>
+                            <div>DETAIL</div>
+                            <LocationProbe />
+                        </React.Fragment>
+                    }
+                />
             </Routes>
         </MemoryRouter>
     );
@@ -192,7 +200,7 @@ describe("TransactionsPage", () => {
         expect(screen.getByRole("link", {name: "新增第一筆交易"})).toBeInTheDocument();
     });
 
-    it("opens the side panel on desktop without leaving the list", async () => {
+    it("uses the canonical detail path on desktop", async () => {
         const user = userEvent.setup();
         setDesktopViewport(true);
         renderTransactions();
@@ -201,8 +209,7 @@ describe("TransactionsPage", () => {
         if (row === null) throw new Error("找不到交易列");
         await user.click(row);
 
-        expect(await screen.findByRole("dialog")).toBeInTheDocument();
-        expect(screen.getByRole("link", {name: "修改"})).toHaveAttribute("href", `/transactions/${expenseTransaction.id}/edit`);
-        expect(screen.getByTestId("location")).toHaveTextContent("selected=");
+        expect(await screen.findByText("DETAIL")).toBeInTheDocument();
+        expect(screen.getByTestId("location")).toHaveTextContent(`/transactions/${expenseTransaction.id}`);
     });
 });
