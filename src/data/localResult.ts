@@ -1,12 +1,12 @@
 import {formatMessage, messages} from "../lib/i18n";
 import type {LocalError, LocalErrorCode, LocalResult} from "./types";
 
-/** 未登入／token 失效時嘅統一文案，API layer 同 auth layer 共用。 */
+/** 未登入／token 失效時的統一文案，API layer 與 auth layer 共用。 */
 export const UNAUTHORIZED_MESSAGE = formatMessage(messages.errors.unauthorized);
-/** 網絡或非預期錯誤嘅統一文案。 */
+/** 網絡或非預期錯誤的統一文案。 */
 export const API_FAILURE_MESSAGE = formatMessage(messages.errors.apiFailed);
 
-/** Repository 只回 LocalResult、唔 throw；呢個 module 集中所有 result／error 建構，避免每個 repository 自己砌 object literal。 */
+/** Repository 只回 LocalResult、不 throw；此 module 集中所有 result／error 建構，避免每個 repository 自行組合 object literal。 */
 export function localError(code: LocalErrorCode, message: string, fields?: LocalError["fields"]): LocalError {
     return fields === undefined ? {code, message} : {code, message, fields};
 }

@@ -13,7 +13,7 @@ type UpcomingRecurringCardProps = {
     rules: RecurringRuleSummary[];
 };
 
-/** 未來 7 日會產生嘅定期交易。 */
+/** 未來 7 日會產生的定期交易。 */
 export const UpcomingRecurringCard = ({rules}: UpcomingRecurringCardProps) => {
     const intl = useIntl();
 

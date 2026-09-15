@@ -8,7 +8,7 @@ export type NavItem = {
     to: string;
     label: MessageDescriptor;
     icon: LucideIcon;
-    /** 係咪出現喺 mobile 底部 tab bar（tab bar 只放最多 4 個，中間留位畀 FAB）。 */
+    /** 是否出現於 mobile 底部 tab bar（tab bar 只放最多 4 個，中間留位給 FAB）。 */
     showInTabBar: boolean;
 };
 
@@ -21,5 +21,5 @@ export const NAV_ITEMS: readonly NavItem[] = [
     {to: ROUTES.settings, label: messages.nav.settings, icon: SettingsIcon, showInTabBar: true},
 ];
 
-/** Mobile tab bar 用嘅 4 個 item；中間 FAB 由 MobileTabBar 自己插入。 */
+/** Mobile tab bar 用的 4 個 item；中間 FAB 由 MobileTabBar 自行插入。 */
 export const TAB_NAV_ITEMS: readonly NavItem[] = NAV_ITEMS.filter(item => item.showInTabBar);

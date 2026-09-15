@@ -147,7 +147,7 @@ describe("DashboardPage", () => {
         getMock.mockResolvedValue({ok: true, value: emptyDashboard});
         renderDashboard();
 
-        expect(await screen.findByText("仲未有任何交易")).toBeInTheDocument();
+        expect(await screen.findByText("尚未有任何交易")).toBeInTheDocument();
         expect(screen.getByRole("link", {name: /新增第一筆交易/})).toBeInTheDocument();
     });
 

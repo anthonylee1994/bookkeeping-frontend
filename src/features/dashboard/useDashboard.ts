@@ -11,8 +11,8 @@ export type DashboardQuery = {
 };
 
 /**
- * 攞指定月份嘅 dashboard 資料。`date` 一變（換月）就清走舊數據，
- * 免得月份標題同數字對唔上；`reload` 用嚟做錯誤重試。
+ * 取得指定月份的 dashboard 資料。`date` 一變（換月）即清走舊數據，
+ * 免得月份標題與數字對不上；`reload` 用來做錯誤重試。
  */
 export function useDashboard(date: string): DashboardQuery {
     const token = useAuthStore(state => state.token);

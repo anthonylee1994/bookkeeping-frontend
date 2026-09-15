@@ -4,7 +4,7 @@ import {subscribeToNetworkStatus, useUiStore} from "../stores/uiStore";
 let activeSubscribers = 0;
 let stopNetworkSubscription: (() => void) | null = null;
 
-/** 讀 uiStore 嘅 isOffline；第一個訂閱者負責接駁 online／offline 事件，最後一個離開先拆。 */
+/** 讀 uiStore 的 isOffline；第一個訂閱者負責接駁 online／offline 事件，最後一個離開才拆除。 */
 export function useOffline(): boolean {
     const isOffline = useUiStore(state => state.isOffline);
 

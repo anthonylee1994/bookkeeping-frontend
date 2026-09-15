@@ -7,7 +7,7 @@ export type ToastApi = {
     dismissToast: (id: string) => void;
 };
 
-/** 讀寫 uiStore toast queue 嘅共用入口，令 component 唔使直接摸 store。 */
+/** 讀寫 uiStore toast queue 的共用入口，讓 component 不必直接接觸 store。 */
 export function useToast(): ToastApi {
     const toasts = useUiStore(state => state.toasts);
     const pushToast = useUiStore(state => state.pushToast);

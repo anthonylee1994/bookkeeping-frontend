@@ -6,14 +6,14 @@ import {normalizeApiError} from "./apiError";
 import {localApiFailure, localFailure, localSuccess, localUnauthorized} from "./localResult";
 import type {LocalResult} from "./types";
 
-/** 全 app 共用嘅 axios instance：baseURL、將來的 interceptors／timeout 都集中喺呢度。 */
+/** 全 app 共用的 axios instance：baseURL、將來的 interceptors／timeout 都集中在此處。 */
 export const apiClient = axios.create({
     baseURL: `${import.meta.env.VITE_API_URL ?? ""}/api/v1`,
 });
 
 const INVALID_RESPONSE_MESSAGE = formatMessage(messages.validation.responseFormatInvalid);
 
-/** Backend 所有成功回應都包喺 `{data: ...}`；分頁再加 `meta`，所以有 `meta` 就唔拆。 */
+/** Backend 所有成功回應都包在 `{data: ...}`；分頁再加 `meta`，所以有 `meta` 即不拆。 */
 function unwrapEnvelope(body: unknown): unknown {
     if (body !== null && typeof body === "object" && "data" in body && !("meta" in body)) {
         return (body as {data: unknown}).data;
@@ -21,7 +21,7 @@ function unwrapEnvelope(body: unknown): unknown {
     return body;
 }
 
-/** 加 Bearer token；token 係空白就回 null，由 caller 轉做 unauthorized。 */
+/** 加 Bearer token；token 為空白即回 null，由 caller 轉做 unauthorized。 */
 function authorizedConfig(token: string, config: AxiosRequestConfig): AxiosRequestConfig | null {
     if (token.trim() === "") return null;
     return {...config, headers: {...config.headers, Authorization: `Bearer ${token}`}};

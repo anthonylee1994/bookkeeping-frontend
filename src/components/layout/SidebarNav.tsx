@@ -5,7 +5,6 @@ import {Link, NavLink} from "react-router";
 import {NAV_ITEMS} from "@/components/layout/navItems";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
-import {useAuthStore} from "@/stores/authStore";
 
 export const SIDEBAR_WIDTH = "15rem";
 export const SIDEBAR_COLLAPSED_WIDTH = "4.5rem";
@@ -14,10 +13,9 @@ type SidebarNavProps = {
     collapsed: boolean;
 };
 
-/** Tablet／desktop 左側 navigation rail；collapsed 時淨返 icon。 */
+/** Tablet／desktop 左側 navigation rail；collapsed 時只餘下 icon。 */
 export const SidebarNav = ({collapsed}: SidebarNavProps) => {
     const intl = useIntl();
-    const username = useAuthStore(state => state.user?.username);
     const addLabel = intl.formatMessage(messages.layout.addTransaction);
 
     return (
@@ -91,7 +89,7 @@ export const SidebarNav = ({collapsed}: SidebarNavProps) => {
                                     color={isActive ? "brand.activeFg" : "fg.muted"}
                                     fontWeight={isActive ? "semibold" : "medium"}
                                     transition="background 150ms ease, color 150ms ease"
-                                    /* Hover 用半透明 brand.active，咁 selected（實色 + semibold）仲分得出。 */
+                                    /* Hover 用半透明 brand.active，如此 selected（實色 + semibold）仍能分辨。 */
                                     _hover={isActive ? undefined : {bg: "brand.active/60", color: "brand.activeFg"}}
                                 >
                                     <Icon size="md" flexShrink="0">

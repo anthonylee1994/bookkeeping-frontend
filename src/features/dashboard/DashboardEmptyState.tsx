@@ -5,7 +5,7 @@ import {Link} from "react-router";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 
-/** 未有交易時嘅主動作：新增第一筆交易（次動作：掃描單據）。 */
+/** 未有交易時的主要動作：新增第一筆交易（次要動作：掃描單據）。 */
 export const DashboardEmptyState = () => {
     const intl = useIntl();
 

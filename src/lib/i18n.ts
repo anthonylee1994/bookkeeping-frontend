@@ -2,14 +2,14 @@ import {createIntl, createIntlCache} from "react-intl";
 import type {IntlShape, MessageDescriptor, PrimitiveType} from "react-intl";
 
 /**
- * 顯示語言。MVP 只有繁體中文（香港），冇語言切換器；
- * 將來加語言先喺呢度擴充，唔好喺 feature 散落 hardcode 字串。
+ * 顯示語言。MVP 只有繁體中文（香港），沒有語言切換器；
+ * 將來新增語言時再在此處擴充，不要在各 feature 散落 hardcode 字串。
  */
 export const DEFAULT_LOCALE = "zh-HK";
 
 /**
- * 全 app 文案集中一處，每個 leaf 都係 react-intl 嘅 MessageDescriptor。
- * `id` 用嚟做 catalog key／翻譯 lookup，`defaultMessage` 係繁中預設文案。
+ * 全 app 文案集中一處，每個 leaf 都是 react-intl 的 MessageDescriptor。
+ * `id` 用來做 catalog key／翻譯 lookup，`defaultMessage` 是繁中預設文案。
  */
 export const messages = {
     app: {
@@ -40,14 +40,14 @@ export const messages = {
         retry: {id: "common.retry", defaultMessage: "重試"},
         clearFilters: {id: "common.clearFilters", defaultMessage: "清除篩選"},
         loading: {id: "common.loading", defaultMessage: "載入中…"},
-        emptyTitle: {id: "common.emptyTitle", defaultMessage: "暫時未有資料"},
-        noResults: {id: "common.noResults", defaultMessage: "冇符合條件嘅結果"},
+        emptyTitle: {id: "common.emptyTitle", defaultMessage: "暫無資料"},
+        noResults: {id: "common.noResults", defaultMessage: "沒有符合條件的結果"},
     },
     errors: {
         unauthorized: {id: "errors.unauthorized", defaultMessage: "登入已失效，請重新登入"},
         apiFailed: {id: "errors.apiFailed", defaultMessage: "暫時無法連接服務"},
         apiFailedLogin: {id: "errors.apiFailedLogin", defaultMessage: "暫時無法連接登入服務"},
-        notFound: {id: "errors.notFound", defaultMessage: "搵唔到指定資料"},
+        notFound: {id: "errors.notFound", defaultMessage: "找不到指定資料"},
         validation: {id: "errors.validation", defaultMessage: "輸入資料無效"},
         storageFailed: {id: "errors.storageFailed", defaultMessage: "無法讀取或儲存本機資料"},
         conflictAlreadyMaterialized: {id: "errors.conflictAlreadyMaterialized", defaultMessage: "今日已經產生過交易"},
@@ -62,18 +62,18 @@ export const messages = {
         refundInvalid: {id: "validation.refundInvalid", defaultMessage: "退款資料無效"},
         recurringInvalid: {id: "validation.recurringInvalid", defaultMessage: "定期交易資料無效"},
         reportDateInvalid: {id: "validation.reportDateInvalid", defaultMessage: "報表日期無效"},
-        dashboardDateInvalid: {id: "validation.dashboardDateInvalid", defaultMessage: "Dashboard 日期無效"},
-        paginationInvalid: {id: "validation.paginationInvalid", defaultMessage: "頁碼必須大過 0，每頁數量必須係 1 至 {maxPerPage}"},
+        dashboardDateInvalid: {id: "validation.dashboardDateInvalid", defaultMessage: "儀表板日期無效"},
+        paginationInvalid: {id: "validation.paginationInvalid", defaultMessage: "頁碼必須大於 0，每頁數量必須為 1 至 {maxPerPage}"},
         idempotencyKeyInvalid: {id: "validation.idempotencyKeyInvalid", defaultMessage: "Idempotency key 無效"},
         aiLogIdInvalid: {id: "validation.aiLogIdInvalid", defaultMessage: "AI log id 無效"},
         receiptImageUrlInvalid: {id: "validation.receiptImageUrlInvalid", defaultMessage: "單據圖片網址無效"},
         receiptTypeUnsupported: {id: "validation.receiptTypeUnsupported", defaultMessage: "只支援 JPEG、PNG 或 WebP 圖片"},
-        receiptTooLarge: {id: "validation.receiptTooLarge", defaultMessage: "圖片不可大過 10 MiB"},
+        receiptTooLarge: {id: "validation.receiptTooLarge", defaultMessage: "圖片不可大於 10 MiB"},
         loginInvalid: {id: "validation.loginInvalid", defaultMessage: "請輸入有效登入資料"},
         tokenInvalid: {id: "validation.tokenInvalid", defaultMessage: "Token 無效"},
         authStorageFailed: {id: "validation.authStorageFailed", defaultMessage: "無法儲存登入資料"},
         transferAccountRequired: {id: "validation.transferAccountRequired", defaultMessage: "轉帳必須選擇轉入帳戶"},
-        transferSameAccount: {id: "validation.transferSameAccount", defaultMessage: "轉出同轉入帳戶不可相同"},
+        transferSameAccount: {id: "validation.transferSameAccount", defaultMessage: "轉出與轉入帳戶不可相同"},
         transferCategoryNotAllowed: {id: "validation.transferCategoryNotAllowed", defaultMessage: "轉帳不可設定分類"},
         transferMerchantNotAllowed: {id: "validation.transferMerchantNotAllowed", defaultMessage: "轉帳不可設定商戶"},
         transferAccountNotAllowed: {id: "validation.transferAccountNotAllowed", defaultMessage: "收入或支出不可設定轉入帳戶"},
@@ -83,7 +83,7 @@ export const messages = {
         responseFormatInvalid: {id: "validation.responseFormatInvalid", defaultMessage: "服務回應格式無效"},
         amountInvalidFormat: {id: "validation.amountInvalidFormat", defaultMessage: "請輸入有效金額，最多兩位小數"},
         amountTooLarge: {id: "validation.amountTooLarge", defaultMessage: "金額太大"},
-        amountNotPositive: {id: "validation.amountNotPositive", defaultMessage: "金額必須大過零"},
+        amountNotPositive: {id: "validation.amountNotPositive", defaultMessage: "金額必須大於零"},
     },
     fields: {
         required: {id: "fields.required", defaultMessage: "必填"},
@@ -95,20 +95,20 @@ export const messages = {
         usernameRequired: {id: "fields.usernameRequired", defaultMessage: "用戶名稱為必填"},
         passwordRequired: {id: "fields.passwordRequired", defaultMessage: "請輸入密碼"},
         passwordTooShort: {id: "fields.passwordTooShort", defaultMessage: "密碼最少需要 8 個字元"},
-        passwordMismatch: {id: "fields.passwordMismatch", defaultMessage: "兩次密碼唔一致"},
+        passwordMismatch: {id: "fields.passwordMismatch", defaultMessage: "兩次密碼不一致"},
     },
     runtime: {
         invalidDate: {id: "runtime.invalidDate", defaultMessage: "無效日期"},
         isoFormatRequired: {id: "runtime.isoFormatRequired", defaultMessage: "日期必須使用 YYYY-MM-DD 格式"},
-        positiveInteger: {id: "runtime.positiveInteger", defaultMessage: "{name} 必須係正整數"},
-        periodAmountInteger: {id: "runtime.periodAmountInteger", defaultMessage: "period amount 必須係整數"},
-        dayOfWeekRange: {id: "runtime.dayOfWeekRange", defaultMessage: "day_of_week 必須係 0 至 6"},
-        dayOfMonthRange: {id: "runtime.dayOfMonthRange", defaultMessage: "day_of_month 必須係 1 至 31"},
-        monthOfYearRange: {id: "runtime.monthOfYearRange", defaultMessage: "month_of_year 必須係 1 至 12"},
-        centsNotSafeInteger: {id: "runtime.centsNotSafeInteger", defaultMessage: "金額必須係安全整數 cents"},
+        positiveInteger: {id: "runtime.positiveInteger", defaultMessage: "{name} 必須為正整數"},
+        periodAmountInteger: {id: "runtime.periodAmountInteger", defaultMessage: "period amount 必須為整數"},
+        dayOfWeekRange: {id: "runtime.dayOfWeekRange", defaultMessage: "day_of_week 必須為 0 至 6"},
+        dayOfMonthRange: {id: "runtime.dayOfMonthRange", defaultMessage: "day_of_month 必須為 1 至 31"},
+        monthOfYearRange: {id: "runtime.monthOfYearRange", defaultMessage: "month_of_year 必須為 1 至 12"},
+        centsNotSafeInteger: {id: "runtime.centsNotSafeInteger", defaultMessage: "金額必須為安全整數 cents"},
     },
     offline: {
-        banner: {id: "offline.banner", defaultMessage: "而家離線：資料只會儲存喺本機"},
+        banner: {id: "offline.banner", defaultMessage: "目前離線：資料只會儲存於本機"},
         stale: {id: "offline.stale", defaultMessage: "資料可能未更新"},
     },
     auth: {
@@ -125,10 +125,10 @@ export const messages = {
         signOut: {id: "auth.signOut", defaultMessage: "登出"},
         loginSuccess: {id: "auth.loginSuccess", defaultMessage: "已登入"},
         registerSuccess: {id: "auth.registerSuccess", defaultMessage: "帳戶已建立"},
-        noAccount: {id: "auth.noAccount", defaultMessage: "仲未有帳戶？"},
+        noAccount: {id: "auth.noAccount", defaultMessage: "還沒有帳戶？"},
         haveAccount: {id: "auth.haveAccount", defaultMessage: "已經有帳戶？"},
         registerCta: {id: "auth.registerCta", defaultMessage: "建立帳戶"},
-        loginCta: {id: "auth.loginCta", defaultMessage: "去登入"},
+        loginCta: {id: "auth.loginCta", defaultMessage: "前往登入"},
     },
     transactions: {
         refundSuffix: {id: "transactions.refundSuffix", defaultMessage: "退款"},
@@ -150,7 +150,7 @@ export const messages = {
         addTransaction: {id: "dashboard.addTransaction", defaultMessage: "新增交易"},
         scanReceipt: {id: "dashboard.scanReceipt", defaultMessage: "掃描單據"},
         categoryTitle: {id: "dashboard.categoryTitle", defaultMessage: "支出分類"},
-        categoryDescription: {id: "dashboard.categoryDescription", defaultMessage: "本月支出最高嘅 5 個分類"},
+        categoryDescription: {id: "dashboard.categoryDescription", defaultMessage: "本月支出最高的 5 個分類"},
         accountBalancesTitle: {id: "dashboard.accountBalancesTitle", defaultMessage: "帳戶餘額"},
         upcomingTitle: {id: "dashboard.upcomingTitle", defaultMessage: "未來 7 日定期交易"},
         recentTitle: {id: "dashboard.recentTitle", defaultMessage: "最近交易"},
@@ -158,13 +158,13 @@ export const messages = {
         columnCategory: {id: "dashboard.columnCategory", defaultMessage: "分類"},
         columnAmount: {id: "dashboard.columnAmount", defaultMessage: "金額"},
         columnShare: {id: "dashboard.columnShare", defaultMessage: "佔比"},
-        noCategoryData: {id: "dashboard.noCategoryData", defaultMessage: "本月未有支出紀錄"},
-        noUpcoming: {id: "dashboard.noUpcoming", defaultMessage: "未來 7 日冇定期交易"},
-        noRecent: {id: "dashboard.noRecent", defaultMessage: "未有交易紀錄"},
-        emptyTitle: {id: "dashboard.emptyTitle", defaultMessage: "仲未有任何交易"},
-        emptyDescription: {id: "dashboard.emptyDescription", defaultMessage: "由記錄第一筆交易開始，掌握每個月嘅收支。"},
+        noCategoryData: {id: "dashboard.noCategoryData", defaultMessage: "本月沒有支出記錄"},
+        noUpcoming: {id: "dashboard.noUpcoming", defaultMessage: "未來 7 日沒有定期交易"},
+        noRecent: {id: "dashboard.noRecent", defaultMessage: "沒有交易記錄"},
+        emptyTitle: {id: "dashboard.emptyTitle", defaultMessage: "尚未有任何交易"},
+        emptyDescription: {id: "dashboard.emptyDescription", defaultMessage: "由記錄第一筆交易開始，掌握每個月的收支。"},
         emptyAction: {id: "dashboard.emptyAction", defaultMessage: "新增第一筆交易"},
-        loadFailed: {id: "dashboard.loadFailed", defaultMessage: "載入唔到儀表板資料"},
+        loadFailed: {id: "dashboard.loadFailed", defaultMessage: "無法載入儀表板資料"},
         uncategorized: {id: "dashboard.uncategorized", defaultMessage: "未分類"},
         nextRun: {id: "dashboard.nextRun", defaultMessage: "下次"},
     },
@@ -173,8 +173,8 @@ export const messages = {
         previous: {id: "pagination.previous", defaultMessage: "上一頁"},
         next: {id: "pagination.next", defaultMessage: "下一頁"},
         morePages: {id: "pagination.morePages", defaultMessage: "更多頁數"},
-        goToPrevious: {id: "pagination.goToPrevious", defaultMessage: "去上一頁"},
-        goToNext: {id: "pagination.goToNext", defaultMessage: "去下一頁"},
+        goToPrevious: {id: "pagination.goToPrevious", defaultMessage: "前往上一頁"},
+        goToNext: {id: "pagination.goToNext", defaultMessage: "前往下一頁"},
     },
     layout: {
         primaryNav: {id: "layout.primaryNav", defaultMessage: "主導航"},
@@ -186,16 +186,16 @@ export const messages = {
         account: {id: "layout.account", defaultMessage: "帳戶"},
     },
     notFound: {
-        title: {id: "notFound.title", defaultMessage: "搵唔到呢一頁"},
-        description: {id: "notFound.description", defaultMessage: "連結可能已經失效或者打錯咗。"},
-        action: {id: "notFound.action", defaultMessage: "返儀表板"},
+        title: {id: "notFound.title", defaultMessage: "找不到此頁"},
+        description: {id: "notFound.description", defaultMessage: "連結可能已經失效或輸入有誤。"},
+        action: {id: "notFound.action", defaultMessage: "返回儀表板"},
     },
     fatal: {
-        title: {id: "fatal.title", defaultMessage: "呢頁出咗錯"},
-        description: {id: "fatal.description", defaultMessage: "可以重試，或者清除本機資料再嚟過。"},
+        title: {id: "fatal.title", defaultMessage: "此頁發生錯誤"},
+        description: {id: "fatal.description", defaultMessage: "可以重試，或清除本機資料後再試。"},
         retry: {id: "fatal.retry", defaultMessage: "重試"},
         reset: {id: "fatal.reset", defaultMessage: "清除本機資料"},
-        home: {id: "fatal.home", defaultMessage: "返儀表板"},
+        home: {id: "fatal.home", defaultMessage: "返回儀表板"},
     },
 } as const;
 
@@ -205,7 +205,7 @@ function isMessageDescriptor(value: unknown): value is MessageDescriptor {
     return typeof value === "object" && value !== null && typeof (value as MessageDescriptor).id === "string";
 }
 
-/** 將 nested descriptor tree 攤平成 react-intl Provider 要嘅 `{id: defaultMessage}` catalog。 */
+/** 將 nested descriptor tree 攤平成 react-intl Provider 需要的 `{id: defaultMessage}` catalog。 */
 function flattenMessages(tree: Record<string, unknown>, prefix = ""): Record<string, string> {
     const catalog: Record<string, string> = {};
     for (const [key, value] of Object.entries(tree)) {
@@ -225,7 +225,7 @@ export const intlMessages: Record<string, string> = flattenMessages(messages);
 const intlCache = createIntlCache();
 export const intl: IntlShape = createIntl({locale: DEFAULT_LOCALE, defaultLocale: DEFAULT_LOCALE, messages: intlMessages}, intlCache);
 
-/** 非 React context（例如 data layer）用嘅格式化入口；component 內請用 `useIntl()`。 */
+/** 非 React context（例如 data layer）用的格式化入口；component 內請用 `useIntl()`。 */
 export function formatMessage(descriptor: MessageDescriptor, values?: Record<string, PrimitiveType>): string {
     return intl.formatMessage(descriptor, values);
 }

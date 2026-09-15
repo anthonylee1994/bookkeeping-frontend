@@ -48,7 +48,7 @@ function stringFields(value: unknown): LocalError["fields"] | undefined {
     return entries.length === 0 ? undefined : Object.fromEntries(entries);
 }
 
-/** Backend 錯誤格式係 `{error: {code, message, details?}}`；同時兼容 flat body。 */
+/** Backend 錯誤格式為 `{error: {code, message, details?}}`；同時兼容 flat body。 */
 function errorPayload(error: AxiosError): ErrorPayload {
     const data = error.response?.data;
     if (!isRecord(data)) return {};
@@ -63,7 +63,7 @@ function codeFromStatus(status: number | undefined): LocalErrorCode {
     return "api_failed";
 }
 
-/** 將 axios error 收窄成 UI 識處理嘅 `LocalError`，優先用 backend 嘅 code／message／details。 */
+/** 將 axios error 收窄成 UI 可處理的 `LocalError`，優先採用 backend 的 code／message／details。 */
 export function normalizeApiError(error: unknown): LocalError {
     const axiosError = error as AxiosError;
     const status = axiosError.response?.status;

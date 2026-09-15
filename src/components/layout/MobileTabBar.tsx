@@ -7,8 +7,8 @@ import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 
 /**
- * Mobile 底部 floating tab bar：4 個 tab，中間凸起嘅 FAB 做新增交易。
- * 用 safe-area inset 避開 home indicator，desktop 完全唔渲染（改用 sidebar）。
+ * Mobile 底部 floating tab bar：4 個 tab，中間凸起的 FAB 用於新增交易。
+ * 用 safe-area inset 避開 home indicator，desktop 完全不渲染（改用 sidebar）。
  */
 export const MobileTabBar = () => {
     const intl = useIntl();

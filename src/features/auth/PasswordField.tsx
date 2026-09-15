@@ -4,7 +4,7 @@ import {EyeIcon, EyeOffIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {messages} from "@/lib/i18n";
 
-/** `size` 要 omit：native input 嘅 `size` 係 number，同 Chakra Input 嘅 size token 撞晒。 */
+/** `size` 要 omit：native input 的 `size` 是 number，與 Chakra Input 的 size token 完全相撞。 */
 type PasswordFieldProps = Omit<React.ComponentProps<"input">, "type" | "size"> & {
     label: string;
     error?: string;

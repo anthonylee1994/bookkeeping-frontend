@@ -10,7 +10,7 @@ function matchesMedia(query: string): boolean {
     return window.matchMedia(query).matches;
 }
 
-/** 訂閱 CSS media query，responsive layout 用；冇 matchMedia 嘅環境安全回 false。 */
+/** 訂閱 CSS media query，供 responsive layout 使用；沒有 matchMedia 的環境安全回 false。 */
 export function useMediaQuery(query: string): boolean {
     const [matches, setMatches] = React.useState(() => matchesMedia(query));
 

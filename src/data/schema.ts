@@ -53,7 +53,7 @@ export const transactionInputSchema = z.object({
     image_urls: z.array(imageUrlSchema).default([]),
 });
 
-/** Update 唔可以改 `source`。 */
+/** Update 不可以改 `source`。 */
 export const transactionUpdateInputSchema = transactionInputSchema.omit({source: true});
 
 export const refundInputSchema = z.object({

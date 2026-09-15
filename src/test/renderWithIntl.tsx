@@ -8,7 +8,7 @@ import type {RenderOptions, RenderResult} from "@testing-library/react";
 
 type WrapperProps = {children: React.ReactNode};
 
-/** Test 要同 main.tsx 一樣包 Chakra 同 intl，否則 Chakra component 攞唔到 system。 */
+/** Test 要與 main.tsx 一樣包 Chakra 及 intl，否則 Chakra component 取不到 system。 */
 const AppProviders = ({children}: WrapperProps) => {
     return (
         <ChakraProvider value={system}>

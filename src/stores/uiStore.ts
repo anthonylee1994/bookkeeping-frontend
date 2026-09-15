@@ -19,7 +19,7 @@ const EMPTY_UI_STATE = {
     installPrompt: "unavailable" as InstallPromptStatus,
 };
 
-/** 純 UI state，唔 persist；reload 後由預設值重來。 */
+/** 純 UI state，不 persist；reload 後由預設值重新開始。 */
 export type UiState = typeof EMPTY_UI_STATE & {
     setMobileNavOpen: (open: boolean) => void;
     setActiveDialog: (dialog: string | null) => void;

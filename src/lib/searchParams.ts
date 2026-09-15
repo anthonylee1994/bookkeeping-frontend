@@ -59,7 +59,7 @@ function appendValue(search: URLSearchParams, key: string, value: string | numbe
 
 /* ---------- Transactions filter ---------- */
 
-/** 由 URL query 還原 transaction filter；任何無效值一律當冇填，唔 throw。 */
+/** 由 URL query 還原 transaction filter；任何無效值一律當作未填，不 throw。 */
 export function parseTransactionFilters(input: URLSearchParams | string): TransactionFilters {
     const search = asSearchParams(input);
     const filters: TransactionFilters = {};
@@ -94,7 +94,7 @@ export function parseTransactionFilters(input: URLSearchParams | string): Transa
     return filters;
 }
 
-/** 將 transaction filter 寫成 URL query；`keyword`／`min_amount_cents`／`max_amount_cents` 對應 URL 上嘅 `q`／`min`／`max`。 */
+/** 將 transaction filter 寫成 URL query；`keyword`／`min_amount_cents`／`max_amount_cents` 對應 URL 上的 `q`／`min`／`max`。 */
 export function serializeTransactionFilters(filters: TransactionFilters): URLSearchParams {
     const search = new URLSearchParams();
     appendValue(search, "from", filters.from);
@@ -142,7 +142,7 @@ export function serializeSummaryParams(params: SummaryParams): URLSearchParams {
 const UNSAFE_PATH_PATTERN = /[\u0000-\u001f\\]/;
 const PROTOCOL_PATTERN = /^[a-z][a-z\d+.-]*:/i;
 
-/** 只接受站內 path：`/` 開頭、唔可以 `//`（protocol-relative）、唔可以有 scheme 或控制字元。 */
+/** 只接受站內 path：`/` 開頭、不可以 `//`（protocol-relative）、不可以有 scheme 或控制字元。 */
 export function parseReturnTo(value: string | null | undefined): string | null {
     if (value === null || value === undefined) return null;
     const path = value.trim();

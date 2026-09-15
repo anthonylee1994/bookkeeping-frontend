@@ -9,8 +9,8 @@ import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {RouteErrorBoundary} from "@/routes/RouteErrorBoundary";
 
 /**
- * App shell 行 mobile-app 模式：mobile 係 app bar + 底部 floating tab bar，
- * tablet／desktop 換成左側 sidebar rail，內容永遠置中喺 container 之內。
+ * App shell 採用 mobile-app 模式：mobile 是 app bar + 底部 floating tab bar，
+ * tablet／desktop 換成左側 sidebar rail，內容永遠置中於 container 之內。
  */
 export const AppLayout = () => {
     const isDesktop = useMediaQuery(DESKTOP_QUERY);

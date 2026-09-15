@@ -12,7 +12,7 @@ export type DraftState = {
     resetDrafts: () => void;
 };
 
-/** object URL／base64 preview 唔可以寫入 sessionStorage：reload 後一定失效。 */
+/** object URL／base64 preview 不可以寫入 sessionStorage：reload 後必定失效。 */
 function isEphemeralUrl(value: string): boolean {
     return value.startsWith("blob:") || value.startsWith("data:");
 }

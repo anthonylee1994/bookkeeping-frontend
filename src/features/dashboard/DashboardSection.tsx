@@ -8,7 +8,7 @@ type DashboardSectionProps = {
     children: React.ReactNode;
 };
 
-/** Dashboard 各區共用嘅卡片外殼：標題 + 可選動作 + 內容。 */
+/** Dashboard 各區共用的卡片外殼：標題 + 可選動作 + 內容。 */
 export const DashboardSection = ({title, description, action, children}: DashboardSectionProps) => {
     return (
         <Card.Root as="section" rounded="xl" borderColor="border" shadow="xs">

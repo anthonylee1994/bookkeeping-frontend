@@ -53,12 +53,12 @@ export function addPeriod(input: DateInput, period: SummaryPeriod, amount = 1): 
     return toHongKongInstant(addCalendarDays(date, amount * (period === "weekly" ? 7 : 1)));
 }
 
-/** 香港時區嘅今日，格式 `YYYY-MM-DD`。 */
+/** 香港時區的今日，格式 `YYYY-MM-DD`。 */
 export function todayDate(): string {
     return toIsoDate(new Date());
 }
 
-/** 將任何 datetime 轉做香港時區嘅 `YYYY-MM-DD`（畀 URL filter 用）。 */
+/** 將任何 datetime 轉為香港時區的 `YYYY-MM-DD`（供 URL filter 使用）。 */
 export function toIsoDate(input: DateInput): string {
     return formatCalendarDate(toHongKongCalendar(input));
 }

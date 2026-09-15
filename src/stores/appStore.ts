@@ -1,7 +1,7 @@
 import {create} from "zustand";
 import type {Account, Category, LocalError, Merchant, PaginationMeta, RecurringRule, Transaction} from "../data/types";
 
-/** 空白 domain mirror；initial state 同 reset 共用同一形狀，避免兩處走音。 */
+/** 空白 domain mirror；initial state 與 reset 共用同一形狀，避免兩處不一致。 */
 const EMPTY_APP_STATE = {
     accounts: [] as Account[],
     categories: [] as Category[],
@@ -17,7 +17,7 @@ export type AppDomainState = typeof EMPTY_APP_STATE;
 
 /**
  * Domain memory mirror。Repository 先寫入來源（API），feature hook 收到結果再 setState。
- * Store 唔自己 cache／persist domain，避免同 repository 出現雙重 source of truth。
+ * Store 不自行 cache／persist domain，避免與 repository 出現雙重 source of truth。
  */
 export type AppState = AppDomainState & {
     setAccounts: (accounts: Account[]) => void;

@@ -2,7 +2,7 @@ import type {CategoryBreakdown, TransactionKind, TransactionRow} from "@/data/ty
 import {formatMessage, messages} from "@/lib/i18n";
 import {formatSignedAmount} from "@/lib/money";
 
-/** 分類 chart 用嘅固定色序；dashboard response 冇跟 category color，所以由 UI 決定。 */
+/** 分類 chart 用的固定色序；dashboard response 沒有跟 category color，所以由 UI 決定。 */
 export const CATEGORY_COLORS = ["#047857", "#0284c7", "#d97706", "#7c3aed", "#e11d48"];
 
 export type CategorySlice = {
@@ -21,7 +21,7 @@ export function kindLabel(kind: TransactionKind): string {
     return formatMessage(messages.transactions.transfer);
 }
 
-/** 按本月總支出排序，攞頭 N 個分類；share 係相對「所有分類支出總和」計。 */
+/** 按本月總支出排序，取頭 N 個分類；share 是相對「所有分類支出總和」計算。 */
 export function rankExpenseCategories(breakdown: CategoryBreakdown[], limit = 5): CategorySlice[] {
     const total = breakdown.reduce((sum, item) => sum + Math.max(item.expense_cents, 0), 0);
 

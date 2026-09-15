@@ -16,12 +16,12 @@ import {useDashboard} from "@/features/dashboard/useDashboard";
 import {addMonthsToDate, toDisplayMonth, toIsoDate, todayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
 
-/** Chart 連 recharts 一齊 code-split，唔想拖大儀表板 critical bundle。 */
+/** Chart 連 recharts 一併 code-split，不想拖大儀表板 critical bundle。 */
 const CategorySpendingChart = React.lazy(() => import("@/features/dashboard/CategorySpendingChart").then(module => ({default: module.CategorySpendingChart})));
 
 const RECENT_TRANSACTION_LIMIT = 10;
 
-/** URL 上嘅 `date` 有校驗；無填或格式錯就當今日（即當月）。 */
+/** URL 上的 `date` 有校驗；未填或格式錯誤即當作今日（即當月）。 */
 function resolveDashboardDate(value: string | null): string {
     if (value !== null && dateSchema.safeParse(value).success) return value;
     return todayDate();

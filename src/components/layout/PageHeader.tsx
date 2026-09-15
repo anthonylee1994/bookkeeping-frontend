@@ -8,8 +8,8 @@ type PageHeaderProps = {
 };
 
 /**
- * 每個 page 頂部嘅標題區。Mobile 標題由 app bar 負責，所以呢度只留 screen reader 用嘅 h1；
- * desktop 冇 app bar 標題，就顯示大標題。
+ * 每個 page 頂部的標題區。Mobile 標題由 app bar 負責，所以此處只留 screen reader 用的 h1；
+ * desktop 沒有 app bar 標題，便顯示大標題。
  */
 export const PageHeader = ({title, description, actions}: PageHeaderProps) => {
     return (

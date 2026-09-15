@@ -14,7 +14,7 @@ type AccountBalancesCardProps = {
     to: string;
 };
 
-/** 帳戶餘額列表；每行連去已按帳戶 + 當月範圍 filter 嘅交易頁。 */
+/** 帳戶餘額列表；每行連去已按帳戶 + 當月範圍 filter 的交易頁。 */
 export const AccountBalancesCard = ({balances, from, to}: AccountBalancesCardProps) => {
     const intl = useIntl();
 

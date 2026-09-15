@@ -4,9 +4,9 @@ import {ROUTES} from "@/routes/paths";
 import type {MessageDescriptor} from "react-intl";
 
 export type RouteMeta = {
-    /** App bar 顯示嘅標題。 */
+    /** App bar 顯示的標題。 */
     title: MessageDescriptor;
-    /** Root（tab bar 直達）嘅頁唔顯示返回掣。 */
+    /** Root（tab bar 直達）的頁不顯示返回按鈕。 */
     isRoot: boolean;
 };
 
@@ -29,7 +29,7 @@ const ROUTE_META: readonly RouteMetaEntry[] = [
 
 const FALLBACK_META: RouteMeta = {title: messages.app.name, isRoot: true};
 
-/** 由目前 pathname 推導 app bar 標題同係咪 root 頁，畀 mobile app shell 用。 */
+/** 由目前 pathname 推導 app bar 標題及是否 root 頁，供 mobile app shell 使用。 */
 export function useRouteMeta(): RouteMeta {
     const {pathname} = useLocation();
     const entry = ROUTE_META.find(candidate => matchPath({path: candidate.path, end: true}, pathname) !== null);

@@ -67,7 +67,7 @@ describe("RegisterForm", () => {
         await user.type(screen.getByLabelText("確認密碼"), "secret456");
         await user.click(screen.getByRole("button", {name: "註冊"}));
 
-        expect(await screen.findByText("兩次密碼唔一致")).toBeInTheDocument();
+        expect(await screen.findByText("兩次密碼不一致")).toBeInTheDocument();
         expect(registerMock).not.toHaveBeenCalled();
     });
 

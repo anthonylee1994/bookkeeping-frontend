@@ -7,10 +7,10 @@ export type SessionStatus = "loading" | "ready";
 /**
  * App 啟動時還原本機 session：
  * 1. 由 localStorage 讀 token（hydrate）
- * 2. token 有效就 `getMe` 補返 user
- * 3. 只喺 unauthorized 先清 session，其他錯誤保留 token（避免 offline reload 被登出）
+ * 2. token 有效就 `getMe` 補回 user
+ * 3. 只在 unauthorized 才清 session，其他錯誤保留 token（避免 offline reload 被登出）
  *
- * 呢段完成前唔會 render routes，所以唔會閃 login page。
+ * 此段完成前不會 render routes，所以不會閃現 login page。
  */
 export function useSessionBootstrap(): SessionStatus {
     const [status, setStatus] = React.useState<SessionStatus>("loading");

@@ -3,10 +3,10 @@ import {createSystem, defaultConfig, defineConfig} from "@chakra-ui/react";
 const FONT_STACK = '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans HK", "PingFang HK", "Microsoft JhengHei", sans-serif';
 
 /**
- * 專案 design system。刻意收緊三樣嘢令個 app 睇落精緻啲：
+ * 專案 design system。刻意收緊三樣事項，使 app 看起來更精緻：
  * 1. 字體層次（heading 用負 letter-spacing、明確 size scale）
- * 2. 圓角（control 細、card 大，唔係一刀切）
- * 3. 陰影（多層低透明度，唔用預設嗰種硬陰影）
+ * 2. 圓角（control 小、card 大，並非一刀切）
+ * 3. 陰影（多層低透明度，不用預設那種硬陰影）
  */
 const config = defineConfig({
     globalCss: {
@@ -72,7 +72,7 @@ const config = defineConfig({
                     800: {value: "#065f46"},
                     900: {value: "#064e3b"},
                     950: {value: "#022c22"},
-                    /** 柔和灰綠，唔屬於 emerald ramp（飽和度低好多），專門畀 navigation selected 底色。 */
+                    /** 柔和灰綠，不屬於 emerald ramp（飽和度低很多），專門作為 navigation selected 底色。 */
                     sage: {value: "#d4e8de"},
                 },
             },
@@ -99,7 +99,7 @@ const config = defineConfig({
                     subtle: {value: {base: "{colors.brand.50}", _dark: "{colors.brand.950}"}},
                     emphasized: {value: {base: "{colors.brand.800}", _dark: "{colors.brand.400}"}},
                     focusRing: {value: {base: "{colors.brand.500}", _dark: "{colors.brand.400}"}},
-                    /** Navigation selected state；sidebar 同 mobile tab bar 共用，唔好各自寫死。 */
+                    /** Navigation selected state；sidebar 與 mobile tab bar 共用，不要各自寫死。 */
                     active: {value: {base: "{colors.brand.sage}", _dark: "{colors.brand.900}"}},
                     activeFg: {value: {base: "{colors.brand.800}", _dark: "{colors.brand.200}"}},
                 },
@@ -118,7 +118,7 @@ const config = defineConfig({
             },
             /**
              * 低調 button（ghost／outline／subtle）hover 統一用 brand.active 柔和灰綠。
-             * Solid button 唔改：實色深綠 hover 變淺綠會好突兀，照用預設嘅加深。
+             * Solid button 不改：實色深綠 hover 變淺綠會很突兀，照用預設的加深。
              */
             button: {
                 variants: {
@@ -127,7 +127,7 @@ const config = defineConfig({
                             _hover: {bg: "brand.active", color: "brand.activeFg"},
                         },
                         outline: {
-                            /* 實底而唔係透明，咁喺漸變背景上都睇得清；border 跟文字色。 */
+                            /* 實底而非透明，如此在漸變背景上也能看清；border 跟文字色。 */
                             bg: "bg.panel",
                             borderColor: "colorPalette.fg",
                             _hover: {bg: "brand.active", color: "brand.activeFg", borderColor: "brand.activeFg"},

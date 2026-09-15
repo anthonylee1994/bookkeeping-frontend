@@ -10,7 +10,7 @@ type FatalErrorFallbackProps = {
     onRetry: () => void;
 };
 
-/** Route-level fatal error UI：重試、返儀表板、或者清本機資料再嚟。 */
+/** Route-level fatal error UI：重試、返回儀表板，或清除本機資料後再試。 */
 export const FatalErrorFallback = ({onRetry}: FatalErrorFallbackProps) => {
     const intl = useIntl();
 

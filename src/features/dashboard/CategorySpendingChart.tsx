@@ -12,8 +12,8 @@ type CategorySpendingChartProps = {
 };
 
 /**
- * 支出分類 donut chart。圖表本身對 screen reader 隱藏，數據由旁邊嘅
- * table 提供（同時做 legend）：色點、分類、實際金額、佔比。
+ * 支出分類 donut chart。圖表本身對 screen reader 隱藏，數據由旁邊的
+ * table 提供（同時作為 legend）：色點、分類、實際金額、佔比。
  */
 export const CategorySpendingChart = ({breakdown}: CategorySpendingChartProps) => {
     const intl = useIntl();

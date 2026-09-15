@@ -13,8 +13,8 @@ type AppHeaderProps = {
 };
 
 /**
- * Mobile 做 native app bar（返回掣／置中標題／右側動作），
- * desktop 做 sidebar 上方嘅工具列。兩者共用同一個 sticky blur 樣式。
+ * Mobile 作為 native app bar（返回按鈕／置中標題／右側動作），
+ * desktop 作為 sidebar 上方的工具列。兩者共用同一個 sticky blur 樣式。
  */
 export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) => {
     const intl = useIntl();
@@ -56,7 +56,7 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
                     )}
                 </Flex>
 
-                {/* Mobile 用 app bar 做標題；desktop 標題交返畀頁面內嘅 PageHeader。 */}
+                {/* Mobile 用 app bar 作為標題；desktop 標題交還給頁面內的 PageHeader。 */}
                 <Box flex="1" minW="0">
                     <Heading as="h2" size="md" textAlign="center" truncate display={{base: "block", md: "none"}}>
                         {intl.formatMessage(title)}
