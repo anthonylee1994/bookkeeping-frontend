@@ -70,18 +70,18 @@ export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDe
                         <Alert.Title>{duplicateError}</Alert.Title>
                     </Alert.Root>
                 )}
-                <HStack justify="flex-end" gap="3" wrap="wrap">
-                    <Button asChild variant="outline">
+                <HStack justify={{base: "flex-start", md: "flex-end"}} gap="3" wrap="wrap" direction={{base: "column", md: "row"}}>
+                    <Button asChild variant="outline" w={{base: "full", md: "auto"}}>
                         <Link to={transactionEditPath(transaction.id)}>
                             <PencilIcon />
                             {intl.formatMessage(messages.common.edit)}
                         </Link>
                     </Button>
-                    <Button type="button" variant="outline" loading={isDuplicating} onClick={duplicateTransaction}>
+                    <Button type="button" variant="outline" loading={isDuplicating} w={{base: "full", md: "auto"}} onClick={duplicateTransaction}>
                         <CopyIcon />
                         {intl.formatMessage(messages.transactions.detail.duplicate)}
                     </Button>
-                    <Button type="button" colorPalette="red" variant="outline" onClick={() => setConfirmOpen(true)}>
+                    <Button type="button" colorPalette="red" variant="outline" w={{base: "full", md: "auto"}} onClick={() => setConfirmOpen(true)}>
                         <Trash2Icon />
                         {intl.formatMessage(messages.common.delete)}
                     </Button>
