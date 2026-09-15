@@ -1,9 +1,9 @@
 import React from "react";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {Alert, Box, Button, Field, HStack, Image, Input, NativeSelect, SimpleGrid, Stack, Text, Textarea} from "@chakra-ui/react";
+import {Alert, Box, Button, Field, HStack, Image, Input, Link as ChakraLink, NativeSelect, SimpleGrid, Stack, Text, Textarea} from "@chakra-ui/react";
 import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
-import {useBeforeUnload, useBlocker, useNavigate} from "react-router";
+import {useBeforeUnload, useBlocker, useNavigate, Link as RouterLink} from "react-router";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Account, Category, Merchant, Transaction, TransactionKind} from "@/data/types";
 import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
@@ -101,6 +101,16 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         <React.Fragment>
             <form onSubmit={submit} noValidate>
                 <Stack gap="5">
+                    {accounts.length > 0 ? null : (
+                        <Alert.Root status="warning" role="alert" rounded="lg">
+                            <Alert.Indicator />
+                            <Alert.Title flex="1">{intl.formatMessage(messages.transactions.form.noAccounts)}</Alert.Title>
+                            <Button asChild type="button" size="sm" variant="outline">
+                                <RouterLink to={ROUTES.settingsAccounts}>{intl.formatMessage(messages.transactions.form.goToAccounts)}</RouterLink>
+                            </Button>
+                        </Alert.Root>
+                    )}
+
                     <Field.Root>
                         <Field.Label>{intl.formatMessage(messages.transactions.form.kind)}</Field.Label>
                         <HStack role="group" aria-label={intl.formatMessage(messages.transactions.form.kind)} gap="1" bg="gray.200" _dark={{bg: "gray.700"}} p="1" rounded="lg" width="full">
@@ -132,8 +142,8 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
                         <Field.Root required invalid={formState.errors.accountId !== undefined}>
                             <Field.Label>{intl.formatMessage(kind === "transfer" ? messages.transactions.form.transferFrom : messages.transactions.form.account)}</Field.Label>
                             <NativeSelect.Root>
-                                <NativeSelect.Field {...register("accountId")}>
-                                    <option value="">{intl.formatMessage(messages.transactions.form.selectAccount)}</option>
+                                <NativeSelect.Field disabled={accounts.length === 0} {...register("accountId")}>
+                                    <option value="">{intl.formatMessage(accounts.length === 0 ? messages.transactions.form.noAccounts : messages.transactions.form.selectAccount)}</option>
                                     {accounts.map(account => (
                                         <option key={account.id} value={account.id}>
                                             {account.name}
@@ -143,6 +153,13 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
                                 <NativeSelect.Indicator />
                             </NativeSelect.Root>
                             {formState.errors.accountId === undefined ? null : <Field.ErrorText>{formState.errors.accountId.message}</Field.ErrorText>}
+                            {accounts.length === 0 ? (
+                                <Text fontSize="sm" mt="1">
+                                    <ChakraLink asChild color="brand.fg">
+                                        <RouterLink to={ROUTES.settingsAccounts}>{intl.formatMessage(messages.transactions.form.goToAccounts)}</RouterLink>
+                                    </ChakraLink>
+                                </Text>
+                            ) : null}
                         </Field.Root>
 
                         {kind !== "transfer" ? null : (

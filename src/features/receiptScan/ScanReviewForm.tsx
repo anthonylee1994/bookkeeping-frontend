@@ -1,9 +1,9 @@
 import React from "react";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {Alert, Badge, Button, Field, HStack, Input, NativeSelect, SimpleGrid, Stack, Textarea} from "@chakra-ui/react";
+import {Alert, Badge, Button, Field, HStack, Input, Link as ChakraLink, NativeSelect, SimpleGrid, Stack, Text, Textarea} from "@chakra-ui/react";
 import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
-import {useNavigate} from "react-router";
+import {useNavigate, Link as RouterLink} from "react-router";
 import {ReceiptsRepository} from "@/data/receiptsRepository";
 import type {AiPreview, Merchant} from "@/data/types";
 import {confidencePercent, isLowConfidence, missingReviewFields, previewToReviewValues, reviewValuesToInput, scanReviewSchema, suggestedMerchantName} from "@/features/receiptScan/scanModel";
@@ -11,7 +11,7 @@ import type {ScanReference, ScanReviewField, ScanReviewValues} from "@/features/
 import {MerchantAutocomplete} from "@/features/transactions/MerchantAutocomplete";
 import {messages} from "@/lib/i18n";
 import {createId} from "@/lib/id";
-import {transactionDetailPath} from "@/routes/paths";
+import {ROUTES, transactionDetailPath} from "@/routes/paths";
 import {useAuthStore} from "@/stores/authStore";
 
 type ScanReviewFormProps = {
@@ -64,6 +64,16 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
     return (
         <form onSubmit={submit} noValidate>
             <Stack gap="5">
+                {reference.accounts.length > 0 ? null : (
+                    <Alert.Root status="warning" role="alert" rounded="lg">
+                        <Alert.Indicator />
+                        <Alert.Title flex="1">{intl.formatMessage(messages.scan.noAccounts)}</Alert.Title>
+                        <Button asChild type="button" size="sm" variant="outline">
+                            <RouterLink to={ROUTES.settingsAccounts}>{intl.formatMessage(messages.scan.goToAccounts)}</RouterLink>
+                        </Button>
+                    </Alert.Root>
+                )}
+
                 {isLowConfidence(preview) ? (
                     <Alert.Root status="warning" role="alert" rounded="lg">
                         <Alert.Indicator />
@@ -117,8 +127,8 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
                     <Field.Root required invalid={formState.errors.accountId !== undefined}>
                         <Field.Label>{intl.formatMessage(messages.transactions.form.account)}</Field.Label>
                         <NativeSelect.Root>
-                            <NativeSelect.Field {...register("accountId")}>
-                                <option value="">{intl.formatMessage(messages.transactions.form.selectAccount)}</option>
+                            <NativeSelect.Field disabled={reference.accounts.length === 0} {...register("accountId")}>
+                                <option value="">{intl.formatMessage(reference.accounts.length === 0 ? messages.scan.noAccounts : messages.transactions.form.selectAccount)}</option>
                                 {reference.accounts.map(account => (
                                     <option key={account.id} value={account.id}>
                                         {account.name}
@@ -128,6 +138,13 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
                             <NativeSelect.Indicator />
                         </NativeSelect.Root>
                         {formState.errors.accountId === undefined ? null : <Field.ErrorText>{formState.errors.accountId.message}</Field.ErrorText>}
+                        {reference.accounts.length === 0 ? (
+                            <Text fontSize="sm" mt="1">
+                                <ChakraLink asChild color="brand.fg">
+                                    <RouterLink to={ROUTES.settingsAccounts}>{intl.formatMessage(messages.scan.goToAccounts)}</RouterLink>
+                                </ChakraLink>
+                            </Text>
+                        ) : null}
                     </Field.Root>
 
                     <Field.Root>
