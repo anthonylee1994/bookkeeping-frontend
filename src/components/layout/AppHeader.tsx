@@ -1,5 +1,5 @@
-import {Box, Center, Flex, Heading, Icon, IconButton} from "@chakra-ui/react";
-import {ArrowLeftIcon, LogOutIcon, PanelLeftIcon, RepeatIcon, ScanLineIcon, WalletIcon} from "lucide-react";
+import {Box, Flex, Grid, Heading, IconButton} from "@chakra-ui/react";
+import {ArrowLeftIcon, LogOutIcon, PanelLeftIcon, RepeatIcon, ScanLineIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, useNavigate} from "react-router";
 import {useRouteMeta} from "@/components/layout/useRouteMeta";
@@ -37,40 +37,32 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
 
     return (
         <Box as="header" position="sticky" top="0" zIndex="30" bg="bg/80" backdropFilter="blur(16px)">
-            <Flex h={{base: 14, md: 16}} maxW="7xl" mx="auto" px={{base: 2, md: 4}} align="center" gap="1" borderBottomWidth="1px" borderColor="border">
-                <Flex flexShrink="0" w={{base: 14, md: "auto"}} justify="flex-start">
+            <Grid h={{base: 14, md: 16}} maxW="7xl" mx="auto" px={{base: 2, md: 4}} alignItems="center" gap="1" gridTemplateColumns="1fr auto 1fr" borderBottomWidth="1px" borderColor="border">
+                <Flex flexShrink="0" justify="flex-start" align="center" gap="1">
                     <IconButton aria-label={sidebarLabel} onClick={onToggleSidebar} variant="ghost" size="sm" display={{base: "none", md: "inline-flex"}}>
                         <PanelLeftIcon />
                     </IconButton>
-                    {isRoot ? (
-                        <Center asChild w="11" h="11" color="brand.fg" display={{base: "flex", md: "none"}}>
-                            <Link to={ROUTES.dashboard} aria-label={intl.formatMessage(messages.app.name)}>
-                                <Icon size="lg">
-                                    <WalletIcon />
-                                </Icon>
-                            </Link>
-                        </Center>
-                    ) : (
+                    {isRoot ? null : (
                         <IconButton aria-label={intl.formatMessage(messages.layout.back)} onClick={goBack} variant="ghost" size="sm" display={{base: "inline-flex", md: "none"}}>
                             <ArrowLeftIcon />
                         </IconButton>
                     )}
+                    {/* Mobile 沒有 sidebar，定期交易在底下 tab bar 又沒有位，所以放 header 左邊。 */}
+                    <IconButton asChild aria-label={recurringLabel} title={recurringLabel} variant="ghost" size="sm" display={{base: "inline-flex", md: "none"}}>
+                        <Link to={ROUTES.recurringRules}>
+                            <RepeatIcon />
+                        </Link>
+                    </IconButton>
                 </Flex>
 
                 {/* Mobile 用 app bar 作為標題；desktop 標題交還給頁面內的 PageHeader。 */}
-                <Box flex="1" minW="0">
+                <Box minW="0">
                     <Heading as="h2" size="md" textAlign="center" truncate display={{base: "block", md: "none"}}>
                         {intl.formatMessage(title)}
                     </Heading>
                 </Box>
 
                 <Flex gap="1" align="center" justify="flex-end" flexShrink="0">
-                    {/* Mobile 沒有 sidebar，定期交易在底下 tab bar 又沒有位，所以收在 header。 */}
-                    <IconButton asChild aria-label={recurringLabel} title={recurringLabel} variant="ghost" size="sm" display={{base: "inline-flex", md: "none"}}>
-                        <Link to={ROUTES.recurringRules}>
-                            <RepeatIcon />
-                        </Link>
-                    </IconButton>
                     <IconButton asChild aria-label={scanLabel} title={scanLabel} variant="ghost" size="sm">
                         <Link to={ROUTES.scan}>
                             <ScanLineIcon />
@@ -80,7 +72,7 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
                         <LogOutIcon />
                     </IconButton>
                 </Flex>
-            </Flex>
+            </Grid>
         </Box>
     );
 };
