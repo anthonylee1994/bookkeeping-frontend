@@ -66,6 +66,11 @@ export function centsToDollars(cents: number): string {
     return `${sign}HK$${groupedDollars(absoluteCents)}.${String(absoluteCents % 100).padStart(2, "0")}`;
 }
 
+/** 已帶正負號嘅金額顏色：負數紅、非負數綠。 */
+export function signedAmountTone(cents: number): "income" | "expense" {
+    return cents < 0 ? "expense" : "income";
+}
+
 export function formatSignedAmount({cents, kind, isRefund = false}: SignedAmountOptions): string {
     assertValidCents(cents);
 

@@ -90,7 +90,7 @@ export const TransactionsTable = ({transactions, names, sort, order, onSelect, o
                                 {view.primary}
                             </Text>
                             {view.refund ? (
-                                <Badge colorPalette="amber" variant="subtle" rounded="full">
+                                <Badge colorPalette="orange" variant="subtle" rounded="full">
                                     {intl.formatMessage(messages.transactions.list.refund)}
                                 </Badge>
                             ) : null}

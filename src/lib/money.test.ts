@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {centsToDollars, dollarsToCents, formatSignedAmount} from "./money";
+import {centsToDollars, dollarsToCents, formatSignedAmount, signedAmountTone} from "./money";
 
 describe("dollarsToCents", () => {
     it.each([
@@ -33,6 +33,12 @@ describe("money formatting", () => {
         expect(formatSignedAmount({cents: 12345, kind: "expense"})).toBe("-HK$123.45");
         expect(formatSignedAmount({cents: 12345, kind: "transfer"})).toBe("HK$123.45");
         expect(formatSignedAmount({cents: 12345, kind: "expense", isRefund: true})).toBe("+HK$123.45 退款");
+    });
+
+    it("maps signed cents to amount colour", () => {
+        expect(signedAmountTone(-1)).toBe("expense");
+        expect(signedAmountTone(0)).toBe("income");
+        expect(signedAmountTone(1)).toBe("income");
     });
 
     it("rejects non-integer cents", () => {

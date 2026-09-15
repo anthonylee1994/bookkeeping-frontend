@@ -11,7 +11,7 @@ type DashboardSummaryProps = {
 type SummaryTile = {
     label: string;
     value: string;
-    tone: "income" | "expense" | "refund";
+    tone: "income" | "expense";
 };
 
 /** 本月淨額、收入、支出、退款四個數字。淨額用正負號同顏色同時表達。 */
@@ -26,7 +26,7 @@ export const DashboardSummary = ({dashboard}: DashboardSummaryProps) => {
         },
         {label: intl.formatMessage(messages.dashboard.income), value: `+${centsToDollars(dashboard.income_cents)}`, tone: "income"},
         {label: intl.formatMessage(messages.dashboard.expense), value: `-${centsToDollars(dashboard.expense_cents)}`, tone: "expense"},
-        {label: intl.formatMessage(messages.dashboard.refund), value: `+${centsToDollars(dashboard.refund_cents)}`, tone: "refund"},
+        {label: intl.formatMessage(messages.dashboard.refund), value: `+${centsToDollars(dashboard.refund_cents)}`, tone: "income"},
     ];
 
     return (

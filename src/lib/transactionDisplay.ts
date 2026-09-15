@@ -2,7 +2,7 @@ import type {TransactionKind, TransactionRow} from "@/data/types";
 import {formatMessage, messages} from "./i18n";
 import {formatSignedAmount} from "./money";
 
-export type TransactionTone = "income" | "expense" | "transfer" | "refund";
+export type TransactionTone = "income" | "expense" | "transfer";
 
 export function kindLabel(kind: TransactionKind): string {
     if (kind === "income") return formatMessage(messages.transactions.income);
@@ -10,13 +10,17 @@ export function kindLabel(kind: TransactionKind): string {
     return formatMessage(messages.transactions.transfer);
 }
 
-export function transactionTone(transaction: TransactionRow): TransactionTone {
-    if (transaction.refund_of_id !== null && transaction.refund_of_id !== undefined) return "refund";
-    return transaction.kind;
-}
-
 export function isRefund(transaction: TransactionRow): boolean {
     return transaction.refund_of_id !== null && transaction.refund_of_id !== undefined;
+}
+
+/**
+ * 金額顏色跟顯示正負號：支出紅、收入／退款綠（退款顯示為 +）；轉帳無正負號。
+ */
+export function transactionTone(transaction: TransactionRow): TransactionTone {
+    if (transaction.kind === "transfer" && !isRefund(transaction)) return "transfer";
+    if (isRefund(transaction) || transaction.kind === "income") return "income";
+    return "expense";
 }
 
 export function transactionTitle(transaction: TransactionRow): string {

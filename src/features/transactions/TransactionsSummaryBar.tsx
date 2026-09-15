@@ -2,7 +2,7 @@ import {Flex, HStack, Separator, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import type {PageTotals} from "@/features/transactions/transactionsFormat";
 import {messages} from "@/lib/i18n";
-import {centsToDollars} from "@/lib/money";
+import {centsToDollars, signedAmountTone} from "@/lib/money";
 
 type TransactionsSummaryBarProps = {
     total: number;
@@ -38,7 +38,7 @@ export const TransactionsSummaryBar = ({total, totals}: TransactionsSummaryBarPr
                         </Text>
                     </HStack>
                 </HStack>
-                <Text fontWeight="semibold" color={totals.netCents < 0 ? "expense" : "income"}>
+                <Text fontWeight="semibold" color={signedAmountTone(totals.netCents)}>
                     {`${totals.netCents < 0 ? "" : "+"}${centsToDollars(totals.netCents)}`}
                 </Text>
             </HStack>

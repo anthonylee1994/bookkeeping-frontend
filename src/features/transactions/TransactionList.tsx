@@ -9,7 +9,7 @@ import {describeTransaction, groupTransactionsByDate} from "@/features/transacti
 import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {toDisplayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
-import {centsToDollars} from "@/lib/money";
+import {centsToDollars, signedAmountTone} from "@/lib/money";
 import {transactionDetailPath} from "@/routes/paths";
 
 type TransactionListProps = {
@@ -43,7 +43,7 @@ export const TransactionList = ({transactions, names, grouped}: TransactionListP
                                     {view.primary}
                                 </Text>
                                 {view.refund ? (
-                                    <Badge colorPalette="amber" variant="subtle" rounded="full" flexShrink="0">
+                                    <Badge colorPalette="orange" variant="subtle" rounded="full" flexShrink="0">
                                         {intl.formatMessage(messages.transactions.list.refund)}
                                     </Badge>
                                 ) : null}
@@ -90,7 +90,7 @@ export const TransactionList = ({transactions, names, grouped}: TransactionListP
                     <Text fontSize="xs" fontWeight="semibold" color="fg.muted">
                         {toDisplayDate(group.date)}
                     </Text>
-                    <Text fontSize="xs" color="fg.muted" fontVariantNumeric="tabular-nums">
+                    <Text fontSize="xs" color={signedAmountTone(group.netCents)} fontVariantNumeric="tabular-nums">
                         {`${group.netCents < 0 ? "" : "+"}${centsToDollars(group.netCents)}`}
                     </Text>
                 </Flex>
