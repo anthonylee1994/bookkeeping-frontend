@@ -26,11 +26,12 @@ const RANGE_OPTIONS: readonly {value: QuickRange; label: keyof typeof messages.t
 export const TransactionsToolbar = ({keyword, range, onSearch, onRangeChange, filterControl}: TransactionsToolbarProps) => {
     const intl = useIntl();
     const [draft, setDraft] = React.useState(keyword);
+    const [prevKeyword, setPrevKeyword] = React.useState(keyword);
 
-    React.useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (prevKeyword !== keyword) {
+        setPrevKeyword(keyword);
         setDraft(keyword);
-    }, [keyword]);
+    }
 
     const commit = () => {
         if (draft.trim() !== keyword) onSearch(draft.trim());

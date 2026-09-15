@@ -50,8 +50,7 @@ export const RecurringRuleForm = ({rule, accounts, categories, merchants, onSave
 
     React.useEffect(() => {
         onDirtyChange(formState.isDirty);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [formState.isDirty]);
+    }, [formState.isDirty, onDirtyChange]);
 
     const selectKind = (nextKind: "income" | "expense") => {
         setValue("kind", nextKind, {shouldDirty: true, shouldValidate: true});

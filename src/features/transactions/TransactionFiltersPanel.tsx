@@ -28,14 +28,14 @@ export const TransactionFiltersPanel = ({filters, activeCount, accounts, categor
     const intl = useIntl();
     const isDesktop = useMediaQuery(DESKTOP_QUERY);
     const [open, setOpen] = React.useState(false);
+    const [prevOpen, setPrevOpen] = React.useState(false);
     const [draft, setDraft] = React.useState<TransactionFilterDraft>(() => toFilterDraft(filters));
 
-    React.useEffect(() => {
-        // 每次打開都以目前生效的 filter 為準，不要留下上次未套用的草稿。
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+    // 每次打開都以目前生效的 filter 為準，不留下上次未套用的草稿。
+    if (prevOpen !== open) {
+        setPrevOpen(open);
         if (open) setDraft(toFilterDraft(filters));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open]);
+    }
 
     const update = (field: keyof TransactionFilterDraft, value: string) => {
         setDraft(previous => ({...previous, [field]: value}));

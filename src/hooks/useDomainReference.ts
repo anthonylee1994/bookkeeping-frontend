@@ -15,6 +15,11 @@ export type DomainReference = {
     reload: () => void;
 };
 
+type DomainReferenceResult = {
+    key: string;
+    error: LocalError | null;
+};
+
 /**
  * Accounts／categories／merchants 參考資料；成功載入後寫入 appStore 並標記 `referenceLoaded`，
  * 之後其他 feature mount 時就不用重複抓取。失敗保留舊資料，可透過 `reload` 重試。
@@ -25,17 +30,14 @@ export function useDomainReference(): DomainReference {
     const categories = useAppStore(state => state.categories);
     const merchants = useAppStore(state => state.merchants);
     const referenceLoaded = useAppStore(state => state.referenceLoaded);
-    const [isLoading, setLoading] = React.useState(false);
-    const [error, setError] = React.useState<LocalError | null>(null);
+    const [result, setResult] = React.useState<DomainReferenceResult | null>(null);
     const [reloadToken, setReloadToken] = React.useState(0);
+    const requestKey = `${token ?? ""}:${reloadToken}`;
 
     React.useEffect(() => {
         if (token === null || referenceLoaded) return;
 
         let active = true;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setLoading(true);
-        setError(null);
 
         void Promise.all([new AccountsRepository(token).list(), new CategoriesRepository(token).list(), new MerchantsRepository(token).search("")]).then(
             ([accountsResult, categoriesResult, merchantsResult]) => {
@@ -49,21 +51,29 @@ export function useDomainReference(): DomainReference {
                 const failure = [accountsResult, categoriesResult, merchantsResult].find(result => !result.ok);
                 if (failure === undefined) {
                     store.setReferenceLoaded(true);
-                } else if (!failure.ok) {
-                    setError(failure.error);
+                    setResult({key: requestKey, error: null});
+                } else {
+                    setResult({key: requestKey, error: failure.error});
                 }
-                setLoading(false);
             }
         );
 
         return () => {
             active = false;
         };
-    }, [token, referenceLoaded, reloadToken]);
+    }, [token, referenceLoaded, requestKey]);
 
     const reload = () => setReloadToken(value => value + 1);
 
     // 多個 consumer 同時 mount 時，其中一個完成便會將 shared referenceLoaded 設為 true。
-    // 另一個 effect 會被 cleanup；此時必須以 shared 狀態收斂 loading，否則會永久停在 skeleton。
-    return {accounts, categories, merchants, isLoading: isLoading && !referenceLoaded, error, reload};
+    // 另一個 request 會被 cleanup；此時必須以 shared 狀態收斂 loading，否則會永久停在 skeleton。
+    const isCurrent = result !== null && result.key === requestKey;
+    return {
+        accounts,
+        categories,
+        merchants,
+        isLoading: token !== null && !referenceLoaded && !isCurrent,
+        error: isCurrent ? result.error : null,
+        reload,
+    };
 }

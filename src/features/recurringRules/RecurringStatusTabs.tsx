@@ -4,7 +4,7 @@ import type {RecurringStatus} from "@/data/types";
 import {recurringStatusLabel} from "@/features/recurringRules/recurringRuleModel";
 import {messages} from "@/lib/i18n";
 
-export const RECURRING_STATUSES: readonly RecurringStatus[] = ["active", "paused", "ended"];
+const RECURRING_STATUSES: readonly RecurringStatus[] = ["active", "paused", "ended"];
 
 type RecurringStatusTabsProps = {
     status: RecurringStatus;

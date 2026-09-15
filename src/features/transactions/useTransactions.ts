@@ -11,44 +11,52 @@ export type TransactionsQuery = {
     reload: () => void;
 };
 
+type TransactionsResult = {
+    key: string;
+    page: Paginated<Transaction> | null;
+    error: LocalError | null;
+};
+
 /** 依 URL filter 抓取交易分頁；filter 一變即重新抓取，`reload` 用於錯誤重試。 */
 export function useTransactions(filters: TransactionFilters): TransactionsQuery {
     const token = useAuthStore(state => state.token);
-    const [page, setPage] = React.useState<Paginated<Transaction> | null>(null);
-    const [isLoading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState<LocalError | null>(null);
+    const [result, setResult] = React.useState<TransactionsResult | null>(null);
     const [reloadToken, setReloadToken] = React.useState(0);
     const filtersKey = serializeTransactionFilters(filters).toString();
+    const requestKey = `${token ?? ""}:${filtersKey}:${reloadToken}`;
+    // Effect 只依賴序列化後的 filtersKey，用 ref 讀取最新 filter 內容，避免每次 render 都重新抓取。
+    const filtersRef = React.useRef(filters);
 
     React.useEffect(() => {
-        if (token === null) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setPage(null);
-            setLoading(false);
-            return;
-        }
+        filtersRef.current = filters;
+    });
+
+    React.useEffect(() => {
+        if (token === null) return;
 
         let active = true;
-        setLoading(true);
-        setError(null);
 
-        void new TransactionsRepository(token).list(filters).then(result => {
+        void new TransactionsRepository(token).list(filtersRef.current).then(response => {
             if (!active) return;
-            if (result.ok) {
-                setPage(result.value);
+            if (response.ok) {
+                setResult({key: requestKey, page: response.value, error: null});
             } else {
-                setError(result.error);
+                setResult({key: requestKey, page: null, error: response.error});
             }
-            setLoading(false);
         });
 
         return () => {
             active = false;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [token, filtersKey, reloadToken]);
+    }, [token, requestKey]);
 
     const reload = () => setReloadToken(value => value + 1);
 
-    return {page, isLoading, error, reload};
+    const current = token !== null && result !== null && result.key === requestKey ? result : null;
+    return {
+        page: current?.page ?? null,
+        isLoading: token !== null && current === null,
+        error: current?.error ?? null,
+        reload,
+    };
 }

@@ -16,11 +16,12 @@ export const AppLayout = () => {
     const isDesktop = useMediaQuery(DESKTOP_QUERY);
     const location = useLocation();
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(!isDesktop);
+    const [prevIsDesktop, setPrevIsDesktop] = React.useState(isDesktop);
 
-    React.useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (prevIsDesktop !== isDesktop) {
+        setPrevIsDesktop(isDesktop);
         setSidebarCollapsed(!isDesktop);
-    }, [isDesktop]);
+    }
 
     const toggleSidebar = () => {
         setSidebarCollapsed(collapsed => !collapsed);

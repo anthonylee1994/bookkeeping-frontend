@@ -151,8 +151,7 @@ export function serializeRecurringStatus(status: RecurringStatus): URLSearchPara
 
 /* ---------- returnTo（防 open redirect） ---------- */
 
-// eslint-disable-next-line no-control-regex
-const UNSAFE_PATH_PATTERN = /[\u0000-\u001f\\]/;
+const UNSAFE_PATH_PATTERN = /[\p{Cc}\\]/u;
 const PROTOCOL_PATTERN = /^[a-z][a-z\d+.-]*:/i;
 
 /** 只接受站內 path：`/` 開頭、不可以 `//`（protocol-relative）、不可以有 scheme 或控制字元。 */

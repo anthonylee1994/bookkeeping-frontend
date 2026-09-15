@@ -1,12 +1,14 @@
 import React from "react";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Alert, Button, CloseButton, Dialog, Drawer, Field, HStack, Input, NativeSelect, Portal, Stack} from "@chakra-ui/react";
-import {useForm} from "react-hook-form";
+import {useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {z} from "zod";
+import {ColorPicker} from "@/components/ColorPicker";
 import {CategoriesRepository} from "@/data/categoriesRepository";
 import type {Category, CategoryKind} from "@/data/types";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
+import {FLAT_UI_COLORS} from "@/lib/colors";
 import {formatMessage, messages} from "@/lib/i18n";
 import {useAuthStore} from "@/stores/authStore";
 
@@ -49,17 +51,14 @@ function formValuesToInput(values: CategoryFormValues) {
     };
 }
 
-const COLOR_PALETTE = ["#ea580c", "#2563eb", "#10b981", "#7c3aed", "#dc2626", "#64748b"];
-
 export const CategoryFormDrawer = ({category, defaultKind, onSaved, onDeleted, onClose}: CategoryFormDrawerProps) => {
     const intl = useIntl();
     const isDesktop = useMediaQuery(DESKTOP_QUERY);
     const token = useAuthStore(state => state.token);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
-    const [isDirty, setDirty] = React.useState(false);
     const [confirmOpen, setConfirmOpen] = React.useState(false);
     const [deleteOpen, setDeleteOpen] = React.useState(false);
-    const {register, handleSubmit, watch, setValue, formState} = useForm<CategoryFormValues>({
+    const {register, handleSubmit, control, setValue, formState} = useForm<CategoryFormValues>({
         resolver: zodResolver(categoryFormSchema),
         defaultValues:
             category === null
@@ -68,16 +67,13 @@ export const CategoryFormDrawer = ({category, defaultKind, onSaved, onDeleted, o
                       kind: defaultKind,
                       position: "0",
                       icon: "",
-                      color: COLOR_PALETTE[0],
+                      color: FLAT_UI_COLORS[0],
                   }
                 : categoryToFormValues(category),
     });
 
-    const selectedColor = watch("color");
-
-    React.useEffect(() => {
-        setDirty(formState.isDirty);
-    }, [formState.isDirty]);
+    const selectedColor = useWatch({control, name: "color"});
+    const {isDirty} = formState;
 
     const requestClose = () => {
         if (isDirty) {
@@ -161,25 +157,7 @@ export const CategoryFormDrawer = ({category, defaultKind, onSaved, onDeleted, o
 
                                         <Field.Root>
                                             <Field.Label>{intl.formatMessage(messages.categories.color)}</Field.Label>
-                                            <HStack gap="2">
-                                                {COLOR_PALETTE.map(color => (
-                                                    <Button
-                                                        key={color}
-                                                        type="button"
-                                                        variant="plain"
-                                                        w="10"
-                                                        h="10"
-                                                        p="0"
-                                                        minW="auto"
-                                                        rounded="lg"
-                                                        bg={color}
-                                                        borderWidth="2px"
-                                                        borderColor={selectedColor === color ? "brand.solid" : "transparent"}
-                                                        onClick={() => setValue("color", color, {shouldDirty: true})}
-                                                        _hover={{borderColor: "brand.solid"}}
-                                                    />
-                                                ))}
-                                            </HStack>
+                                            <ColorPicker value={selectedColor} onChange={color => setValue("color", color, {shouldDirty: true})} />
                                         </Field.Root>
 
                                         <Field.Root>
