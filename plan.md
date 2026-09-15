@@ -387,6 +387,8 @@ URL 同步全部 filter／sort／page。Mobile list row；desktop table。Refund
 
 ## Step 13 — 新增／修改交易
 
+**狀態：已完成（2026-09-15）**
+
 Segmented control 切 kind，欄位表跟 spec 5.4。
 
 - RHF + Zod
@@ -397,10 +399,12 @@ Segmented control 切 kind，欄位表跟 spec 5.4。
 - Dirty leave：`useBlocker` 確認
 - 離線：spec 5.4 寫 disable submit，但 8.3 寫 CRUD 離線照常。**跟 8.3**：離線仍可本地寫入；5.4 嘅「disable」理解為唔做假網絡 retry。Banner 提示資料只在本機。
 - 成功 toast，同步所有 view
+- 新增交易預設選取帳戶列表第一個帳戶；修改交易保留原有帳戶
+- Segmented control 未選中狀態用 neutral 灰底／灰色 hover；active 狀態用品牌深綠
 
-Desktop：route 以 modal／drawer 呈現。Mobile：全頁。
+Desktop：右側 drawer。Mobile：底部 drawer（最高 92dvh）。兩者都保留交易列表做遮罩後背景；直接進入 `/transactions/new`／edit URL 亦相同，唔 render 空白中間頁。Drawer 內 action 跟表單正常 flow，唔 sticky。
 
-**完成標準**：三種 kind 欄位切換同 validation 測試。
+**完成標準（已達成）**：三種 kind 欄位切換同 validation、create cents payload／idempotency、edit payload、商戶建議／即場建立、dirty leave、responsive overlay route 均有測試；ESLint、完整 Vitest 同 production build 通過。
 
 ---
 
