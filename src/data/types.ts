@@ -110,8 +110,6 @@ export type TransactionRow = Omit<TransactionInput, "currency" | "source" | "ima
     currency: Currency;
     source: TransactionSource;
     image_urls: string[];
-    refund_of_id?: UUID | null;
-    net_amount_cents: number;
 };
 
 export type Transaction = TransactionRow & {
@@ -222,7 +220,6 @@ export type CategoryBreakdown = {
     category_id: UUID | null;
     name: string | null;
     expense_cents: number;
-    refund_cents: number;
 };
 
 export type AccountBreakdown = {
@@ -230,7 +227,6 @@ export type AccountBreakdown = {
     name: string | null;
     income_cents: number;
     expense_cents: number;
-    refund_cents: number;
 };
 
 export type AccountBalance = {
@@ -250,7 +246,6 @@ export type Summary = {
     range: Range;
     income_cents: number;
     expense_cents: number;
-    refund_cents: number;
     net_cents: number;
     by_category: CategoryBreakdown[];
     by_account: AccountBreakdown[];
@@ -262,8 +257,6 @@ export type Dashboard = {
     range: Range;
     income_cents: number;
     expense_cents: number;
-    refund_cents: number;
-    net_expense_cents: number;
     net_cents: number;
     recent_transactions: TransactionRow[];
     by_category: CategoryBreakdown[];
@@ -271,12 +264,6 @@ export type Dashboard = {
     account_balances: AccountBalance[];
     upcoming_recurring: RecurringRuleSummary[];
     recurring_reminders: RecurringRuleSummary[];
-};
-
-export type RefundInput = {
-    amount_cents: number;
-    occurred_at: string;
-    note?: string | null;
 };
 
 export type ReceiptUpload = {

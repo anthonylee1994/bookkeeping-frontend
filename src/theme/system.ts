@@ -114,7 +114,6 @@ const config = defineConfig({
                 income: {value: {base: "{colors.green.600}", _dark: "{colors.green.400}"}},
                 expense: {value: {base: "{colors.red.600}", _dark: "{colors.red.400}"}},
                 transfer: {value: {base: "{colors.blue.600}", _dark: "{colors.blue.400}"}},
-                refund: {value: {base: "{colors.green.600}", _dark: "{colors.green.400}"}},
             },
         },
         recipes: {

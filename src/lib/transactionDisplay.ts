@@ -10,16 +10,12 @@ export function kindLabel(kind: TransactionKind): string {
     return formatMessage(messages.transactions.transfer);
 }
 
-export function isRefund(transaction: TransactionRow): boolean {
-    return transaction.refund_of_id !== null && transaction.refund_of_id !== undefined;
-}
-
 /**
- * 金額顏色跟顯示正負號：支出紅、收入／退款綠（退款顯示為 +）；轉帳無正負號。
+ * 金額顏色跟顯示正負號：支出紅、收入綠；轉帳無正負號。
  */
 export function transactionTone(transaction: TransactionRow): TransactionTone {
-    if (transaction.kind === "transfer" && !isRefund(transaction)) return "transfer";
-    if (isRefund(transaction) || transaction.kind === "income") return "income";
+    if (transaction.kind === "transfer") return "transfer";
+    if (transaction.kind === "income") return "income";
     return "expense";
 }
 
@@ -29,15 +25,10 @@ export function transactionTitle(transaction: TransactionRow): string {
     return kindLabel(transaction.kind);
 }
 
-/** 交易本身金額（退款加後綴），不計其他退款。 */
 export function transactionAmountLabel(transaction: TransactionRow): string {
-    return formatSignedAmount({cents: transaction.amount_cents, kind: transaction.kind, isRefund: isRefund(transaction)});
+    return formatSignedAmount({cents: transaction.amount_cents, kind: transaction.kind});
 }
 
-/** 列表用金額：退款行顯示正值加「退款」後綴；其他行顯示 `net_amount_cents`（原交易扣除退款後）。 */
 export function transactionDisplayAmount(transaction: TransactionRow): string {
-    if (isRefund(transaction)) {
-        return formatSignedAmount({cents: transaction.amount_cents, kind: transaction.kind, isRefund: true});
-    }
-    return formatSignedAmount({cents: transaction.net_amount_cents, kind: transaction.kind});
+    return formatSignedAmount({cents: transaction.amount_cents, kind: transaction.kind});
 }

@@ -1,12 +1,10 @@
 import React from "react";
-import {Alert, Button, Dialog, HStack, Portal, Stack, Text} from "@chakra-ui/react";
-import {CopyIcon, PencilIcon, Trash2Icon, Undo2Icon} from "lucide-react";
+import {Alert, Button, Dialog, HStack, Portal, Stack} from "@chakra-ui/react";
+import {CopyIcon, PencilIcon, Trash2Icon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, useNavigate} from "react-router";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
-import {refundAvailability} from "@/features/transactions/refundModel";
-import {TransactionRefundDialog} from "@/features/transactions/TransactionRefundDialog";
 import {messages} from "@/lib/i18n";
 import {transactionDetailPath, transactionEditPath} from "@/routes/paths";
 import {useAppStore} from "@/stores/appStore";
@@ -15,21 +13,17 @@ import {useAuthStore} from "@/stores/authStore";
 type TransactionDetailActionsProps = {
     transaction: Transaction;
     onDeleted: () => void;
-    /** 退款後原交易淨額會改變，交畀詳情更新顯示。 */
-    onRefunded: (original: Transaction) => void;
 };
 
-export const TransactionDetailActions = ({transaction, onDeleted, onRefunded}: TransactionDetailActionsProps) => {
+export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDetailActionsProps) => {
     const intl = useIntl();
     const navigate = useNavigate();
     const token = useAuthStore(state => state.token);
     const [confirmOpen, setConfirmOpen] = React.useState(false);
-    const [refundOpen, setRefundOpen] = React.useState(false);
     const [isDeleting, setDeleting] = React.useState(false);
     const [isDuplicating, setDuplicating] = React.useState(false);
     const [deleteError, setDeleteError] = React.useState<string | null>(null);
     const [duplicateError, setDuplicateError] = React.useState<string | null>(null);
-    const refund = refundAvailability(transaction);
 
     const deleteTransaction = async () => {
         if (token === null) return;
@@ -44,7 +38,7 @@ export const TransactionDetailActions = ({transaction, onDeleted, onRefunded}: T
 
         const store = useAppStore.getState();
         store.setTransactions(
-            store.transactions.filter(item => item.id !== transaction.id && item.refund_of_id !== transaction.id),
+            store.transactions.filter(item => item.id !== transaction.id),
             store.transactionsMeta
         );
         setConfirmOpen(false);
@@ -76,11 +70,6 @@ export const TransactionDetailActions = ({transaction, onDeleted, onRefunded}: T
                         <Alert.Title>{duplicateError}</Alert.Title>
                     </Alert.Root>
                 )}
-                {refund.reason === null ? null : (
-                    <Text fontSize="xs" color="fg.muted" textAlign="end">
-                        {refund.reason}
-                    </Text>
-                )}
                 <HStack justify="flex-end" gap="3" wrap="wrap">
                     <Button asChild variant="outline">
                         <Link to={transactionEditPath(transaction.id)}>
@@ -92,26 +81,12 @@ export const TransactionDetailActions = ({transaction, onDeleted, onRefunded}: T
                         <CopyIcon />
                         {intl.formatMessage(messages.transactions.detail.duplicate)}
                     </Button>
-                    <Button type="button" variant="outline" disabled={!refund.allowed} onClick={() => setRefundOpen(true)}>
-                        <Undo2Icon />
-                        {intl.formatMessage(messages.transactions.detail.refund)}
-                    </Button>
                     <Button type="button" colorPalette="red" variant="outline" onClick={() => setConfirmOpen(true)}>
                         <Trash2Icon />
                         {intl.formatMessage(messages.common.delete)}
                     </Button>
                 </HStack>
             </Stack>
-
-            {!refund.allowed ? null : (
-                <TransactionRefundDialog
-                    transaction={transaction}
-                    remainingCents={refund.remainingCents}
-                    open={refundOpen}
-                    onOpenChange={setRefundOpen}
-                    onRefunded={original => onRefunded(original)}
-                />
-            )}
 
             <Dialog.Root open={confirmOpen} role="alertdialog" onOpenChange={event => setConfirmOpen(event.open)}>
                 <Portal>

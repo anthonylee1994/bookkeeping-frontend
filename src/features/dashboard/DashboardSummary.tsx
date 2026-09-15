@@ -14,7 +14,7 @@ type SummaryTile = {
     tone: "income" | "expense";
 };
 
-/** 本月淨額、收入、支出、退款四個數字。淨額用正負號同顏色同時表達。 */
+/** 本月淨額、收入、支出三個數字。淨額用正負號同顏色同時表達。 */
 export const DashboardSummary = ({dashboard}: DashboardSummaryProps) => {
     const intl = useIntl();
 
@@ -26,11 +26,10 @@ export const DashboardSummary = ({dashboard}: DashboardSummaryProps) => {
         },
         {label: intl.formatMessage(messages.dashboard.income), value: `+${centsToDollars(dashboard.income_cents)}`, tone: "income"},
         {label: intl.formatMessage(messages.dashboard.expense), value: `-${centsToDollars(dashboard.expense_cents)}`, tone: "expense"},
-        {label: intl.formatMessage(messages.dashboard.refund), value: `+${centsToDollars(dashboard.refund_cents)}`, tone: "income"},
     ];
 
     return (
-        <SimpleGrid columns={{base: 2, md: 4}} gap="3">
+        <SimpleGrid columns={{base: 1, sm: 3}} gap="3">
             {tiles.map(tile => (
                 <Box key={tile.label} bg="bg.panel" borderWidth="1px" borderColor="border" rounded="xl" p="4" shadow="xs">
                     <Text fontSize="sm" color="fg.muted">

@@ -56,12 +56,6 @@ export const transactionInputSchema = z.object({
 /** Update 不可以改 `source`。 */
 export const transactionUpdateInputSchema = transactionInputSchema.omit({source: true});
 
-export const refundInputSchema = z.object({
-    amount_cents: z.number().int().min(1),
-    occurred_at: dateTimeSchema,
-    note: z.string().nullable().optional(),
-});
-
 export const recurringRuleInputSchema = z.object({
     account_id: uuidSchema,
     category_id: nullableUuidSchema.optional(),
@@ -103,8 +97,6 @@ export const merchantSchema = merchantInputSchema.extend({
 
 export const transactionRowSchema = transactionInputSchema.extend({
     id: uuidSchema,
-    refund_of_id: nullableUuidSchema.optional(),
-    net_amount_cents: z.number().int(),
 });
 
 export const transactionSchema = transactionRowSchema.extend({

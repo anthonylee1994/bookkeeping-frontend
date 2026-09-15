@@ -9,7 +9,6 @@ function summaryResponse() {
         range: {from: "2026-08-31T16:00:00.000Z", to: "2026-09-30T15:59:59.999Z"},
         income_cents: 0,
         expense_cents: 0,
-        refund_cents: 0,
         net_cents: 0,
         by_category: [],
         by_account: [],

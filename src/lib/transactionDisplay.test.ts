@@ -14,9 +14,4 @@ describe("transactionTone", () => {
     it("keeps unsigned transfers on the transfer tone", () => {
         expect(transactionTone({...base, kind: "transfer", category_id: null, transfer_account_id: domainTestState.accounts[1].id})).toBe("transfer");
     });
-
-    it("colours refunds green because they display as a positive amount", () => {
-        expect(transactionTone({...base, kind: "expense", refund_of_id: base.id})).toBe("income");
-        expect(transactionTone({...base, kind: "income", refund_of_id: base.id})).toBe("income");
-    });
 });

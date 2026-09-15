@@ -41,8 +41,6 @@ const expenseTransaction: TransactionRow = {
     source: "manual",
     transfer_account_id: null,
     image_urls: [],
-    refund_of_id: null,
-    net_amount_cents: 50000,
 };
 
 const transferTransaction: TransactionRow = {
@@ -53,7 +51,6 @@ const transferTransaction: TransactionRow = {
     category_id: null,
     note: "轉去銀行",
     transfer_account_id: SAVINGS_ID,
-    net_amount_cents: 20000,
 };
 
 const accountBalance = {id: ACCOUNT_ID, name: "現金", currency: "HKD" as const, initial_balance_cents: 0, balance_cents: 50000};
@@ -62,11 +59,9 @@ const dashboardFixture: Dashboard = {
     range: {from: "2026-08-31T16:00:00.000Z", to: "2026-09-30T15:59:59.999Z"},
     income_cents: 100000,
     expense_cents: 50000,
-    refund_cents: 0,
-    net_expense_cents: 50000,
     net_cents: 50000,
     recent_transactions: [expenseTransaction, transferTransaction],
-    by_category: [{category_id: CATEGORY_ID, name: "飲食", expense_cents: 50000, refund_cents: 0}],
+    by_category: [{category_id: CATEGORY_ID, name: "飲食", expense_cents: 50000}],
     accounts: [accountBalance],
     account_balances: [accountBalance],
     upcoming_recurring: [],
@@ -77,8 +72,6 @@ const emptyDashboard: Dashboard = {
     ...dashboardFixture,
     income_cents: 0,
     expense_cents: 0,
-    refund_cents: 0,
-    net_expense_cents: 0,
     net_cents: 0,
     recent_transactions: [],
     by_category: [],

@@ -33,10 +33,10 @@ export const TransactionReceiptImages = ({urls}: TransactionReceiptImagesProps) 
 
     return (
         <Box>
-            <Text fontSize="sm" color="fg.muted" mb="2">
+            <Text fontSize="sm" color="fg.muted" mb="2" textAlign="end">
                 {intl.formatMessage(messages.transactions.detail.images)}
             </Text>
-            <Flex gap="2" wrap="wrap">
+            <Flex gap="2" wrap="wrap" justify="flex-end">
                 {urls.map((url, index) =>
                     failedUrls.includes(url) ? (
                         <FallbackTile key={url} label={failedLabel} boxSize="20" />

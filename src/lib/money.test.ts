@@ -28,11 +28,10 @@ describe("money formatting", () => {
         expect(centsToDollars(-123450)).toBe("-HK$1,234.50");
     });
 
-    it("formats income, expense, transfer and refund signs", () => {
+    it("formats income, expense and transfer signs", () => {
         expect(formatSignedAmount({cents: 12345, kind: "income"})).toBe("+HK$123.45");
         expect(formatSignedAmount({cents: 12345, kind: "expense"})).toBe("-HK$123.45");
         expect(formatSignedAmount({cents: 12345, kind: "transfer"})).toBe("HK$123.45");
-        expect(formatSignedAmount({cents: 12345, kind: "expense", isRefund: true})).toBe("+HK$123.45 退款");
     });
 
     it("maps signed cents to amount colour", () => {

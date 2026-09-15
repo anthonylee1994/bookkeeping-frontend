@@ -95,14 +95,4 @@ describe("TransactionsRepository", () => {
         });
         expect(request).not.toHaveBeenCalled();
     });
-
-    it("posts refunds and exposes the backend refund cap error", async () => {
-        const request = vi.spyOn(apiClient, "request").mockRejectedValue({response: {status: 422, data: {message: "退款金額超過可退款上限", fields: {amount_cents: ["最多可退 7000"]}}}});
-
-        expect(await new TransactionsRepository(TOKEN).refund(transaction.id, {amount_cents: 7001, occurred_at: "2026-09-14T16:00:00+08:00"})).toEqual({
-            ok: false,
-            error: {code: "validation", message: "退款金額超過可退款上限", fields: {amount_cents: ["最多可退 7000"]}},
-        });
-        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: `/transactions/${transaction.id}/refund`}));
-    });
 });

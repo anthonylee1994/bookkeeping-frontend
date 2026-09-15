@@ -1,16 +1,13 @@
 import React from "react";
-import {Box, Flex, Link, Stack, Text} from "@chakra-ui/react";
+import {Box, Flex, Stack, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
-import {Link as RouterLink} from "react-router";
 import type {Transaction} from "@/data/types";
 import {TransactionReceiptImages} from "@/features/transactions/TransactionReceiptImages";
 import {sourceLabel} from "@/features/transactions/transactionsFormat";
 import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {toDisplayDateTime} from "@/lib/date";
 import {messages} from "@/lib/i18n";
-import {centsToDollars} from "@/lib/money";
 import {kindLabel, transactionAmountLabel, transactionTone} from "@/lib/transactionDisplay";
-import {transactionDetailPath} from "@/routes/paths";
 
 type TransactionDetailContentProps = {
     transaction: Transaction;
@@ -20,15 +17,33 @@ type TransactionDetailContentProps = {
 type TransactionDetailRowProps = {
     label: string;
     children: React.ReactNode;
+    preserveLineBreaks?: boolean;
 };
 
-export const TransactionDetailRow = ({label, children}: TransactionDetailRowProps) => {
+export const TransactionDetailRow = ({label, children, preserveLineBreaks = false}: TransactionDetailRowProps) => {
     return (
-        <Flex justify="space-between" align="flex-start" gap="4" px="4" py="2.5" borderBottomWidth="1px" borderColor="border" _last={{borderBottomWidth: "0"}}>
+        <Flex
+            direction={preserveLineBreaks ? "column" : "row"}
+            justify={preserveLineBreaks ? undefined : "space-between"}
+            align={preserveLineBreaks ? "stretch" : "flex-start"}
+            gap={preserveLineBreaks ? "1" : "4"}
+            px="4"
+            py="2.5"
+            borderBottomWidth="1px"
+            borderColor="border"
+            _last={{borderBottomWidth: "0"}}
+        >
             <Text fontSize="sm" color="fg.muted" flexShrink="0">
                 {label}
             </Text>
-            <Text fontSize="sm" textAlign="end">
+            <Text
+                fontSize="sm"
+                textAlign={preserveLineBreaks ? "start" : "end"}
+                whiteSpace={preserveLineBreaks ? "pre-wrap" : undefined}
+                wordBreak={preserveLineBreaks ? "keep-all" : undefined}
+                overflowWrap={preserveLineBreaks ? "break-word" : undefined}
+                lineHeight={preserveLineBreaks ? "1.6" : undefined}
+            >
                 {children}
             </Text>
         </Flex>
@@ -42,7 +57,6 @@ export const TransactionDetailContent = ({transaction, names}: TransactionDetail
     const transferName = transaction.transfer_account_id != null ? names.accounts.get(transaction.transfer_account_id) : undefined;
     const categoryName = transaction.category_id != null ? names.categories.get(transaction.category_id) : undefined;
     const merchantName = transaction.merchant_id != null ? names.merchants.get(transaction.merchant_id) : undefined;
-    const netDiffers = transaction.net_amount_cents !== transaction.amount_cents;
 
     return (
         <Stack gap="4">
@@ -73,22 +87,11 @@ export const TransactionDetailContent = ({transaction, names}: TransactionDetail
                     <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.paymentMethod)}>{transaction.payment_method}</TransactionDetailRow>
                 )}
                 {transaction.note === null || transaction.note === undefined || transaction.note === "" ? null : (
-                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.note)}>{transaction.note}</TransactionDetailRow>
-                )}
-                <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.source)}>{sourceLabel(transaction.source)}</TransactionDetailRow>
-                {netDiffers ? (
-                    <React.Fragment>
-                        <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.originalAmount)}>{centsToDollars(transaction.amount_cents)}</TransactionDetailRow>
-                        <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.netAmount)}>{centsToDollars(transaction.net_amount_cents)}</TransactionDetailRow>
-                    </React.Fragment>
-                ) : null}
-                {transaction.refund_of_id == null ? null : (
-                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.refundOf)}>
-                        <Link asChild color="brand.fg" textDecoration="underline">
-                            <RouterLink to={transactionDetailPath(transaction.refund_of_id)}>{transaction.refund_of_id}</RouterLink>
-                        </Link>
+                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.note)} preserveLineBreaks>
+                        {transaction.note}
                     </TransactionDetailRow>
                 )}
+                <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.source)}>{sourceLabel(transaction.source)}</TransactionDetailRow>
                 <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.createdAt)}>{toDisplayDateTime(transaction.created_at)}</TransactionDetailRow>
                 <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.updatedAt)}>{toDisplayDateTime(transaction.updated_at)}</TransactionDetailRow>
             </Stack>

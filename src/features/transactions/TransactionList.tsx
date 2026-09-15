@@ -1,6 +1,6 @@
 import React from "react";
 import type {ReactNode} from "react";
-import {Badge, Box, Flex, HStack, Icon, Text} from "@chakra-ui/react";
+import {Box, Flex, HStack, Icon, Text} from "@chakra-ui/react";
 import {ArrowLeftRightIcon, ChevronRightIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
@@ -42,11 +42,6 @@ export const TransactionList = ({transactions, names, grouped}: TransactionListP
                                 <Text fontWeight="medium" truncate>
                                     {view.primary}
                                 </Text>
-                                {view.refund ? (
-                                    <Badge colorPalette="orange" variant="subtle" rounded="full" flexShrink="0">
-                                        {intl.formatMessage(messages.transactions.list.refund)}
-                                    </Badge>
-                                ) : null}
                             </HStack>
                             <Text fontSize="xs" color="fg.muted" truncate>
                                 {[view.category, view.account, view.secondary].filter(value => value !== null).join(" · ")}

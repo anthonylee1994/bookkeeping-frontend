@@ -1,4 +1,4 @@
-import {Badge, Box, HStack, Icon, Table, Text} from "@chakra-ui/react";
+import {Box, HStack, Icon, Table, Text} from "@chakra-ui/react";
 import {ArrowDownIcon, ArrowUpIcon, ArrowLeftRightIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import type {SortOrder, Transaction, TransactionSortField} from "@/data/types";
@@ -89,11 +89,6 @@ export const TransactionsTable = ({transactions, names, sort, order, onSelect, o
                             <Text fontWeight="medium" truncate>
                                 {view.primary}
                             </Text>
-                            {view.refund ? (
-                                <Badge colorPalette="orange" variant="subtle" rounded="full">
-                                    {intl.formatMessage(messages.transactions.list.refund)}
-                                </Badge>
-                            ) : null}
                         </HStack>
                         {view.secondary === null ? null : (
                             <Text fontSize="xs" color="fg.muted" truncate>

@@ -11,7 +11,6 @@ export type MoneyError = {
 type SignedAmountOptions = {
     cents: number;
     kind: TransactionKind;
-    isRefund?: boolean;
 };
 
 const MAX_SAFE_DOLLARS = Math.floor(Number.MAX_SAFE_INTEGER / 100);
@@ -71,13 +70,10 @@ export function signedAmountTone(cents: number): "income" | "expense" {
     return cents < 0 ? "expense" : "income";
 }
 
-export function formatSignedAmount({cents, kind, isRefund = false}: SignedAmountOptions): string {
+export function formatSignedAmount({cents, kind}: SignedAmountOptions): string {
     assertValidCents(cents);
 
     const amount = centsToDollars(Math.abs(cents));
-    if (isRefund) {
-        return `+${amount} ${formatMessage(messages.transactions.refundSuffix)}`;
-    }
     if (kind === "income") {
         return `+${amount}`;
     }

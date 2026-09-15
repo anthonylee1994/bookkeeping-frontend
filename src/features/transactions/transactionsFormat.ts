@@ -1,7 +1,7 @@
 import type {TransactionFilters, TransactionKind, TransactionRow, TransactionSource} from "@/data/types";
 import {formatMessage, messages} from "@/lib/i18n";
 import {centsToDollars} from "@/lib/money";
-import {isRefund, kindLabel, transactionDisplayAmount, transactionTitle, transactionTone} from "@/lib/transactionDisplay";
+import {kindLabel, transactionDisplayAmount, transactionTitle, transactionTone} from "@/lib/transactionDisplay";
 import type {TransactionTone} from "@/lib/transactionDisplay";
 
 export type TransactionNameMaps = {
@@ -18,7 +18,6 @@ export type TransactionRowView = {
     kind: string;
     amount: string;
     tone: TransactionTone;
-    refund: boolean;
 };
 
 export type TransactionFilterDraft = {
@@ -113,7 +112,6 @@ export function describeTransaction(transaction: TransactionRow, names: Transact
         kind: kindLabel(transaction.kind),
         amount: transactionDisplayAmount(transaction),
         tone: transactionTone(transaction),
-        refund: isRefund(transaction),
     };
 }
 
@@ -134,9 +132,7 @@ export type PageTotals = {
 /** 單筆交易對淨額的影響；轉帳只係搬錢，唔計。 */
 function netEffectCents(transaction: TransactionRow): number {
     if (transaction.kind === "transfer") return 0;
-    const amount = isRefund(transaction) ? transaction.amount_cents : transaction.net_amount_cents;
-    if (isRefund(transaction)) return transaction.kind === "expense" ? amount : -amount;
-    return transaction.kind === "income" ? amount : -amount;
+    return transaction.kind === "income" ? transaction.amount_cents : -transaction.amount_cents;
 }
 
 /**

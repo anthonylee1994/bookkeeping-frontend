@@ -29,8 +29,6 @@ export const domainTestState: {accounts: Account[]; categories: Category[]; merc
             source: "manual",
             transfer_account_id: null,
             image_urls: [],
-            refund_of_id: null,
-            net_amount_cents: 300000,
             created_at: timestamp,
             updated_at: timestamp,
         },

@@ -34,7 +34,6 @@ const created: Transaction = {
     id: "40000000-0000-4000-8000-000000000099",
     kind: "expense",
     amount_cents: 1250,
-    net_amount_cents: 1250,
 };
 
 function renderForm(transaction: Transaction | null = null): void {
@@ -170,7 +169,7 @@ describe("TransactionForm", () => {
         expect(screen.getByLabelText("金額")).toHaveValue("12");
     });
 
-    it("updates without sending source or refund fields", async () => {
+    it("updates without sending source", async () => {
         const user = userEvent.setup();
         const edited = {...domainTestState.transactions[0], note: "已修改"};
         updateMock.mockResolvedValue({ok: true, value: edited});
@@ -183,7 +182,6 @@ describe("TransactionForm", () => {
         await waitFor(() => expect(screen.getByText("DETAIL")).toBeInTheDocument());
         const input = updateMock.mock.calls[0][1] as Record<string, unknown>;
         expect(input).not.toHaveProperty("source");
-        expect(input).not.toHaveProperty("refund_of_id");
         expect(input.note).toBe("已修改");
     });
 });

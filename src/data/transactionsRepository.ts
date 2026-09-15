@@ -1,9 +1,9 @@
 import {apiDelete, apiRequest} from "./apiRepository";
 import {localSuccess, localValidation} from "./localResult";
 import {paginatedTransactionsResponseSchema, transactionResponseSchema} from "./repositorySchemas";
-import {refundInputSchema, transactionInputSchema, transactionUpdateInputSchema, uuidSchema} from "./schema";
+import {transactionInputSchema, transactionUpdateInputSchema, uuidSchema} from "./schema";
 import {formatMessage, messages} from "../lib/i18n";
-import type {LocalResult, Paginated, RefundInput, Transaction, TransactionFilters, TransactionInput, TransactionUpdateInput, UUID} from "./types";
+import type {LocalResult, Paginated, Transaction, TransactionFilters, TransactionInput, TransactionUpdateInput, UUID} from "./types";
 
 function validateKindFields(input: TransactionInput | TransactionUpdateInput): LocalResult<true> {
     if (input.kind === "transfer") {
@@ -61,12 +61,6 @@ export class TransactionsRepository {
 
     async delete(id: UUID): Promise<LocalResult<true>> {
         return apiDelete(this.#token, `/transactions/${id}`);
-    }
-
-    async refund(id: UUID, input: RefundInput): Promise<LocalResult<Transaction>> {
-        const parsed = refundInputSchema.safeParse(input);
-        if (!parsed.success) return localValidation(formatMessage(messages.validation.refundInvalid));
-        return apiRequest(this.#token, {method: "POST", url: `/transactions/${id}/refund`, data: parsed.data}, transactionResponseSchema);
     }
 
     async duplicate(id: UUID): Promise<LocalResult<Transaction>> {

@@ -16,7 +16,7 @@ MVP 係 **pure local prototype**。Repository 唔發 HTTP。Swagger path 只作�
 
 Local domain type 必須補齊，唔可以只抄 swagger input：
 
-- `Transaction`：`id`、`refund_of_id`、`net_amount_cents`、`created_at`、`updated_at`
+- `Transaction`：`id`、`created_at`、`updated_at`
 - `RecurringRule`：`id`、`status`、`note`、`day_of_week`（0–6）、`day_of_month`（1–31）、`month_of_year`（1–12）、`created_at`、`updated_at`
 - `Account`／`Category`／`Merchant`／`User`：`id`、timestamps；merchant 加 `usage_count`
 - `AiPreview`：confidence、parsed fields、missing／low-confidence flags（swagger 只寫 200 description）
@@ -43,6 +43,7 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 6. **AI parse 用 deterministic fixture**，可按檔名／hash 選成功或失敗 mock。
 7. **`tsconfig` 開 `strict`**。`erasableSyntaxOnly` 已開，用 union type 唔用 enum。Type-only import 用 `import type`。
 8. **UI primitives 用 shadcn/ui**（Radix + Tailwind v4 style `radix-nova`）：`src/components/ui/` 直接放 shadcn 生成嘅 component（已統一成專案 convention），專案自建嘅再 compose 上去。`@/*` alias → `src/*`。
+9. **Refund 已於 2026-09-15 按用戶決定移除**（前後端一齊剷）。唔再有 `POST /transactions/:id/refund`、`refund_of_id`、`net_amount_cents`、dashboard／summary 嘅 `refund_cents`。舊退款紀錄喺 migration 轉成對應收入／支出（支出退款→收入、收入退款→支出）之後 drop column，帳戶餘額唔會歪。想還原就要連 API、欄位、UI、統計一齊加返。
 
 ---
 
@@ -106,7 +107,7 @@ Entity（比 swagger input 多 id／timestamps／derived）：
 - `Account`：swagger `AccountInput` + `id`、`created_at`、`updated_at`、computed `balance_cents`
 - `Category`：swagger `CategoryInput` + `id`、timestamps
 - `Merchant`：swagger `MerchantInput` + `id`、`usage_count`、timestamps
-- `Transaction`：swagger `TransactionInput` + `id`、`refund_of_id`、`net_amount_cents`、timestamps
+- `Transaction`：swagger `TransactionInput` + `id`、timestamps
 - `RecurringRule`：swagger `RecurringRuleInput` + spec 嘅 `day_of_week`／`day_of_month`／`month_of_year`／`status`／`note` + `id`、timestamps
 - `PaginationMeta`：跟 spec
 - `LocalError`：`{code, message, fields?}`；code 包括 `validation`、`unauthorized`、`not_found`、`conflict_already_materialized`、`in_use`、`storage_failed`
@@ -125,7 +126,7 @@ Money：
 
 - `dollarsToCents(input: string): number | MoneyError`
 - `centsToDollars(cents: number): string` → `HK$1,234.50`
-- `formatSignedAmount({cents, kind, isRefund})`：收入 `+`、支出 `-`、退款 `+… 退款`
+- `formatSignedAmount({cents, kind})`：收入 `+`、支出 `-`、轉帳無正負號
 - 拒絕：負數、0、超過兩位小數、科學記數、空白以外嘅 trim 失敗、非數字
 - 加減只用 integer
 
@@ -153,7 +154,7 @@ Date（`Asia/Hong_Kong`）：
     - 1 個現金帳戶（HKD，initial 0 或細額）
     - 預設收入／支出分類（飲食、交通、工資等，有 icon／color／position）
     - 幾個 merchant
-    - 十幾筆交易（含收入、支出、轉帳、一筆退款）覆蓋 dashboard／filter／refund demo
+    - 十幾筆交易（含收入、支出、轉帳）覆蓋 dashboard／filter demo
     - 1–2 條 recurring rule（active + paused）
 - Repository 純同步、無 React import
 - Idempotency map：key → created transaction id
@@ -188,7 +189,7 @@ Date（`Asia/Hong_Kong`）：
 
 - list／create／update／delete
 - `currency` 固定 `HKD`
-- `balance_cents` = `initial_balance_cents` + income − expense − 轉出 + 轉入 + refund
+- `balance_cents` = `initial_balance_cents` + income − expense − 轉出 + 轉入
 - 刪除：如仍被 transaction 或 recurring rule 使用 → `in_use`，message 講明原因
 
 ### Categories — `/api/v1/categories`
@@ -209,10 +210,10 @@ Date（`Asia/Hong_Kong`）：
 - list：filter（from／to、kind、account、category、merchant、keyword note／payment_method／merchant name、min／max amount）、sort（occurred_at／amount_cents／created_at asc／desc）、pagination
 - get by id
 - create：要 `Idempotency-Key`；kind 欄位規則跟 spec 5.4；transfer 要 `transfer_account_id` 且 ≠ `account_id`；`amount_cents >= 1`
-- update：不可改 `source`；不可直接設 `refund_of_id`
-- delete：連關聯 refund 一齊刪
-- refund：轉帳不可退；上限 = 原額 − 已退總額；全數後退款 disable（repository 拒絕）
+- update：不可改 `source`
+- delete：hard delete 單筆交易
 - duplicate：新 id、`occurred_at` = now、source 跟產品（manual）、打開新詳情由 UI 做
+- **唔做 refund**（見關鍵決策 9）
 
 ### Receipts / AI — `/api/v1/receipts/upload`、`/ai/parse`、`/ai/confirm`
 
@@ -222,8 +223,8 @@ Date（`Asia/Hong_Kong`）：
 
 ### Dashboard / summaries
 
-- dashboard(date)：當月淨額、收入、支出、退款、top 5 支出分類、帳戶餘額、未來 7 日 recurring、最近 10 筆
-- summary(period, date, page)：收入／支出／退款／淨額、分類分佈、帳戶分佈、轉帳摘要（**轉帳唔入收支／淨額**）、期內交易分頁
+- dashboard(date)：當月淨額、收入、支出、top 5 支出分類、帳戶餘額、未來 7 日 recurring、最近 10 筆
+- summary(period, date, page)：收入／支出／淨額、分類分佈、帳戶分佈、轉帳摘要（**轉帳唔入收支／淨額**）、期內交易分頁
 - weekly range 一至日
 
 ### Recurring — `/api/v1/recurring_rules` + `/{id}/{action}`
@@ -234,7 +235,7 @@ Date（`Asia/Hong_Kong`）：
 - `next_run_at` 用香港時區 ISO
 - skip_next 回將被跳過嘅日期，畀 UI 確認文案用
 
-**完成標準**：repository unit tests：filter／sort／page、refund cap、transfer 唔入 summary 收支、idempotency、already_materialized、delete account in_use。
+**完成標準**：repository unit tests：filter／sort／page、transfer 唔入 summary 收支、idempotency、already_materialized、delete account in_use。
 
 ---
 
@@ -275,7 +276,7 @@ Date（`Asia/Hong_Kong`）：
 
 - `components.json`（shadcn CLI，style `radix-nova`）；加 component：`pnpm dlx shadcn@latest add <name>`
 - `src/lib/utils.ts`：`cn()`（`cn` package）
-- `src/index.css`：shadcn semantic tokens（`:root` + `@theme inline`）；primary `emerald-700`、ring `emerald-500`；另 map `income`／`expense`／`transfer`／`refund` 做 `text-income` 等 utility；radius control 6px、card 8px
+- `src/index.css`：shadcn semantic tokens（`:root` + `@theme inline`）；primary `emerald-700`、ring `emerald-500`；另 map `income`／`expense`／`transfer` 做 `text-income` 等 utility；radius control 6px、card 8px
 - 測試：Vitest `jsdom`、`pool: "vmThreads"`（jsdom 每個 worker 只建一次）、`src/test/setup.ts`（jest-dom、matchMedia／ResizeObserver／pointer-capture stubs）、`src/test/renderWithIntl.ts` 包 `IntlProvider`
 
 **Components**（`src/components/ui/`）
@@ -295,7 +296,7 @@ Date（`Asia/Hong_Kong`）：
 
 - radius：input／button 6px，card 8px
 - primary `emerald-700`，focus ring `emerald-500`
-- 收入 emerald／支出 rose／轉帳 blue／退款 amber，**同時有正負號或文字**
+- 收入 emerald／支出 rose／轉帳 blue，**同時有正負號或文字**
 - touch ≥ 44px；body ≥ 16px；secondary ≥ 14px
 - icon-only 要 `aria-label` + tooltip
 - Dialog／Sheet：focus trap、Escape、關閉後 focus 返觸發者；body 先 scroll
@@ -336,7 +337,7 @@ Date（`Asia/Hong_Kong`）：
 
 **PWA chrome**
 
-- Manifest／theme color 已喺 `vite.config.ts`（emerald `#047857`）；`index.html` 有 viewport `viewport-fit=cover`、CSP、`theme-color`
+- Manifest／theme color 已喺 `vite.config.ts`（emerald `#047857`）；`index.html` 有 viewport `viewport-fit=cover`、`theme-color`（CSP 已停用，見 Step 0）
 - 正式 192／512 maskable icon、Apple touch icon、install prompt 留 Step 19
 
 Browser back 關 modal／drawer：dialog 狀態用 URL search 或 history stack（`?dialog=` 或 `useBlocker`）留 feature step（12–14）做。
@@ -376,7 +377,7 @@ Loading：同 layout 尺寸 skeleton。
 
 ## Step 12 — 交易列表 `/transactions`
 
-URL 同步全部 filter／sort／page。Mobile list row；desktop table。Refund badge；原交易顯示 `net_amount_cents`。Skeleton 固定高。無結果：清 filter。換頁 scroll 去列表頂。`per_page` desktop 25／50／100。
+URL 同步全部 filter／sort／page。Mobile list row；desktop table。金額用 `amount_cents`。Skeleton 固定高。無結果：清 filter。換頁 scroll 去列表頂。`per_page` desktop 25／50／100。
 
 點 row：所有 viewport 都去 `/transactions/:id`；route 保留交易列表做背景，mobile 開底部 drawer、desktop 開右側 drawer。
 
@@ -394,7 +395,7 @@ Segmented control 切 kind，欄位表跟 spec 5.4。
 - Merchant autocomplete debounce 300ms；可即場建立
 - Merchant 有 default category 時建議分類，**唔 silently 覆蓋用戶已選**
 - Create 開表單即生 UUID 做 idempotency
-- Edit 唔改 source、唔設 refund_of_id
+- Edit 唔改 source
 - Dirty leave：`useBlocker` 確認
 - 離線：spec 5.4 寫 disable submit，但 8.3 寫 CRUD 離線照常。**跟 8.3**：離線仍可本地寫入；5.4 嘅「disable」理解為唔做假網絡 retry。Banner 提示資料只在本機。
 - 成功後同步所有 view；全 app 不顯示 toast
@@ -411,24 +412,21 @@ Desktop：右側 drawer。Mobile：底部 drawer（最高 92dvh）。兩者都�
 
 **狀態：已完成（2026-09-15）**
 
-顯示全部欄位、單據圖、source、時間、原額、淨額。
+顯示全部欄位、單據圖、source、時間。金額用 `amount_cents`。
 
-Actions：改、複製、退款、刪。
+Actions：改、複製、刪。（**唔做退款**，見關鍵決策 9）
 
-- 轉帳無退款
-- 退款上限；退晒 disable
 - 複製成功去新詳情，日期 now
-- 刪除確認提到關聯 refund；成功返列表
+- 刪除確認：此操作無法復原；成功返列表
 - 圖片 lightbox；失效 fallback，唔無限重試
 
 實作備註：
 
-- `refundModel.ts`：`refundAvailability`（轉帳／退款記錄／已退晒一律 disable，並附原因文案）、`refundFormSchema(remainingCents)`（上限＝`net_amount_cents`）
-- `TransactionRefundDialog`：只喺開啟時 mount，每次開都係全新預設值（預設退全數、時間 now）；成功後 prepend 退款交易並扣減原交易 `net_amount_cents`
-- `TransactionReceiptImages`：縮圖係 button，開 lightbox dialog；`onError` 轉 fallback tile，唔會重複重試
-- 詳情有退款時同時顯示「原始金額」同「扣除退款後淨額」
+- **Refund 已移除（2026-09-15）**：`refundModel.ts`、`TransactionRefundDialog`、詳情「退款」掣、列表退款 badge、dashboard 退款格、`refund_of_id`／`net_amount_cents`／`refund_cents` 均已刪。後端 migration 將舊退款紀錄轉成對應收入／支出後 drop `refund_of_id`。
+- 備註長文：`TransactionDetailRow` 用 `preserveLineBreaks`（標籤喺上、內容靠左、`pre-wrap`／`keep-all`），唔跟其他欄位靠右摺行
+- `TransactionReceiptImages`：標題同縮圖靠右；縮圖係 button，開 lightbox dialog；`onError` 轉 fallback tile，唔會重複重試
 
-**完成標準（已達成）**：refund（上限 validation／成功更新淨額／transfer 同全數退款 disable）、delete、duplicate（成功轉去新詳情、失敗顯示錯誤）、圖片 lightbox 同 fallback 均有測試；Prettier、完整 Vitest（178 個）同 production build 通過。
+**完成標準（已達成）**：delete、duplicate（成功轉去新詳情、失敗顯示錯誤）、圖片 lightbox 同 fallback 均有測試；Prettier、完整 Vitest（178 個）同 production build 通過。
 
 ---
 
@@ -525,11 +523,10 @@ Playwright critical paths（spec 12.3）：
 2. 新增支出 → dashboard／列表反映
 3. 新增轉帳 → 報表唔計入收支
 4. 搜尋篩選 → reload 保留
-5. 部分退款 → net + summary
-6. 定期：建立 → pause → resume → run now
-7. 單據 → AI preview → 修正 → confirm
-8. Logout → private 入唔到
-9. Manifest／SW／offline fallback（能測幾多測幾多）
+5. 定期：建立 → pause → resume → run now
+6. 單據 → AI preview → 修正 → confirm
+7. Logout → private 入唔到
+8. Manifest／SW／offline fallback（能測幾多測幾多）
 
 Viewport：320×568、390×844、768×1024、1280×800、1440×900。無水平 overflow、dialog 可用、bottom nav safe-area。
 
@@ -559,4 +556,5 @@ Step 0
 - 多貨幣、多用戶、CSV 匯入、push、雲同步
 - 商戶 edit、分類 drag-and-drop
 - 虛假 undo（hard delete）
+- 退款功能（2026-09-15 已由產品決定移除）
 - 聲稱真實 OCR／AI

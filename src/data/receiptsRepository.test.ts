@@ -21,8 +21,6 @@ const transactionRow = {
     source: transaction.source,
     transfer_account_id: transaction.transfer_account_id,
     image_urls: transaction.image_urls,
-    refund_of_id: transaction.refund_of_id,
-    net_amount_cents: transaction.net_amount_cents,
 };
 
 afterEach(() => {

@@ -23,8 +23,6 @@ const transactionRow = {
     source: transaction.source,
     transfer_account_id: transaction.transfer_account_id,
     image_urls: transaction.image_urls,
-    refund_of_id: transaction.refund_of_id,
-    net_amount_cents: transaction.net_amount_cents,
 };
 const ruleSummary = {
     id: rule.id,
@@ -54,9 +52,7 @@ describe("DashboardRepository", () => {
             range: {from: "2026-08-31T16:00:00.000Z", to: "2026-09-30T15:59:59.999Z"},
             income_cents: 300000,
             expense_cents: 120000,
-            refund_cents: 1500,
-            net_expense_cents: 118500,
-            net_cents: 181500,
+            net_cents: 180000,
             recent_transactions: [transactionRow],
             by_category: [],
             accounts: [accountBalance],

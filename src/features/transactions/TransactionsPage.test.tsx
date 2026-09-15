@@ -55,8 +55,6 @@ const expenseTransaction: Transaction = {
     source: "manual",
     transfer_account_id: null,
     image_urls: [],
-    refund_of_id: null,
-    net_amount_cents: 1200,
     created_at: "2026-09-10T04:00:00.000Z",
     updated_at: "2026-09-10T04:00:00.000Z",
 };

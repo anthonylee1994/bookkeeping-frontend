@@ -72,13 +72,12 @@ export const paginatedTransactionRowsResponseSchema = z.union([
 /* ---------- Dashboard／summary ---------- */
 
 const rangeSchema = z.object({from: z.string(), to: z.string()});
-const categoryBreakdownSchema = z.object({category_id: uuidSchema.nullable(), name: z.string().nullable(), expense_cents: z.number().int(), refund_cents: z.number().int()});
+const categoryBreakdownSchema = z.object({category_id: uuidSchema.nullable(), name: z.string().nullable(), expense_cents: z.number().int()});
 const accountBreakdownSchema = z.object({
     account_id: uuidSchema.nullable(),
     name: z.string().nullable(),
     income_cents: z.number().int(),
     expense_cents: z.number().int(),
-    refund_cents: z.number().int(),
 });
 const accountBalanceSchema = z.object({
     id: uuidSchema,
@@ -94,7 +93,6 @@ export const summaryResponseSchema = z.object({
     range: rangeSchema,
     income_cents: z.number().int(),
     expense_cents: z.number().int(),
-    refund_cents: z.number().int(),
     net_cents: z.number().int(),
     by_category: z.array(categoryBreakdownSchema),
     by_account: z.array(accountBreakdownSchema),
@@ -106,8 +104,6 @@ export const dashboardResponseSchema = z.object({
     range: rangeSchema,
     income_cents: z.number().int(),
     expense_cents: z.number().int(),
-    refund_cents: z.number().int(),
-    net_expense_cents: z.number().int(),
     net_cents: z.number().int(),
     recent_transactions: z.array(transactionRowSchema),
     by_category: z.array(categoryBreakdownSchema),
