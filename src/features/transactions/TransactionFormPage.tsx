@@ -1,7 +1,8 @@
 import React from "react";
-import {Alert, CloseButton, Drawer, Portal, Skeleton, Stack} from "@chakra-ui/react";
+import {Alert, CloseButton, Drawer, Portal, Stack} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {useNavigate, useParams} from "react-router";
+import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
 import {TransactionForm} from "@/features/transactions/TransactionForm";
@@ -43,7 +44,7 @@ export const TransactionFormPage = () => {
     const close = () => navigate(transaction === null ? ROUTES.transactions : transactionDetailPath(transaction.id));
 
     const body = (() => {
-        if (isLoading || reference.isLoading) return <Skeleton h="32rem" rounded="xl" />;
+        if (isLoading || reference.isLoading) return <LoadingIndicator minH="32rem" />;
         const error = loadError ?? reference.error?.message ?? null;
         if (error !== null) {
             return (

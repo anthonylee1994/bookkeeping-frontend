@@ -3,13 +3,13 @@ import {Alert, Box, Button, EmptyState, Flex, HStack, NativeSelect, Stack, Text,
 import {FileQuestionIcon, PlusIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, useNavigate, useSearchParams} from "react-router";
+import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {PageHeader} from "@/components/layout/PageHeader";
 import type {SortOrder, Transaction, TransactionFilters, TransactionSortField} from "@/data/types";
 import {TransactionFilterChips} from "@/features/transactions/TransactionFilterChips";
 import {TransactionFiltersPanel} from "@/features/transactions/TransactionFiltersPanel";
 import {TransactionList} from "@/features/transactions/TransactionList";
 import {TransactionPanel} from "@/features/transactions/TransactionPanel";
-import {TransactionsSkeleton} from "@/features/transactions/TransactionsSkeleton";
 import {TransactionsSummaryBar} from "@/features/transactions/TransactionsSummaryBar";
 import {TransactionsTable} from "@/features/transactions/TransactionsTable";
 import {matchQuickRange, quickRangeToFilters} from "@/features/transactions/transactionQuickRanges";
@@ -108,7 +108,7 @@ export const TransactionsPage = () => {
     const grouped = sort === "occurred_at";
 
     const renderBody = () => {
-        if (isLoading) return <TransactionsSkeleton />;
+        if (isLoading) return <LoadingIndicator minH="24rem" />;
 
         if (error !== null) {
             return (

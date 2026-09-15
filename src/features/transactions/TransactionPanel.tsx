@@ -1,6 +1,7 @@
-import {Drawer, IconButton, Skeleton} from "@chakra-ui/react";
+import {Drawer, IconButton} from "@chakra-ui/react";
 import {XIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import type {Transaction} from "@/data/types";
 import {TransactionDetailContent} from "@/features/transactions/TransactionDetailContent";
 import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
@@ -38,7 +39,7 @@ export const TransactionPanel = ({transaction, names, isOpen, onClose}: Transact
                             <XIcon />
                         </IconButton>
                     </Drawer.CloseTrigger>
-                    <Drawer.Body>{transaction === null ? <Skeleton h="20rem" rounded="xl" /> : <TransactionDetailContent transaction={transaction} names={names} />}</Drawer.Body>
+                    <Drawer.Body>{transaction === null ? <LoadingIndicator minH="20rem" /> : <TransactionDetailContent transaction={transaction} names={names} />}</Drawer.Body>
                 </Drawer.Content>
             </Drawer.Positioner>
         </Drawer.Root>

@@ -1,13 +1,13 @@
 import React from "react";
-import {Alert, Button, SimpleGrid, Skeleton, Stack} from "@chakra-ui/react";
+import {Alert, Button, SimpleGrid, Stack} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {useSearchParams} from "react-router";
+import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {PageHeader} from "@/components/layout/PageHeader";
 import {dateSchema} from "@/data/schema";
 import {AccountBalancesCard} from "@/features/dashboard/AccountBalancesCard";
 import {DashboardEmptyState} from "@/features/dashboard/DashboardEmptyState";
 import {DashboardQuickActions} from "@/features/dashboard/DashboardQuickActions";
-import {DashboardSkeleton} from "@/features/dashboard/DashboardSkeleton";
 import {DashboardSummary} from "@/features/dashboard/DashboardSummary";
 import {MonthNavigator} from "@/features/dashboard/MonthNavigator";
 import {RecentTransactionsCard} from "@/features/dashboard/RecentTransactionsCard";
@@ -42,7 +42,7 @@ export const DashboardPage = () => {
     };
 
     const renderBody = () => {
-        if (isLoading) return <DashboardSkeleton />;
+        if (isLoading) return <LoadingIndicator minH="24rem" />;
 
         if (error !== null || dashboard === null) {
             return (
@@ -74,7 +74,7 @@ export const DashboardPage = () => {
             <Stack gap="5">
                 <DashboardSummary dashboard={dashboard} />
                 <DashboardQuickActions />
-                <React.Suspense fallback={<Skeleton h={{base: "26rem", md: "18rem"}} rounded="xl" />}>
+                <React.Suspense fallback={<LoadingIndicator minH={{base: "26rem", md: "18rem"}} />}>
                     <CategorySpendingChart breakdown={dashboard.by_category} />
                 </React.Suspense>
                 <SimpleGrid columns={{base: 1, lg: 2}} gap="4">

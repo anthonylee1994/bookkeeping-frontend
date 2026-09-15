@@ -102,7 +102,7 @@ beforeEach(() => {
 });
 
 describe("DashboardPage", () => {
-    it("shows a skeleton, then the monthly content", async () => {
+    it("shows the loading indicator, then the monthly content", async () => {
         let resolveDashboard: (value: LocalResult<Dashboard>) => void = () => undefined;
         getMock.mockReturnValue(
             new Promise<LocalResult<Dashboard>>(resolve => {
