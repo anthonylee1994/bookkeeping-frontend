@@ -101,6 +101,11 @@ export const TransactionsPage = () => {
         setSearchParams(serializeTransactionFilters(filters));
     };
 
+    const closeDeletedPanel = () => {
+        closePanel();
+        reload();
+    };
+
     const selectedTransaction = selectedId === null ? null : (page?.data.find(transaction => transaction.id === selectedId) ?? null);
     const activeFilterCount = countActiveFilters(filters);
     const chips = describeActiveFilters(filters, names);
@@ -233,7 +238,7 @@ export const TransactionsPage = () => {
                 {renderBody()}
             </Stack>
 
-            {isDesktop ? <TransactionPanel transaction={selectedTransaction} names={names} isOpen={selectedTransaction !== null} onClose={closePanel} /> : null}
+            {isDesktop ? <TransactionPanel transaction={selectedTransaction} names={names} isOpen={selectedTransaction !== null} onClose={closePanel} onDeleted={closeDeletedPanel} /> : null}
         </React.Fragment>
     );
 };

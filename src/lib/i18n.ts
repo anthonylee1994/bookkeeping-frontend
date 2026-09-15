@@ -225,6 +225,9 @@ export const messages = {
             openFull: {id: "transactions.detail.openFull", defaultMessage: "開啟完整詳情"},
             close: {id: "transactions.detail.close", defaultMessage: "關閉"},
             loadFailed: {id: "transactions.detail.loadFailed", defaultMessage: "無法載入交易詳情"},
+            deleteTitle: {id: "transactions.detail.deleteTitle", defaultMessage: "刪除交易？"},
+            deleteDescription: {id: "transactions.detail.deleteDescription", defaultMessage: "此操作無法復原；此交易的關聯退款亦會一併刪除。"},
+            deleted: {id: "transactions.detail.deleted", defaultMessage: "交易已刪除"},
         },
         form: {
             kind: {id: "transactions.form.kind", defaultMessage: "交易類型"},

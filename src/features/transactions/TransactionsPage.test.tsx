@@ -202,6 +202,7 @@ describe("TransactionsPage", () => {
         await user.click(row);
 
         expect(await screen.findByRole("dialog")).toBeInTheDocument();
+        expect(screen.getByRole("link", {name: "修改"})).toHaveAttribute("href", `/transactions/${expenseTransaction.id}/edit`);
         expect(screen.getByTestId("location")).toHaveTextContent("selected=");
     });
 });

@@ -34,7 +34,7 @@ export const TransactionDetailRow = ({label, children}: TransactionDetailRowProp
     );
 };
 
-/** 交易詳情內容；表格 panel 同詳情頁共用。Step 14 會再加入 actions。 */
+/** 交易詳情內容；desktop panel 同 mobile 詳情頁共用。 */
 export const TransactionDetailContent = ({transaction, names}: TransactionDetailContentProps) => {
     const intl = useIntl();
     const accountName = names.accounts.get(transaction.account_id) ?? intl.formatMessage(messages.transactions.list.unknownAccount);
