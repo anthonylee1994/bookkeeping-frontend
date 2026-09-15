@@ -188,11 +188,11 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
                     </Alert.Root>
                 )}
 
-                <HStack justify="flex-end" gap="3" wrap="wrap" py="2">
-                    <Button type="button" variant="outline" onClick={onStartOver}>
+                <HStack justify={{base: "flex-start", md: "flex-end"}} gap="3" wrap="wrap" direction={{base: "column", md: "row"}} py="2">
+                    <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={onStartOver}>
                         {intl.formatMessage(messages.scan.startOver)}
                     </Button>
-                    <Button type="submit" loading={formState.isSubmitting} disabled={reference.accounts.length === 0}>
+                    <Button type="submit" w={{base: "full", md: "auto"}} loading={formState.isSubmitting} disabled={reference.accounts.length === 0}>
                         {intl.formatMessage(messages.scan.confirm)}
                     </Button>
                 </HStack>

@@ -1,6 +1,6 @@
 import React from "react";
 import {Alert, Box, Button, Card, Field, Flex, HStack, Image, Input, Stack, Text} from "@chakra-ui/react";
-import {ImageOffIcon, PencilIcon, RotateCcwIcon} from "lucide-react";
+import {CameraIcon, ImageOffIcon, PencilIcon, RotateCcwIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {useNavigate} from "react-router";
 import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
@@ -30,8 +30,10 @@ export const ScanPage = () => {
     const [imageFailed, setImageFailed] = React.useState(false);
     const [banner, setBanner] = React.useState<Banner | null>(null);
     const [phase, setPhase] = React.useState<RunPhase>(null);
+    const [dragging, setDragging] = React.useState(false);
     // 取消／重新開始會遞增；舊 run 回來時發現 generation 唔同就唔再寫 state。
     const runRef = React.useRef(0);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
         return () => {
@@ -93,9 +95,7 @@ export const ScanPage = () => {
         setAiScan({step: "review", imageUrl, preview: parsed.value});
     };
 
-    const pickFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selected = event.target.files?.[0] ?? null;
-        event.target.value = "";
+    const startScan = async (selected: File | null) => {
         if (selected === null) return;
 
         const invalid = validateReceiptFile(selected);
@@ -111,6 +111,38 @@ export const ScanPage = () => {
         setFile(selected);
         setAiScan({step: "selected", imageUrl: null, preview: null});
         await run(selected, null);
+    };
+
+    const pickFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const selected = event.target.files?.[0] ?? null;
+        event.target.value = "";
+        void startScan(selected);
+    };
+
+    const dragHasFiles = (event: React.DragEvent) => event.dataTransfer.types.includes("Files");
+
+    const onDragEnter = (event: React.DragEvent) => {
+        if (!dragHasFiles(event)) return;
+        event.preventDefault();
+        setDragging(true);
+    };
+
+    const onDragOver = (event: React.DragEvent) => {
+        if (!dragHasFiles(event)) return;
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "copy";
+        setDragging(true);
+    };
+
+    const onDragLeave = (event: React.DragEvent) => {
+        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+        setDragging(false);
+    };
+
+    const onDrop = (event: React.DragEvent) => {
+        event.preventDefault();
+        setDragging(false);
+        void startScan(event.dataTransfer.files?.[0] ?? null);
     };
 
     const cancelRun = () => {
@@ -140,7 +172,7 @@ export const ScanPage = () => {
                     <Text fontSize="sm" color="fg.muted">
                         {intl.formatMessage(phase === "uploading" ? messages.scan.uploading : messages.scan.parsing)}
                     </Text>
-                    <Button type="button" variant="outline" onClick={cancelRun}>
+                    <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={cancelRun}>
                         {intl.formatMessage(messages.scan.cancelParse)}
                     </Button>
                 </Stack>
@@ -156,12 +188,12 @@ export const ScanPage = () => {
                             <Alert.Description>{intl.formatMessage(messages.scan.failedDescription)}</Alert.Description>
                         </Alert.Content>
                     </Alert.Root>
-                    <HStack gap="3" wrap="wrap">
-                        <Button type="button" onClick={() => void run(file, uploadedUrl)}>
+                    <HStack gap="3" wrap="wrap" direction={{base: "column", md: "row"}}>
+                        <Button type="button" w={{base: "full", md: "auto"}} onClick={() => void run(file, uploadedUrl)}>
                             <RotateCcwIcon />
                             {intl.formatMessage(messages.scan.retry)}
                         </Button>
-                        <Button type="button" variant="outline" onClick={() => navigate(ROUTES.transactionNew)}>
+                        <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={() => navigate(ROUTES.transactionNew)}>
                             <PencilIcon />
                             {intl.formatMessage(messages.scan.manualEntry)}
                         </Button>
@@ -181,12 +213,12 @@ export const ScanPage = () => {
         }
         if (step === "selected") {
             return (
-                <HStack gap="3" wrap="wrap">
-                    <Button type="button" onClick={() => void run(file, uploadedUrl)}>
+                <HStack gap="3" wrap="wrap" direction={{base: "column", md: "row"}}>
+                    <Button type="button" w={{base: "full", md: "auto"}} onClick={() => void run(file, uploadedUrl)}>
                         <RotateCcwIcon />
                         {intl.formatMessage(messages.scan.retry)}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => navigate(ROUTES.transactionNew)}>
+                    <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={() => navigate(ROUTES.transactionNew)}>
                         <PencilIcon />
                         {intl.formatMessage(messages.scan.manualEntry)}
                     </Button>
@@ -212,8 +244,42 @@ export const ScanPage = () => {
                     <Stack gap="4">
                         <Field.Root>
                             <Field.Label>{intl.formatMessage(messages.scan.pickTitle)}</Field.Label>
-                            <Input type="file" accept={RECEIPT_ACCEPT} capture="environment" p="1.5" height="auto" onChange={pickFile} />
-                            <Field.HelperText>{intl.formatMessage(messages.scan.pickHint)}</Field.HelperText>
+                            <Input
+                                ref={fileInputRef}
+                                type="file"
+                                accept={RECEIPT_ACCEPT}
+                                capture="environment"
+                                aria-label={intl.formatMessage(messages.scan.pickTitle)}
+                                position="absolute"
+                                boxSize="1px"
+                                opacity={0}
+                                overflow="hidden"
+                                onChange={pickFile}
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                w="full"
+                                h="auto"
+                                py={{base: "7", md: "6"}}
+                                borderStyle="dashed"
+                                borderColor={dragging ? "colorPalette.solid" : "border.emphasized"}
+                                bg={dragging ? "bg.subtle" : undefined}
+                                _hover={{bg: "bg.subtle", borderColor: "colorPalette.solid"}}
+                                onClick={() => fileInputRef.current?.click()}
+                                onDragEnter={onDragEnter}
+                                onDragOver={onDragOver}
+                                onDragLeave={onDragLeave}
+                                onDrop={onDrop}
+                            >
+                                <Stack align="center" gap="1">
+                                    <CameraIcon aria-hidden="true" />
+                                    <Text fontWeight="medium">{intl.formatMessage(dragging ? messages.scan.dropHere : messages.scan.pickAction)}</Text>
+                                    <Text fontSize="xs" color="fg.muted">
+                                        {intl.formatMessage(messages.scan.pickHint)}
+                                    </Text>
+                                </Stack>
+                            </Button>
                         </Field.Root>
 
                         {imageSrc === null ? null : (
@@ -227,14 +293,18 @@ export const ScanPage = () => {
                                     <Image
                                         src={imageSrc}
                                         alt={intl.formatMessage(messages.scan.imageAlt)}
-                                        maxH="16rem"
+                                        display="block"
+                                        w="full"
+                                        maxH={{base: "20rem", md: "16rem"}}
                                         rounded="lg"
                                         borderWidth="1px"
+                                        borderColor="border"
+                                        bg="bg.muted"
                                         objectFit="contain"
                                         onError={() => setImageFailed(true)}
                                     />
                                 )}
-                                <Button type="button" mt="3" size="sm" variant="outline" onClick={startOver}>
+                                <Button type="button" mt="3" size={{base: "md", md: "sm"}} variant="outline" w={{base: "full", md: "auto"}} onClick={startOver}>
                                     {intl.formatMessage(messages.scan.changeImage)}
                                 </Button>
                             </Box>

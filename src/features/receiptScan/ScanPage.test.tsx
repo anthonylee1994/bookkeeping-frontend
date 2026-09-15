@@ -99,6 +99,16 @@ describe("ScanPage", () => {
         expect(uploadMock).not.toHaveBeenCalled();
     });
 
+    it("accepts a receipt dropped onto the picker", async () => {
+        renderScanPage();
+
+        fireEvent.drop(screen.getByRole("button", {name: /選擇或拍攝單據/}), {dataTransfer: {files: [receiptFile()]}});
+
+        expect(await screen.findByText("覆核解析結果")).toBeInTheDocument();
+        expect(uploadMock).toHaveBeenCalledTimes(1);
+        expect(parseMock).toHaveBeenCalledWith(RECEIPT_URL);
+    });
+
     it("uploads, parses and prefills the review form", async () => {
         const user = userEvent.setup();
         renderScanPage();

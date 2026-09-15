@@ -264,6 +264,7 @@ export const messages = {
         pickTitle: {id: "scan.pickTitle", defaultMessage: "選擇單據相片"},
         pickHint: {id: "scan.pickHint", defaultMessage: "支援 JPEG、PNG、WebP，最大 10 MiB"},
         pickAction: {id: "scan.pickAction", defaultMessage: "選擇或拍攝單據"},
+        dropHere: {id: "scan.dropHere", defaultMessage: "放開即可上載單據"},
         changeImage: {id: "scan.changeImage", defaultMessage: "換一張相片"},
         imageAlt: {id: "scan.imageAlt", defaultMessage: "單據預覽"},
         imageFailed: {id: "scan.imageFailed", defaultMessage: "圖片無法載入"},
