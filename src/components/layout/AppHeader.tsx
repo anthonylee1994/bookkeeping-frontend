@@ -1,5 +1,5 @@
 import {Box, Center, Flex, Heading, Icon, IconButton} from "@chakra-ui/react";
-import {ArrowLeftIcon, LogOutIcon, PanelLeftIcon, ScanLineIcon, WalletIcon} from "lucide-react";
+import {ArrowLeftIcon, LogOutIcon, PanelLeftIcon, RepeatIcon, ScanLineIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, useNavigate} from "react-router";
 import {useRouteMeta} from "@/components/layout/useRouteMeta";
@@ -32,6 +32,7 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
 
     const sidebarLabel = intl.formatMessage(sidebarCollapsed ? messages.layout.expandSidebar : messages.layout.collapseSidebar);
     const scanLabel = intl.formatMessage(messages.nav.scan);
+    const recurringLabel = intl.formatMessage(messages.nav.recurringRules);
     const signOutLabel = intl.formatMessage(messages.auth.signOut);
 
     return (
@@ -64,6 +65,12 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
                 </Box>
 
                 <Flex gap="1" align="center" justify="flex-end" flexShrink="0">
+                    {/* Mobile 冇 sidebar，定期交易喺底下 tab bar 又冇位，所以收喺 header。 */}
+                    <IconButton asChild aria-label={recurringLabel} title={recurringLabel} variant="ghost" size="sm" display={{base: "inline-flex", md: "none"}}>
+                        <Link to={ROUTES.recurringRules}>
+                            <RepeatIcon />
+                        </Link>
+                    </IconButton>
                     <IconButton asChild aria-label={scanLabel} title={scanLabel} variant="ghost" size="sm">
                         <Link to={ROUTES.scan}>
                             <ScanLineIcon />

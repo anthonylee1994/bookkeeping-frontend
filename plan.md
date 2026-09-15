@@ -508,6 +508,7 @@ Tabs：active／paused／ended。Create／edit 欄位跟 spec 5.8。Actions 確�
 - `skip next` 確認文案列出 `next_run_at` 日期；刪除文案講明只刪 rule、已產生交易會保留
 - 新增／修改用右側（desktop）／底部（mobile）drawer；有未儲存改動離開時先確認（`useBlocker`＋drawer 內 confirm dialog）
 - Create 預設選第一帳戶；跑完動作後 reload 清單，新增／修改成功會自動切去該 rule 狀態嘅 tab
+- Mobile 底部 tab bar 只有 4 格（俾 FAB 佔中間），所以定期交易入口放喺 header（`RepeatIcon`，跟掃描一樣只喺 mobile 顯示；desktop 用 sidebar）
 
 **完成標準（已達成）**：pause／resume／run now（成功入口同 already_materialized）／skip next 日期／delete 文案、tab 切換、empty state、schedule 描述同 `next_run_at` 計算均有測試；Prettier、完整 Vitest（212 個）同 production build 通過。
 
