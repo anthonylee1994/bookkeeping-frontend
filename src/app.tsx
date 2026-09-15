@@ -5,7 +5,6 @@ import {Toaster} from "@/components/layout/Toaster";
 import {AppRoutes} from "@/routes/AppRoutes";
 import {useSessionBootstrap} from "@/routes/useSessionBootstrap";
 
-/** HeroUI v3 唔需要 Provider，所以呢度淨返 router 同全域 toast。 */
 export const App = () => {
     const sessionStatus = useSessionBootstrap();
 
