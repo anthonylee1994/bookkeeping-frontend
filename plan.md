@@ -2,10 +2,6 @@
 
 對齊 `frontend-spec.md`（產品／UX／本地資料規則）同 `swagger.yaml`（domain／input shape）。呢份文件係實作順序，唔係重寫產品 spec。
 
-## 現況
-
-Repo 係 Vite + React 19 + TypeScript + Tailwind 4 skeleton。`src/App.tsx` 只有空殼。`package.json` 未裝 React Router、Zustand、RHF、Zod、PWA、Lucide、Recharts、Vitest、Playwright。`.env` 有 `VITE_API_URL`，但 MVP **唔打 Rails**。`tsconfig.app.json` 未開 `strict`。
-
 ## 兩份文件點對齊
 
 | 來源               | 角色                                                                                                     |
@@ -312,7 +308,7 @@ Date（`Asia/Hong_Kong`）：
 
 ## Step 9 — Layout、routing、route guard、PWA chrome
 
-**檔案**：`src/App.tsx`、`src/main.tsx`、`src/routes/*`、`src/components/layout/*`
+**檔案**：`src/app.tsx`、`src/main.tsx`、`src/routes/*`、`src/components/layout/*`
 
 Routes 跟 spec §4。Lazy load：transactions、scan、summaries、recurring、settings、recharts。
 
