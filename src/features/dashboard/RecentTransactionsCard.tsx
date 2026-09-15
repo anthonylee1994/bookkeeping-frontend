@@ -2,7 +2,7 @@ import {Box, Button, Flex, Stack, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import type {TransactionRow} from "@/data/types";
-import {DashboardSection} from "@/features/dashboard/DashboardSection";
+import {SectionCard} from "@/components/layout/SectionCard";
 import {toDisplayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
 import {transactionDisplayAmount, transactionTitle, transactionTone} from "@/lib/transactionDisplay";
@@ -17,7 +17,7 @@ export const RecentTransactionsCard = ({transactions}: RecentTransactionsCardPro
     const intl = useIntl();
 
     return (
-        <DashboardSection
+        <SectionCard
             title={intl.formatMessage(messages.dashboard.recentTitle)}
             action={
                 <Button asChild variant="ghost" size="sm">
@@ -43,7 +43,7 @@ export const RecentTransactionsCard = ({transactions}: RecentTransactionsCardPro
                                             {toDisplayDate(transaction.occurred_at)}
                                         </Text>
                                     </Box>
-                                    <Text fontSize="sm" fontWeight="semibold" color={transactionTone(transaction)} fontVariantNumeric="tabular-nums">
+                                    <Text fontSize="sm" fontWeight="semibold" color={transactionTone(transaction)} flexShrink="0" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
                                         {transactionDisplayAmount(transaction)}
                                     </Text>
                                 </Flex>
@@ -52,6 +52,6 @@ export const RecentTransactionsCard = ({transactions}: RecentTransactionsCardPro
                     ))}
                 </Stack>
             )}
-        </DashboardSection>
+        </SectionCard>
     );
 };

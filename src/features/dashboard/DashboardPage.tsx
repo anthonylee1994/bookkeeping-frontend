@@ -17,7 +17,7 @@ import {addMonthsToDate, toDisplayMonth, toIsoDate, todayDate} from "@/lib/date"
 import {messages} from "@/lib/i18n";
 
 /** Chart 連 recharts 一併 code-split，不想拖大儀表板 critical bundle。 */
-const CategorySpendingChart = React.lazy(() => import("@/features/dashboard/CategorySpendingChart").then(module => ({default: module.CategorySpendingChart})));
+const CategoryBreakdownChart = React.lazy(() => import("@/components/CategoryBreakdownChart").then(module => ({default: module.CategoryBreakdownChart})));
 
 const RECENT_TRANSACTION_LIMIT = 10;
 
@@ -69,14 +69,32 @@ export const DashboardPage = () => {
 
         const balances = dashboard.account_balances.length > 0 ? dashboard.account_balances : dashboard.accounts;
         const upcoming = dashboard.upcoming_recurring.length > 0 ? dashboard.upcoming_recurring : dashboard.recurring_reminders;
+        const kindName = (kind: "income" | "expense") => intl.formatMessage(kind === "income" ? messages.transactions.income : messages.transactions.expense);
 
         return (
             <Stack gap="5">
                 <DashboardSummary dashboard={dashboard} />
                 <DashboardQuickActions />
-                <React.Suspense fallback={<LoadingIndicator minH={{base: "26rem", md: "18rem"}} />}>
-                    <CategorySpendingChart breakdown={dashboard.by_category} />
-                </React.Suspense>
+                <SimpleGrid columns={{base: 1, lg: 2}} gap="4">
+                    <React.Suspense fallback={<LoadingIndicator minH={{base: "26rem", md: "18rem"}} />}>
+                        <CategoryBreakdownChart
+                            breakdown={dashboard.by_category}
+                            kind="expense"
+                            title={intl.formatMessage(messages.dashboard.expenseCategoryTitle)}
+                            description={intl.formatMessage(messages.dashboard.expenseCategoryDescription)}
+                            emptyMessage={intl.formatMessage(messages.dashboard.noCategoryData, {kind: kindName("expense")})}
+                        />
+                    </React.Suspense>
+                    <React.Suspense fallback={<LoadingIndicator minH={{base: "26rem", md: "18rem"}} />}>
+                        <CategoryBreakdownChart
+                            breakdown={dashboard.by_category}
+                            kind="income"
+                            title={intl.formatMessage(messages.dashboard.incomeCategoryTitle)}
+                            description={intl.formatMessage(messages.dashboard.incomeCategoryDescription)}
+                            emptyMessage={intl.formatMessage(messages.dashboard.noCategoryData, {kind: kindName("income")})}
+                        />
+                    </React.Suspense>
+                </SimpleGrid>
                 <SimpleGrid columns={{base: 1, lg: 2}} gap="4">
                     <AccountBalancesCard balances={balances} from={toIsoDate(dashboard.range.from)} to={toIsoDate(dashboard.range.to)} />
                     <UpcomingRecurringCard rules={upcoming} />
@@ -90,6 +108,7 @@ export const DashboardPage = () => {
         <React.Fragment>
             <PageHeader
                 title={intl.formatMessage(messages.nav.dashboard)}
+                actionsFullWidth
                 actions={
                     <MonthNavigator
                         label={toDisplayMonth(date)}

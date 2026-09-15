@@ -26,6 +26,7 @@ vi.mock("@/data/dashboardRepository", () => ({
 const ACCOUNT_ID = "10000000-0000-4000-8000-000000000001";
 const SAVINGS_ID = "10000000-0000-4000-8000-000000000002";
 const CATEGORY_ID = "20000000-0000-4000-8000-000000000002";
+const INCOME_CATEGORY_ID = "20000000-0000-4000-8000-000000000003";
 
 const expenseTransaction: TransactionRow = {
     id: "40000000-0000-4000-8000-000000000001",
@@ -61,7 +62,10 @@ const dashboardFixture: Dashboard = {
     expense_cents: 50000,
     net_cents: 50000,
     recent_transactions: [expenseTransaction, transferTransaction],
-    by_category: [{category_id: CATEGORY_ID, name: "飲食", expense_cents: 50000}],
+    by_category: [
+        {category_id: CATEGORY_ID, name: "飲食", income_cents: 0, expense_cents: 50000},
+        {category_id: INCOME_CATEGORY_ID, name: "薪金", income_cents: 100000, expense_cents: 0},
+    ],
     accounts: [accountBalance],
     account_balances: [accountBalance],
     upcoming_recurring: [],
@@ -121,7 +125,7 @@ describe("DashboardPage", () => {
         expect(screen.getAllByText("-HK$500.00").length).toBeGreaterThan(0);
         expect(screen.getByText("+HK$500.00")).toBeInTheDocument();
         expect(await screen.findByText("飲食")).toBeInTheDocument();
-        expect(screen.getByText("100%")).toBeInTheDocument();
+        expect(screen.getAllByText("100%")).toHaveLength(2);
         expect(screen.getByText("現金")).toBeInTheDocument();
         expect(screen.getByText("午餐")).toBeInTheDocument();
     });
@@ -134,6 +138,16 @@ describe("DashboardPage", () => {
         expect(screen.getByText("+HK$1,000.00")).toBeInTheDocument();
         expect(screen.getAllByText("-HK$500.00").length).toBeGreaterThan(0);
         expect(screen.getByText("HK$200.00")).toBeInTheDocument();
+    });
+
+    it("shows separate expense and income category cards", async () => {
+        getMock.mockResolvedValue({ok: true, value: dashboardFixture});
+        renderDashboard();
+
+        expect(await screen.findByText("支出分類")).toBeInTheDocument();
+        expect(screen.getByText("收入分類")).toBeInTheDocument();
+        expect(screen.getByText("飲食")).toBeInTheDocument();
+        expect(screen.getByText("薪金")).toBeInTheDocument();
     });
 
     it("shows the first-transaction empty state when there is no data", async () => {

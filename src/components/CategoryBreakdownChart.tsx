@@ -1,33 +1,42 @@
 import {Box, Flex, Table, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {Cell, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
+import {SectionCard} from "@/components/layout/SectionCard";
 import type {CategoryBreakdown} from "@/data/types";
-import {DashboardSection} from "@/features/dashboard/DashboardSection";
-import {formatShare, rankExpenseCategories} from "@/features/dashboard/dashboardFormat";
+import {formatShare, rankCategories} from "@/lib/categoryBreakdown";
+import type {CategoryBreakdownKind} from "@/lib/categoryBreakdown";
 import {messages} from "@/lib/i18n";
 import {centsToDollars} from "@/lib/money";
 
-type CategorySpendingChartProps = {
+type CategoryBreakdownChartProps = {
     breakdown: CategoryBreakdown[];
+    kind: CategoryBreakdownKind;
+    title: string;
+    description: string;
+    /** 每種分類最多顯示幾個；唔填即 5 個。 */
+    limit?: number;
+    /** 冇資料時嘅文案。 */
+    emptyMessage: string;
 };
 
 /**
- * 支出分類 donut chart。圖表本身對 screen reader 隱藏，數據由旁邊的
- * table 提供（同時作為 legend）：色點、分類、實際金額、佔比。
+ * 單一種類（收入或支出）嘅分類 donut chart。Recharts 內建 accessibility layer，
+ * 圖表可以用鍵盤 focus 再用方向鍵移動 tooltip；旁邊同時提供完整資料表。
+ * 收入同支出各自一張卡，唔用 tab 切換。
  */
-export const CategorySpendingChart = ({breakdown}: CategorySpendingChartProps) => {
+export const CategoryBreakdownChart = ({breakdown, kind, title, description, limit, emptyMessage}: CategoryBreakdownChartProps) => {
     const intl = useIntl();
-    const slices = rankExpenseCategories(breakdown);
+    const slices = rankCategories(breakdown, kind, {limit, uncategorizedLabel: intl.formatMessage(messages.common.uncategorized)});
 
     return (
-        <DashboardSection title={intl.formatMessage(messages.dashboard.categoryTitle)} description={intl.formatMessage(messages.dashboard.categoryDescription)}>
+        <SectionCard title={title} description={description}>
             {slices.length === 0 ? (
                 <Text fontSize="sm" color="fg.muted">
-                    {intl.formatMessage(messages.dashboard.noCategoryData)}
+                    {emptyMessage}
                 </Text>
             ) : (
-                <Flex direction={{base: "column", md: "row"}} gap="5" align="center">
-                    <Box w={{base: "full", md: "13rem"}} h="13rem" flexShrink="0" aria-hidden="true">
+                <Flex direction={{base: "column", md: "row"}} gap="4" align="center">
+                    <Box w={{base: "full", md: "12rem"}} h="12rem" flexShrink="0">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie data={slices} dataKey="cents" nameKey="name" innerRadius="58%" outerRadius="92%" paddingAngle={2} stroke="none">
@@ -40,11 +49,14 @@ export const CategorySpendingChart = ({breakdown}: CategorySpendingChartProps) =
                         </ResponsiveContainer>
                     </Box>
                     <Table.Root size="sm" w="full">
+                        <Table.Caption captionSide="bottom" color="fg.muted" mt={2}>
+                            {intl.formatMessage(messages.common.chartCaption)}
+                        </Table.Caption>
                         <Table.Header>
                             <Table.Row>
-                                <Table.ColumnHeader>{intl.formatMessage(messages.dashboard.columnCategory)}</Table.ColumnHeader>
-                                <Table.ColumnHeader textAlign="end">{intl.formatMessage(messages.dashboard.columnAmount)}</Table.ColumnHeader>
-                                <Table.ColumnHeader textAlign="end">{intl.formatMessage(messages.dashboard.columnShare)}</Table.ColumnHeader>
+                                <Table.ColumnHeader>{intl.formatMessage(messages.common.columnCategory)}</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="end">{intl.formatMessage(messages.common.columnAmount)}</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="end">{intl.formatMessage(messages.common.columnShare)}</Table.ColumnHeader>
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>
@@ -56,10 +68,10 @@ export const CategorySpendingChart = ({breakdown}: CategorySpendingChartProps) =
                                             <Text truncate>{slice.name}</Text>
                                         </Flex>
                                     </Table.Cell>
-                                    <Table.Cell textAlign="end" fontVariantNumeric="tabular-nums">
+                                    <Table.Cell textAlign="end" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
                                         {centsToDollars(slice.cents)}
                                     </Table.Cell>
-                                    <Table.Cell textAlign="end" color="fg.muted" fontVariantNumeric="tabular-nums">
+                                    <Table.Cell textAlign="end" color="fg.muted" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
                                         {formatShare(slice.share)}
                                     </Table.Cell>
                                 </Table.Row>
@@ -68,6 +80,6 @@ export const CategorySpendingChart = ({breakdown}: CategorySpendingChartProps) =
                     </Table.Root>
                 </Flex>
             )}
-        </DashboardSection>
+        </SectionCard>
     );
 };

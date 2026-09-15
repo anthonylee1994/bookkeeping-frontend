@@ -2,7 +2,7 @@ import {Box, Button, Flex, Stack, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import type {RecurringRuleSummary} from "@/data/types";
-import {DashboardSection} from "@/features/dashboard/DashboardSection";
+import {SectionCard} from "@/components/layout/SectionCard";
 import {toDisplayDate} from "@/lib/date";
 import {kindLabel} from "@/lib/transactionDisplay";
 import {messages} from "@/lib/i18n";
@@ -18,7 +18,7 @@ export const UpcomingRecurringCard = ({rules}: UpcomingRecurringCardProps) => {
     const intl = useIntl();
 
     return (
-        <DashboardSection
+        <SectionCard
             title={intl.formatMessage(messages.dashboard.upcomingTitle)}
             action={
                 <Button asChild variant="ghost" size="sm">
@@ -42,13 +42,13 @@ export const UpcomingRecurringCard = ({rules}: UpcomingRecurringCardProps) => {
                                     {toDisplayDate(rule.next_run_at)}
                                 </Text>
                             </Box>
-                            <Text fontSize="sm" fontWeight="semibold" color={rule.kind} fontVariantNumeric="tabular-nums">
+                            <Text fontSize="sm" fontWeight="semibold" color={rule.kind} flexShrink="0" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
                                 {formatSignedAmount({cents: rule.amount_cents, kind: rule.kind})}
                             </Text>
                         </Flex>
                     ))}
                 </Stack>
             )}
-        </DashboardSection>
+        </SectionCard>
     );
 };

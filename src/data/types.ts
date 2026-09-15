@@ -220,6 +220,7 @@ export type Range = {
 export type CategoryBreakdown = {
     category_id: UUID | null;
     name: string | null;
+    income_cents: number;
     expense_cents: number;
 };
 

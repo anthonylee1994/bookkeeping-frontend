@@ -2,7 +2,7 @@ import {Box, Flex, SimpleGrid, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import type {AccountBalance} from "@/data/types";
-import {DashboardSection} from "@/features/dashboard/DashboardSection";
+import {SectionCard} from "@/components/layout/SectionCard";
 import {messages} from "@/lib/i18n";
 import {centsToDollars} from "@/lib/money";
 import {serializeTransactionFilters} from "@/lib/searchParams";
@@ -19,7 +19,7 @@ export const AccountBalancesCard = ({balances, from, to}: AccountBalancesCardPro
     const intl = useIntl();
 
     return (
-        <DashboardSection title={intl.formatMessage(messages.dashboard.accountBalancesTitle)}>
+        <SectionCard title={intl.formatMessage(messages.dashboard.accountBalancesTitle)}>
             <SimpleGrid columns={{base: 1, sm: 2}} gap="2">
                 {balances.map(balance => {
                     const search = serializeTransactionFilters({account_id: balance.id, from, to}).toString();
@@ -30,7 +30,7 @@ export const AccountBalancesCard = ({balances, from, to}: AccountBalancesCardPro
                                     <Text fontSize="sm" truncate>
                                         {balance.name}
                                     </Text>
-                                    <Text fontSize="sm" fontWeight="semibold" color={balance.balance_cents < 0 ? "expense" : "fg"} fontVariantNumeric="tabular-nums">
+                                    <Text fontSize="sm" fontWeight="semibold" color={balance.balance_cents < 0 ? "expense" : "fg"} flexShrink="0" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
                                         {centsToDollars(balance.balance_cents)}
                                     </Text>
                                 </Flex>
@@ -39,6 +39,6 @@ export const AccountBalancesCard = ({balances, from, to}: AccountBalancesCardPro
                     );
                 })}
             </SimpleGrid>
-        </DashboardSection>
+        </SectionCard>
     );
 };
