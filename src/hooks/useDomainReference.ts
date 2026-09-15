@@ -63,5 +63,7 @@ export function useDomainReference(): DomainReference {
 
     const reload = () => setReloadToken(value => value + 1);
 
-    return {accounts, categories, merchants, isLoading, error, reload};
+    // 多個 consumer 同時 mount 時，其中一個完成便會將 shared referenceLoaded 設為 true。
+    // 另一個 effect 會被 cleanup；此時必須以 shared 狀態收斂 loading，否則會永久停在 skeleton。
+    return {accounts, categories, merchants, isLoading: isLoading && !referenceLoaded, error, reload};
 }

@@ -1,19 +1,21 @@
 import React from "react";
-import {BrowserRouter} from "react-router";
+import {createBrowserRouter, RouterProvider} from "react-router";
 import {FullPageLoading} from "@/components/layout/FullPageLoading";
 import {Toaster} from "@/components/layout/Toaster";
 import {AppRoutes} from "@/routes/AppRoutes";
 import {useSessionBootstrap} from "@/routes/useSessionBootstrap";
 
-export const App = () => {
+const AppContent = () => {
     const sessionStatus = useSessionBootstrap();
 
     return (
-        <BrowserRouter>
-            <React.Fragment>
-                {sessionStatus === "loading" ? <FullPageLoading /> : <AppRoutes />}
-                <Toaster />
-            </React.Fragment>
-        </BrowserRouter>
+        <React.Fragment>
+            {sessionStatus === "loading" ? <FullPageLoading /> : <AppRoutes />}
+            <Toaster />
+        </React.Fragment>
     );
 };
+
+const router = createBrowserRouter([{path: "*", element: <AppContent />}]);
+
+export const App = () => <RouterProvider router={router} />;

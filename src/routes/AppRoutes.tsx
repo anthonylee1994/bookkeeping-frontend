@@ -13,7 +13,7 @@ import {ROUTES} from "@/routes/paths";
 
 const TransactionsPage = React.lazy(() => import("@/features/transactions/TransactionsPage").then(module => ({default: module.TransactionsPage})));
 const TransactionDetailPage = React.lazy(() => import("@/features/transactions/TransactionDetailPage").then(module => ({default: module.TransactionDetailPage})));
-const TransactionFormPage = React.lazy(() => import("@/features/transactions/TransactionFormPage").then(module => ({default: module.TransactionFormPage})));
+const TransactionFormRoute = React.lazy(() => import("@/features/transactions/TransactionFormRoute").then(module => ({default: module.TransactionFormRoute})));
 const ScanPage = React.lazy(() => import("@/features/receiptScan/ScanPage").then(module => ({default: module.ScanPage})));
 const SummariesPage = React.lazy(() => import("@/features/summaries/SummariesPage").then(module => ({default: module.SummariesPage})));
 const RecurringRulesPage = React.lazy(() => import("@/features/recurringRules/RecurringRulesPage").then(module => ({default: module.RecurringRulesPage})));
@@ -47,7 +47,7 @@ export const AppRoutes = () => {
                         path={ROUTES.transactionNew}
                         element={
                             <LazyRoute>
-                                <TransactionFormPage />
+                                <TransactionFormRoute />
                             </LazyRoute>
                         }
                     />
@@ -63,7 +63,7 @@ export const AppRoutes = () => {
                         path={ROUTES.transactionEdit}
                         element={
                             <LazyRoute>
-                                <TransactionFormPage />
+                                <TransactionFormRoute />
                             </LazyRoute>
                         }
                     />

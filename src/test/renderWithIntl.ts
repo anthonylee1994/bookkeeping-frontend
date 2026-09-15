@@ -9,15 +9,10 @@ import type {RenderOptions, RenderResult} from "@testing-library/react";
 type WrapperProps = {children: React.ReactNode};
 
 /** Test 要與 main.tsx 一樣包 Chakra 及 intl，否則 Chakra component 取不到 system。 */
-const AppProviders = ({children}: WrapperProps) => {
-    return (
-        <ChakraProvider value={system}>
-            <IntlProvider locale={DEFAULT_LOCALE} defaultLocale={DEFAULT_LOCALE} messages={intlMessages}>
-                {children}
-            </IntlProvider>
-        </ChakraProvider>
-    );
-};
+function AppProviders({children}: WrapperProps): React.ReactElement {
+    const intlProvider = React.createElement(IntlProvider, {locale: DEFAULT_LOCALE, defaultLocale: DEFAULT_LOCALE, messages: intlMessages, children});
+    return React.createElement(ChakraProvider, {value: system, children: intlProvider});
+}
 
 export function renderWithIntl(ui: React.ReactElement, options?: Omit<RenderOptions, "wrapper">): RenderResult {
     return render(ui, {wrapper: AppProviders, ...options});

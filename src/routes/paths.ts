@@ -19,3 +19,8 @@ export const ROUTES = {
 export function transactionDetailPath(id: string): string {
     return `/transactions/${id}`;
 }
+
+/** 交易修改 URL；同詳情 path 一樣集中組合，避免漏 encode。 */
+export function transactionEditPath(id: string): string {
+    return `/transactions/${encodeURIComponent(id)}/edit`;
+}

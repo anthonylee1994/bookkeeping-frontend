@@ -212,8 +212,14 @@ export const TransactionFiltersPanel = ({filters, activeCount, accounts, categor
                                 <CloseButton aria-label={intl.formatMessage(messages.common.close)} size="sm" />
                             </Drawer.CloseTrigger>
                         </Drawer.Header>
-                        <Drawer.Body>{fields}</Drawer.Body>
-                        <Drawer.Footer>{actions}</Drawer.Footer>
+                        <Drawer.Body>
+                            <Stack gap="4">
+                                {fields}
+                                <Box display="flex" justifyContent="flex-end" gap="2" pb="2">
+                                    {actions}
+                                </Box>
+                            </Stack>
+                        </Drawer.Body>
                     </Drawer.Content>
                 </Drawer.Positioner>
             </Portal>
