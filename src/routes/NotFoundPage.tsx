@@ -34,10 +34,10 @@ export const NotFoundPage = () => {
                 </Stack>
 
                 <HStack gap="3" flexWrap="wrap" justify="center" w="full">
-                    <Button asChild size="xl" rounded="xl" px="8" minW="8.5rem" shadow="sm">
+                    <Button asChild size="xl" px="8" minW="8.5rem" shadow="sm">
                         <Link to={ROUTES.dashboard}>{intl.formatMessage(messages.notFound.action)}</Link>
                     </Button>
-                    <Button variant="outline" size="xl" rounded="xl" px="8" minW="8.5rem" onClick={goBack}>
+                    <Button variant="outline" size="xl" px="8" minW="8.5rem" onClick={goBack}>
                         <ArrowLeftIcon />
                         {intl.formatMessage(messages.layout.back)}
                     </Button>

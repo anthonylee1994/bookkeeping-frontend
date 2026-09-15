@@ -1,0 +1,104 @@
+import React from "react";
+import {Box, Flex, Image, Link, Stack, Text} from "@chakra-ui/react";
+import {useIntl} from "react-intl";
+import {Link as RouterLink} from "react-router";
+import type {Transaction} from "@/data/types";
+import {sourceLabel} from "@/features/transactions/transactionsFormat";
+import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
+import {toDisplayDateTime} from "@/lib/date";
+import {messages} from "@/lib/i18n";
+import {centsToDollars} from "@/lib/money";
+import {kindLabel, transactionAmountLabel, transactionTone} from "@/lib/transactionDisplay";
+import {transactionDetailPath} from "@/routes/paths";
+
+type TransactionDetailContentProps = {
+    transaction: Transaction;
+    names: TransactionNameMaps;
+};
+
+type TransactionDetailRowProps = {
+    label: string;
+    children: React.ReactNode;
+};
+
+export const TransactionDetailRow = ({label, children}: TransactionDetailRowProps) => {
+    return (
+        <Flex justify="space-between" align="flex-start" gap="4" px="4" py="2.5" borderBottomWidth="1px" borderColor="border" _last={{borderBottomWidth: "0"}}>
+            <Text fontSize="sm" color="fg.muted" flexShrink="0">
+                {label}
+            </Text>
+            <Text fontSize="sm" textAlign="end">
+                {children}
+            </Text>
+        </Flex>
+    );
+};
+
+/** 交易詳情內容；表格 panel 同詳情頁共用。Step 14 會再加入 actions。 */
+export const TransactionDetailContent = ({transaction, names}: TransactionDetailContentProps) => {
+    const intl = useIntl();
+    const accountName = names.accounts.get(transaction.account_id) ?? intl.formatMessage(messages.transactions.list.unknownAccount);
+    const transferName = transaction.transfer_account_id != null ? names.accounts.get(transaction.transfer_account_id) : undefined;
+    const categoryName = transaction.category_id != null ? names.categories.get(transaction.category_id) : undefined;
+    const merchantName = transaction.merchant_id != null ? names.merchants.get(transaction.merchant_id) : undefined;
+    const netDiffers = transaction.net_amount_cents !== transaction.amount_cents;
+
+    return (
+        <Stack gap="4">
+            <Box>
+                <Text fontSize="sm" color="fg.muted">
+                    {intl.formatMessage(messages.transactions.detail.amount)}
+                </Text>
+                <Text fontSize="2xl" fontWeight="bold" color={transactionTone(transaction)} fontVariantNumeric="tabular-nums">
+                    {transactionAmountLabel(transaction)}
+                </Text>
+            </Box>
+
+            <Stack gap="0" borderWidth="1px" borderColor="border" rounded="lg" overflow="hidden">
+                <TransactionDetailRow label={intl.formatMessage(messages.transactions.list.kind)}>{kindLabel(transaction.kind)}</TransactionDetailRow>
+                <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.occurredAt)}>{toDisplayDateTime(transaction.occurred_at)}</TransactionDetailRow>
+                <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.account)}>{accountName}</TransactionDetailRow>
+                {transaction.kind === "transfer" ? (
+                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.transferAccount)}>
+                        {transferName ?? intl.formatMessage(messages.transactions.list.unknownAccount)}
+                    </TransactionDetailRow>
+                ) : (
+                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.category)}>
+                        {categoryName ?? intl.formatMessage(messages.transactions.list.uncategorized)}
+                    </TransactionDetailRow>
+                )}
+                {merchantName === undefined ? null : <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.merchant)}>{merchantName}</TransactionDetailRow>}
+                {transaction.payment_method === null || transaction.payment_method === undefined || transaction.payment_method === "" ? null : (
+                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.paymentMethod)}>{transaction.payment_method}</TransactionDetailRow>
+                )}
+                {transaction.note === null || transaction.note === undefined || transaction.note === "" ? null : (
+                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.note)}>{transaction.note}</TransactionDetailRow>
+                )}
+                <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.source)}>{sourceLabel(transaction.source)}</TransactionDetailRow>
+                {netDiffers ? <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.netAmount)}>{centsToDollars(transaction.net_amount_cents)}</TransactionDetailRow> : null}
+                {transaction.refund_of_id == null ? null : (
+                    <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.refundOf)}>
+                        <Link asChild color="brand.fg" textDecoration="underline">
+                            <RouterLink to={transactionDetailPath(transaction.refund_of_id)}>{transaction.refund_of_id}</RouterLink>
+                        </Link>
+                    </TransactionDetailRow>
+                )}
+                <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.createdAt)}>{toDisplayDateTime(transaction.created_at)}</TransactionDetailRow>
+                <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.updatedAt)}>{toDisplayDateTime(transaction.updated_at)}</TransactionDetailRow>
+            </Stack>
+
+            {transaction.image_urls.length === 0 ? null : (
+                <Box>
+                    <Text fontSize="sm" color="fg.muted" mb="2">
+                        {intl.formatMessage(messages.transactions.detail.images)}
+                    </Text>
+                    <Flex gap="2" wrap="wrap">
+                        {transaction.image_urls.map(url => (
+                            <Image key={url} src={url} alt="" boxSize="20" rounded="lg" objectFit="cover" />
+                        ))}
+                    </Flex>
+                </Box>
+            )}
+        </Stack>
+    );
+};

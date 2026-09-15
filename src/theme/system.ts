@@ -85,6 +85,13 @@ const config = defineConfig({
             },
         },
         semanticTokens: {
+            radii: {
+                /**
+                 * 所有控件（Button／Input／NativeSelect／ButtonGroup）都行 `l2`，
+                 * 所以圓角只需要喺呢度定一次，唔好喺 component 逐個 `rounded=` 覆蓋。
+                 */
+                l2: {value: "{radii.lg}"},
+            },
             colors: {
                 bg: {
                     DEFAULT: {value: {base: "{colors.gray.50}", _dark: "{colors.gray.950}"}},

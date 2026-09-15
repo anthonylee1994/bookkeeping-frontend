@@ -18,13 +18,13 @@ export const DashboardEmptyState = () => {
                 <EmptyState.Title>{intl.formatMessage(messages.dashboard.emptyTitle)}</EmptyState.Title>
                 <EmptyState.Description>{intl.formatMessage(messages.dashboard.emptyDescription)}</EmptyState.Description>
                 <Stack direction="row" gap="3" mt="2" flexWrap="wrap" justify="center">
-                    <Button asChild size="lg" rounded="xl">
+                    <Button asChild size="lg">
                         <Link to={ROUTES.transactionNew}>
                             <PlusIcon />
                             {intl.formatMessage(messages.dashboard.emptyAction)}
                         </Link>
                     </Button>
-                    <Button asChild size="lg" variant="outline" rounded="xl">
+                    <Button asChild size="lg" variant="outline">
                         <Link to={ROUTES.scan}>
                             <ScanLineIcon />
                             {intl.formatMessage(messages.dashboard.scanReceipt)}

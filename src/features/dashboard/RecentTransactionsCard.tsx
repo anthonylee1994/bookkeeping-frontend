@@ -3,9 +3,9 @@ import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import type {TransactionRow} from "@/data/types";
 import {DashboardSection} from "@/features/dashboard/DashboardSection";
-import {transactionAmountLabel, transactionTitle, transactionTone} from "@/features/dashboard/dashboardFormat";
 import {toDisplayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
+import {transactionDisplayAmount, transactionTitle, transactionTone} from "@/lib/transactionDisplay";
 import {ROUTES, transactionDetailPath} from "@/routes/paths";
 
 type RecentTransactionsCardProps = {
@@ -44,7 +44,7 @@ export const RecentTransactionsCard = ({transactions}: RecentTransactionsCardPro
                                         </Text>
                                     </Box>
                                     <Text fontSize="sm" fontWeight="semibold" color={transactionTone(transaction)} fontVariantNumeric="tabular-nums">
-                                        {transactionAmountLabel(transaction)}
+                                        {transactionDisplayAmount(transaction)}
                                     </Text>
                                 </Flex>
                             </Link>

@@ -11,13 +11,13 @@ export const DashboardQuickActions = () => {
 
     return (
         <HStack gap="3" flexWrap="wrap">
-            <Button asChild size="lg" rounded="xl" flex={{base: "1", sm: "0 1 auto"}} minW={{base: 0, sm: "11rem"}}>
+            <Button asChild size="lg" flex={{base: "1", sm: "0 1 auto"}} minW={{base: 0, sm: "11rem"}}>
                 <Link to={ROUTES.transactionNew}>
                     <PlusIcon />
                     {intl.formatMessage(messages.dashboard.addTransaction)}
                 </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" rounded="xl" flex={{base: "1", sm: "0 1 auto"}} minW={{base: 0, sm: "11rem"}}>
+            <Button asChild size="lg" variant="outline" flex={{base: "1", sm: "0 1 auto"}} minW={{base: 0, sm: "11rem"}}>
                 <Link to={ROUTES.scan}>
                     <ScanLineIcon />
                     {intl.formatMessage(messages.dashboard.scanReceipt)}
