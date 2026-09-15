@@ -82,7 +82,7 @@ describe("ScanPage", () => {
     it("rejects an unsupported file type locally without uploading it", async () => {
         renderScanPage();
 
-        // 瀏覽器嘅 accept filter 唔係保證，所以直接派一個唔合規嘅檔案落去試 guard。
+        // 瀏覽器的 accept filter 不是保證，所以直接派一個不合規的檔案落去試 guard。
         fireEvent.change(screen.getByLabelText("選擇單據相片"), {target: {files: [receiptFile("note.txt", "text/plain")]}});
 
         expect(await screen.findByRole("alert")).toHaveTextContent("只支援 JPEG、PNG 或 WebP 圖片");
@@ -121,7 +121,7 @@ describe("ScanPage", () => {
         expect(screen.getByLabelText("金額")).toHaveValue("12.50");
         expect(screen.getByLabelText("日期時間")).toHaveValue("2026-09-14T16:00");
         expect(screen.getByLabelText("商戶")).toHaveValue("街角咖啡");
-        // Preview 用本地 object URL，唔會等上載完先睇到。
+        // Preview 用本地 object URL，不會等上載完才看到。
         expect(screen.getByAltText("單據預覽").getAttribute("src")).toMatch(/^blob:/);
         expect(screen.queryByText("需覆核")).not.toBeInTheDocument();
     });
@@ -157,7 +157,7 @@ describe("ScanPage", () => {
 
     it("offers manual entry when the parse keeps failing", async () => {
         const user = userEvent.setup();
-        parseMock.mockResolvedValue({ok: true, value: {...successPreview, status: "failed", parsed: null, error: "睇唔清張單"}});
+        parseMock.mockResolvedValue({ok: true, value: {...successPreview, status: "failed", parsed: null, error: "看不清這張單"}});
         renderScanPage();
 
         await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());

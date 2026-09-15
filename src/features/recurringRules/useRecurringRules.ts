@@ -18,7 +18,7 @@ type RecurringRulesResult = {
 
 /**
  * 依狀態 tab 取得定期交易清單。狀態或 reload token 一變即清走舊數據，
- * 免得上一個 tab 嘅規則殘留喺新 tab；`reload` 用於動作完成後重新抓取同錯誤重試。
+ * 免得上一個 tab 的規則殘留在新 tab；`reload` 用於動作完成後重新抓取及錯誤重試。
  */
 export function useRecurringRules(status: RecurringStatus): RecurringRulesQuery {
     const token = useAuthStore(state => state.token);

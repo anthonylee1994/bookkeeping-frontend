@@ -27,7 +27,7 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
     const intl = useIntl();
     const navigate = useNavigate();
     const token = useAuthStore(state => state.token);
-    // 同一次覆核重用同一條 key：submit 失敗再試都唔會重複入帳。
+    // 同一次覆核重用同一條 key：submit 失敗再試也不會重複入帳。
     const [idempotencyKey] = React.useState(createId);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
     const {control, register, handleSubmit, setValue, formState} = useForm<ScanReviewValues>({

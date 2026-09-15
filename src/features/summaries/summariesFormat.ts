@@ -15,7 +15,7 @@ export function periodRange(date: string, period: SummaryPeriod): {from: string;
     return {from: toIsoDate(startOfPeriod(date, period)), to: toIsoDate(endOfPeriod(date, period))};
 }
 
-/** 期間標題；週報明文寫出「星期一至星期日」，唔靠用戶自己數。 */
+/** 期間標題；週報明文寫出「星期一至星期日」，不靠用戶自己數。 */
 export function periodRangeLabel(date: string, period: SummaryPeriod): string {
     if (period === "monthly") return toDisplayMonth(date);
 

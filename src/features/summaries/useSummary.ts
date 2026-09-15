@@ -19,7 +19,7 @@ type SummaryResultState = {
 
 /**
  * 取得指定期間、日期、頁數的報表。`period`／`date`／`page` 一變即清走舊數據，
- * 免得期間標題同數字對唔上；`reload` 用來做錯誤重試。
+ * 免得期間標題與數字對不上；`reload` 用來做錯誤重試。
  */
 export function useSummary(period: SummaryPeriod, date: string, page: number): SummaryQuery {
     const token = useAuthStore(state => state.token);

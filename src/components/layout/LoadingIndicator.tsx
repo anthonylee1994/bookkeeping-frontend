@@ -4,14 +4,14 @@ import {messages} from "@/lib/i18n";
 import type {ProgressCircleRootProps} from "@chakra-ui/react";
 
 type LoadingIndicatorProps = {
-    /** 預留高度，令載入完成後唔會跳動；跟住被取代的內容大約高度去設。 */
+    /** 預留高度，令載入完成後不會跳動；跟隨被取代的內容大約高度去設。 */
     minH?: string | Record<string, string>;
     size?: ProgressCircleRootProps["size"];
 };
 
 /**
  * 全 app 共用的載入指示：不定進度的 progress circle。
- * `value={null}` 就係 Chakra 的 indeterminate 模式。
+ * `value={null}` 就是 Chakra 的 indeterminate 模式。
  */
 export const LoadingIndicator = ({minH = "16rem", size = "md"}: LoadingIndicatorProps) => {
     const intl = useIntl();

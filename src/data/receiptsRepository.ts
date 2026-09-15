@@ -10,7 +10,7 @@ export const RECEIPT_ACCEPT = "image/jpeg,image/png,image/webp";
 
 const receiptTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-/** 類型／大小規則；UI 要喺上載前顯示 preview，所以同 repository 共用同一套檢查。 */
+/** 類型／大小規則；UI 要在上載前顯示 preview，所以與 repository 共用同一套檢查。 */
 export function validateReceiptFile(file: File): LocalError | null {
     if (!receiptTypes.has(file.type)) {
         return {code: "validation", message: formatMessage(messages.validation.receiptTypeUnsupported), fields: {file: formatMessage(messages.fields.fileTypeUnsupported)}};

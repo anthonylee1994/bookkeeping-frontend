@@ -1,7 +1,7 @@
 import type {CategoryBreakdown} from "@/data/types";
 import {formatMessage, messages} from "./i18n";
 
-/** 分類 chart 用的固定色序；API 冇跟 category color，所以由 UI 決定。 */
+/** 分類 chart 用的固定色序；API 沒有跟 category color，所以由 UI 決定。 */
 export const CATEGORY_COLORS = ["#047857", "#0284c7", "#d97706", "#7c3aed", "#e11d48"];
 
 export type CategoryBreakdownKind = "income" | "expense";

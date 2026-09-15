@@ -54,7 +54,7 @@ export const SidebarNav = ({collapsed}: SidebarNavProps) => {
                         h="11"
                         justify="center"
                         gap="2"
-                        /* 手砌嘅 button，所以要直接引用控件圓角 token，先同真 Button 一致。 */
+                        /* 手砌的 button，所以要直接引用控件圓角 token，才與真 Button 一致。 */
                         rounded="l2"
                         bg="brand.solid"
                         color="brand.contrast"

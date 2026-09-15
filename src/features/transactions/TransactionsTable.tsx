@@ -24,7 +24,7 @@ type SortableColumn = {
 
 /**
  * Desktop 交易表格：表頭可排序，整行可點擊或用鍵盤開啟詳情。
- * 冇做日期分組——表格本身已經有日期欄，再加分組行等於每筆交易佔兩行。
+ * 沒有做日期分組——表格本身已經有日期欄，再加分組行等於每筆交易佔兩行。
  */
 export const TransactionsTable = ({transactions, names, sort, order, onSelect, onSortChange}: TransactionsTableProps) => {
     const intl = useIntl();

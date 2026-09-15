@@ -65,7 +65,7 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
                 </Box>
 
                 <Flex gap="1" align="center" justify="flex-end" flexShrink="0">
-                    {/* Mobile 冇 sidebar，定期交易喺底下 tab bar 又冇位，所以收喺 header。 */}
+                    {/* Mobile 沒有 sidebar，定期交易在底下 tab bar 又沒有位，所以收在 header。 */}
                     <IconButton asChild aria-label={recurringLabel} title={recurringLabel} variant="ghost" size="sm" display={{base: "inline-flex", md: "none"}}>
                         <Link to={ROUTES.recurringRules}>
                             <RepeatIcon />

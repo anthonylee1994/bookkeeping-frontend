@@ -31,7 +31,7 @@ export const ScanPage = () => {
     const [banner, setBanner] = React.useState<Banner | null>(null);
     const [phase, setPhase] = React.useState<RunPhase>(null);
     const [dragging, setDragging] = React.useState(false);
-    // 取消／重新開始會遞增；舊 run 回來時發現 generation 唔同就唔再寫 state。
+    // 取消／重新開始會遞增；舊 run 回來時發現 generation 不同就不再寫 state。
     const runRef = React.useRef(0);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -45,7 +45,7 @@ export const ScanPage = () => {
     const uploadedUrl = draft?.imageUrl ?? null;
     const preview = draft?.preview ?? null;
 
-    /** Reload 之後 object URL 已失效（draftStore 會清走），冇圖就當重新開始。 */
+    /** Reload 之後 object URL 已失效（draftStore 會清走），沒有圖就當重新開始。 */
     const step: AiScanStep = (() => {
         if (phase !== null) return "parsing";
         if (draft === null || imageSrc === null) return "idle";

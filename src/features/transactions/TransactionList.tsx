@@ -20,8 +20,8 @@ type TransactionListProps = {
 };
 
 /**
- * Mobile 交易列表：按日期分組，組內用分隔線而唔係逐張卡，
- * 咁同樣高度可以多睇幾行，掃描亦更容易。
+ * Mobile 交易列表：按日期分組，組內用分隔線而不是逐張卡，
+ * 這樣同樣高度可以多看幾行，掃描亦更容易。
  */
 export const TransactionList = ({transactions, names, grouped}: TransactionListProps) => {
     const intl = useIntl();
@@ -75,9 +75,9 @@ export const TransactionList = ({transactions, names, grouped}: TransactionListP
 
     if (!grouped) return panel(rowList(transactions));
 
-    // 全部組放喺同一塊 panel，日期做 section header。
+    // 全部組放在同一塊 panel，日期做 section header。
     // 逐組獨立 panel 會令每日只得一筆時，每筆交易佔雙倍高度。
-    // 唔用 sticky：panel 要 overflow hidden 做圓角，而 overflow 會令 sticky 相對錯位。
+    // 不用 sticky：panel 要 overflow hidden 做圓角，而 overflow 會令 sticky 相對錯位。
     return panel(
         groupTransactionsByDate(transactions).map(group => (
             <React.Fragment key={group.date}>

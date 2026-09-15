@@ -11,7 +11,7 @@ type TransactionsSummaryBarProps = {
 
 /**
  * 結果筆數 + 本頁收支合計。
- * 刻意標明「本頁」：API 一次只回一頁，加總全部結果會係錯誤資訊。
+ * 刻意標明「本頁」：API 一次只回一頁，加總全部結果會是錯誤資訊。
  */
 export const TransactionsSummaryBar = ({total, totals}: TransactionsSummaryBarProps) => {
     const intl = useIntl();
@@ -21,7 +21,7 @@ export const TransactionsSummaryBar = ({total, totals}: TransactionsSummaryBarPr
             <Text fontSize="sm" color="fg.muted">
                 {intl.formatMessage(messages.transactions.list.resultsCount, {count: total})}
             </Text>
-            {/* 窄螢幕只顯示淨額，收入／支出明細留畀有位嘅 desktop，唔好逼到疊字。 */}
+            {/* 窄螢幕只顯示淨額，收入／支出明細留給有空間的 desktop，不要逼到疊字。 */}
             <HStack gap="3" fontSize="sm" fontVariantNumeric="tabular-nums" separator={<Separator orientation="vertical" h="4" />}>
                 <HStack gap="3" display={{base: "none", md: "flex"}} separator={<Separator orientation="vertical" h="4" />}>
                     <Text color="fg.muted">{intl.formatMessage(messages.transactions.toolbar.pageTotal)}</Text>

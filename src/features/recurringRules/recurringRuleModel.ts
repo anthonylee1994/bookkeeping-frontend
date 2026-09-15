@@ -61,7 +61,7 @@ export const recurringRuleFormSchema = z
         }
     });
 
-/** 香港今日嘅星期、月、日（供表單預設值用）。 */
+/** 香港今日的星期、月、日（供表單預設值用）。 */
 function hongKongTodayParts(): {weekday: number; month: number; day: number} {
     const [year, month, day] = todayDate().split("-").map(Number);
     return {weekday: new Date(Date.UTC(year, month - 1, day)).getUTCDay(), month, day};
@@ -106,7 +106,7 @@ export function recurringRuleToFormValues(rule: RecurringRule): RecurringRuleFor
     };
 }
 
-/** 由表單值砌出 schedule；只保留跟目前頻率相關嘅欄位，其餘一律 null。 */
+/** 由表單值砌出 schedule；只保留跟目前頻率相關的欄位，其餘一律 null。 */
 function formValuesToSchedule(values: RecurringRuleFormValues): NextRunRule {
     const interval = Number(values.interval);
     return {
@@ -120,7 +120,7 @@ function formValuesToSchedule(values: RecurringRuleFormValues): NextRunRule {
     };
 }
 
-/** 編輯時若排程冇改，保留原本 `next_run_at`，免得重算成過去日期而觸發重複入帳。 */
+/** 編輯時若排程沒有改動，保留原本 `next_run_at`，免得重算成過去日期而觸發重複入帳。 */
 function hasScheduleChanged(rule: RecurringRule, schedule: NextRunRule): boolean {
     return (
         rule.frequency !== schedule.frequency ||

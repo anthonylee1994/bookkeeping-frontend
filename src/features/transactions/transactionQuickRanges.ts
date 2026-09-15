@@ -20,7 +20,7 @@ export function quickRangeToFilters(range: QuickRange): Pick<TransactionFilters,
     return {from: `${month}-01`, to: lastDay.toISOString().slice(0, 10)};
 }
 
-/** 反推目前 filter 對應邊個快捷選項，冇對上就當自訂（`null`）。 */
+/** 反推目前 filter 對應哪個快捷選項，沒有對上就當作自訂（`null`）。 */
 export function matchQuickRange(filters: TransactionFilters): QuickRange | null {
     if (filters.from === undefined && filters.to === undefined) return "all";
     for (const range of ["this_month", "last_month", "last_30"] as const) {

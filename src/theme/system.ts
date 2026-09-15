@@ -88,7 +88,7 @@ const config = defineConfig({
             radii: {
                 /**
                  * 所有控件（Button／Input／NativeSelect／ButtonGroup）都行 `l2`，
-                 * 所以圓角只需要喺呢度定一次，唔好喺 component 逐個 `rounded=` 覆蓋。
+                 * 所以圓角只需要在此定義一次，不要在 component 逐個 `rounded=` 覆蓋。
                  */
                 l2: {value: "{radii.lg}"},
             },
@@ -110,7 +110,7 @@ const config = defineConfig({
                     active: {value: {base: "{colors.brand.sage}", _dark: "{colors.brand.900}"}},
                     activeFg: {value: {base: "{colors.brand.800}", _dark: "{colors.brand.200}"}},
                 },
-                /** 金額正負色。Chakra 預設 palette 冇 emerald／rose／amber，引用會解唔到、變回前景色。 */
+                /** 金額正負色。Chakra 預設 palette 沒有 emerald／rose／amber，引用會解析不到、變回前景色。 */
                 income: {value: {base: "{colors.green.600}", _dark: "{colors.green.400}"}},
                 expense: {value: {base: "{colors.red.600}", _dark: "{colors.red.400}"}},
                 transfer: {value: {base: "{colors.blue.600}", _dark: "{colors.blue.400}"}},

@@ -2,16 +2,16 @@
 
 ## 0. 文件目的
 
-本文件定義記帳 App frontend 第一版（MVP）嘅產品範圍、資訊架構、互動、PWA 行為、responsive 規則同驗收標準。呢個版本係 pure frontend prototype，資料由本地 repository／mock fixtures 提供，唔依賴 Rails API。
+本文件定義記帳 App frontend 第一版（MVP）的產品範圍、資訊架構、互動、PWA 行為、responsive 規則及驗收標準。這個版本是 pure frontend prototype，資料由本地 repository／mock fixtures 提供，不依賴 Rails API。
 
 ### 0.1 產品目標
 
 - 令用戶可以用手機快速記一筆收入、支出或轉帳
-- 一眼睇到本月收支、帳戶餘額、分類分佈同最近交易
-- 支援搜尋、篩選、修改、複製、退款同刪除交易
+- 一眼看到本月收支、帳戶餘額、分類分佈及最近交易
+- 支援搜尋、篩選、修改、複製、退款及刪除交易
 - 支援單據拍攝／上載、AI 辨識、人工覆核後入帳
-- 支援定期交易同日／週／月報表
-- 可安裝成 PWA，於 iOS、Android 同 desktop browser 使用
+- 支援定期交易及日／週／月報表
+- 可安裝成 PWA，於 iOS、Android 及 desktop browser 使用
 
 ### 0.2 非目標（MVP）
 
@@ -75,7 +75,7 @@ Use Zustand's `create` function with `persist` for the explicitly listed local s
 - `.less` 不在本專案使用；如將來需要引入，import 必須放於所有 import 最後
 - 不使用 `any`；fixture、form input、local query params 全部有明確型別
 - 金額轉換集中於 `lib/money.ts`，日期／時區轉換集中於 `lib/date.ts`
-- 所有 app data 同 UI state 都由 Zustand／local repository 管理；唔引入 remote data cache
+- 所有 app data 及 UI state 都由 Zustand／local repository 管理；不引入 remote data cache
 
 ### 1.3 建議目錄
 
@@ -112,7 +112,7 @@ src/
   test/
 ```
 
-Feature 內可再分 `components/`、`hooks/`、`repository.ts`、`schema.ts` 同 `types.ts`。Component 檔名用 TitleCase，其餘模組檔名用 camelCase。共用 UI 只放真正跨 feature 重用嘅 primitive，避免過早抽象。
+Feature 內可再分 `components/`、`hooks/`、`repository.ts`、`schema.ts` 及 `types.ts`。Component 檔名用 TitleCase，其餘模組檔名用 camelCase。共用 UI 只放真正跨 feature 重用的 primitive，避免過早抽象。
 
 ---
 
@@ -121,10 +121,10 @@ Feature 內可再分 `components/`、`hooks/`、`repository.ts`、`schema.ts` �
 ### 2.1 原則
 
 - Mobile-first，主要操作可以單手完成
-- 財務資料要安靜、清晰、易掃描；避免大量裝飾卡片同過度漸變
-- 收入、支出、退款除咗顏色，必須同時用正負號、文字或 icon 區分
+- 財務資料要安靜、清晰、易掃描；避免大量裝飾卡片及過度漸變
+- 收入、支出、退款除了顏色，必須同時用正負號、文字或 icon 區分
 - 主要新增交易按鈕固定容易觸及，但不可遮住內容或 bottom navigation
-- 所有破壞性操作都要明確講清楚影響，確認後先執行
+- 所有破壞性操作都要明確說明清楚影響，確認後才執行
 
 ### 2.2 Design tokens
 
@@ -162,7 +162,7 @@ Tailwind breakpoint 採用預設值，但 layout 以內容需要而非指定裝�
 
 - Header 高 56px，尊重 `env(safe-area-inset-top)`
 - Bottom navigation 包括：首頁、交易、掃描、報表、設定
-- 「掃描」置中並以相機 icon 表達，但保持同其他項目一致嘅 navigation semantics
+- 「掃描」置中並以相機 icon 表達，但保持與其他項目一致的 navigation semantics
 - Page bottom padding 包括 navigation 高度同 `env(safe-area-inset-bottom)`
 - 新增交易用右下角 floating action button；必須置於 bottom navigation 上方
 - 長表格改用 list row；主要資料先顯示，次要資料可展開
@@ -172,7 +172,7 @@ Tailwind breakpoint 採用預設值，但 layout 以內容需要而非指定裝�
 - 左側 navigation：首頁、交易、掃描單據、報表、定期交易、設定
 - Top bar 放頁面標題、日期範圍同 contextual actions
 - 交易列表使用 table；點擊 row 開右側 detail panel，保留列表位置
-- 表單 create/edit 使用 modal 或右側 drawer，唔跳離當前工作脈絡
+- 表單 create/edit 使用 modal 或右側 drawer，不跳離當前工作脈絡
 
 ### 3.3 Layout safety
 
@@ -223,7 +223,7 @@ Tailwind breakpoint 採用預設值，但 layout 以內容需要而非指定裝�
 - Submit 中 disable 重複提交，顯示 inline progress
 - 登入失敗顯示一般化錯誤，不透露 username 是否存在
 - 成功後儲存本地 session、寫入 user state、redirect `returnTo` 或 `/`
-- 登出清除本地 session 同敏感 UI state，再去 `/login`
+- 登出清除本地 session 及敏感 UI state，再去 `/login`
 
 ### 5.2 Dashboard `/`
 
@@ -241,9 +241,9 @@ Tailwind breakpoint 採用預設值，但 layout 以內容需要而非指定裝�
 規則：
 
 - Mobile 金額摘要使用緊湊 2-column grid；desktop 可用 4 columns
-- Pie／donut chart 同時提供 legend、實際金額同可讀 table，唔可以只靠顏色
+- Pie／donut chart 同時提供 legend、實際金額及可讀 table，不可以只靠顏色
 - Empty state 提供「新增第一筆交易」主動作
-- 點擊分類、帳戶或最近交易，進入已套用 filter 嘅交易頁或交易詳情
+- 點擊分類、帳戶或最近交易，進入已套用 filter 的交易頁或交易詳情
 
 ### 5.3 交易列表 `/transactions`
 
@@ -259,7 +259,7 @@ Tailwind breakpoint 採用預設值，但 layout 以內容需要而非指定裝�
 
 互動：
 
-- Filter 同 sort 同步 URL query，reload／分享 URL 可還原狀態
+- Filter 及 sort 同步 URL query，reload／分享 URL 可還原狀態
 - Mobile 顯示交易 row：商戶或 note、分類、日期、帳戶、金額
 - Desktop 顯示 table：日期、商戶／備註、分類、帳戶、類型、金額、actions
 - Refund transaction 顯示「退款」標記；原交易顯示 `net_amount_cents`
@@ -284,10 +284,10 @@ Tailwind breakpoint 採用預設值，但 layout 以內容需要而非指定裝�
 | 圖片     | 可選，顯示已有 URL preview | 可選                 |
 
 - Merchant autocomplete debounce 300ms；輸入新名稱時可建立 merchant，再選回表單
-- 選擇有 default category 嘅 merchant，可自動建議分類，但不可無提示覆蓋用戶已選值
+- 選擇有 default category 的 merchant，可自動建議分類，但不可無提示覆蓋用戶已選值
 - Create 每次開表單產生 UUID；寫入 local repository 後同步更新相關 view
 - Edit 不可改變 `source`，亦不可直接建立 `refund_of_id`
-- 離線時 disable submit，保留尚未送出嘅 form state，提示連線恢復後手動提交
+- 離線時 disable submit，保留尚未送出的 form state，提示連線恢復後手動提交
 - 離開 dirty form 前顯示確認
 
 ### 5.5 交易詳情
@@ -308,13 +308,13 @@ Actions：修改、複製、退款、刪除。
 流程：`選圖／拍攝 -> 本地解析 mock -> 人工覆核 -> 確認入帳`。
 
 1. 使用 `<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment">`
-2. Frontend 驗證類型同 10 MiB 上限，顯示本地 preview
-3. 將圖片存入本地 workflow，顯示可取消嘅 progress UI
+2. Frontend 驗證類型及 10 MiB 上限，顯示本地 preview
+3. 將圖片存入本地 workflow，顯示可取消的 progress UI
 4. 使用 deterministic fixture 產生 AI parse preview
 5. 將 `parsed` 結果填入可修改表單；confidence 低或缺失欄位要明顯標示需要覆核
 6. 用戶補回 account／category／merchant，再由 local repository 入帳
 
-確認時儲存修正後交易欄位同 `image_urls`，並使用本地 UUID 防止重複提交。AI mock 失敗時保留圖片，提供重試解析或轉為手動入帳。
+確認時儲存修正後交易欄位及 `image_urls`，並使用本地 UUID 防止重複提交。AI mock 失敗時保留圖片，提供重試解析或轉為手動入帳。
 
 ### 5.7 報表 `/summaries`
 
@@ -328,7 +328,7 @@ Actions：修改、複製、退款、刪除。
 
 ### 5.8 定期交易 `/recurring-rules`
 
-列表分 active、paused、ended tabs。每項顯示類型、金額、頻率、下一次日期、帳戶、分類／商戶同狀態。
+列表分 active、paused、ended tabs。每項顯示類型、金額、頻率、下一次日期、帳戶、分類／商戶及狀態。
 
 Create／edit 欄位：
 
@@ -346,7 +346,7 @@ Actions：pause、resume、run now、skip next、edit、delete。
 - `run now` 前確認，成功後顯示已建立交易入口
 - 409 `already_materialized` 顯示「今日已經產生過交易」
 - `skip next` 確認文案列出將被跳過日期
-- 刪除只刪 rule，已產生交易會保留；確認文案必須講明
+- 刪除只刪 rule，已產生交易會保留；確認文案必須說明
 
 ### 5.9 設定
 
@@ -376,10 +376,10 @@ Actions：pause、resume、run now、skip next、edit、delete。
 ### 6.1 Local repository 規則
 
 - 所有 domain data 由 `data/authRepository.ts` 管理，初始資料來自 typed fixtures
-- CRUD、搜尋、排序、分頁、summary 同 recurring 計算喺 browser 內完成
-- repository functions 必須係純同步、可測試；唔可以直接依賴 React component
+- CRUD、搜尋、排序、分頁、summary 及 recurring 計算在 browser 內完成
+- repository functions 必須是純同步、可測試；不可以直接依賴 React component
 - local persistence 使用 `localStorage`；session／draft 使用 `sessionStorage`
-- 讀取或寫入失敗時顯示本地錯誤狀態，唔模擬 remote HTTP status
+- 讀取或寫入失敗時顯示本地錯誤狀態，不模擬 remote HTTP status
 
 ### 6.2 Core TypeScript types
 
@@ -411,7 +411,7 @@ useAppStore((state) => state.categories)
 useAppStore((state) => state.recurringRules)
 ```
 
-Selector 只讀取需要嘅 slice；資料寫入後由 store action 更新單一 source of truth，唔建立 duplicated cache。
+Selector 只讀取需要的 slice；資料寫入後由 store action 更新單一 source of truth，不建立 duplicated cache。
 
 ### 6.4 Zustand state management
 
@@ -459,21 +459,21 @@ type DraftState = {
 };
 ```
 
-實際 type 要放 `data/types.ts` 或 feature type file，以上只係 ownership contract；不得用 `any` 或自由格式 object。
+實際 type 要放 `data/types.ts` 或 feature type file，以上只是 ownership contract；不得用 `any` 或自由格式 object。
 
 #### Rules
 
 - 使用 Zustand selectors 讀取最小片段，例如 `useAuthStore((state) => state.token)`；避免 component 直接訂閱整個 store。
-- Store action 用同步、可測試嘅 state transition；所有 repository operation 由 feature hook 呼叫，唔將 component-specific logic 寫入 generic store。
-- `authStore` 用 `persist` middleware 存本地 user session 到 `localStorage`，並設定 version／migration。密碼同單據原圖絕不 persist。
-- App 啟動先 hydrate local stores，再由 route guard 決定是否顯示 login；hydration 完成前不可 redirect，避免 login page 閃現。
-- `uiStore` 不需要持久化；`isOffline` 由 `navigator.onLine` 同 `online`／`offline` events 更新。
+- Store action 用同步、可測試的 state transition；所有 repository operation 由 feature hook 呼叫，不將 component-specific logic 寫入 generic store。
+- `authStore` 用 `persist` middleware 存本地 user session 到 `localStorage`，並設定 version／migration。密碼及單據原圖絕不 persist。
+- App 啟動時首先 hydrate local stores，再由 route guard 決定是否顯示 login；hydration 完成前不可 redirect，避免 login page 閃現。
+- `uiStore` 不需要持久化；`isOffline` 由 `navigator.onLine` 及 `online`／`offline` events 更新。
 - `draftStore` 只 persist 可序列化 draft 欄位到 `sessionStorage`（例如 `transactionDraft`、AI step、URL）；`File`、Blob、object URL 不可 persist，離開頁面或 reload 要清理無效 preview。
 - AI preview 入帳成功、交易提交成功、登出或切換 session 後，必須呼叫 `resetDrafts()`；object URL 要另外 `URL.revokeObjectURL()`。
 - Logout 流程要原子地 `authStore.clearSession()`、`draftStore.resetDrafts()`，再導向 `/login`。
-- 不可將 filters、pagination、selected date 同時放 Zustand 又放 URL；URL 是可分享頁面 state 嘅唯一 source of truth。
+- 不可將 filters、pagination、selected date 同時放於 Zustand 與 URL；URL 是可分享頁面 state 的唯一 source of truth。
 - Store state 要保持可序列化，方便 devtools、測試同跨 tab 行為；禁止將 React element、Promise、AbortController 放入 store。
-- 需要跨 tab 登出時監聽 `storage` event；收到 session 清除後，其他 tab 同步清 local stores 同回到 login。
+- 需要跨 tab 登出時監聽 `storage` event；收到 session 清除後，其他 tab 同步清除 local stores 及回到 login。
 
 #### Testing
 
@@ -482,21 +482,21 @@ type DraftState = {
 
 ### 6.5 Local repository contract
 
-Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview、summaries 同 recurring rules。每個 function 只更新 local store／persistence，唔發出 network request。
+Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview、summaries 及 recurring rules。每個 function 只更新 local store／persistence，不發出 network request。
 
-Prototype 可用 deterministic fixtures 起步；使用者新增、修改、刪除嘅資料要即時反映喺所有相關 view，reload 後由 local persistence 還原。
+Prototype 可用 deterministic fixtures 起步；使用者新增、修改、刪除的資料要即時反映在所有相關 view，reload 後由 local persistence 還原。
 
 ---
 
 ## 7. Auth 與安全
 
-- Prototype auth 只係本地 session gate，唔係真正身份驗證，唔可聲稱具備 production security
-- 所有可插入 UI 嘅 fixture/user text 經 React escaping；不使用 `dangerouslySetInnerHTML`
+- Prototype auth 只是本地 session gate，不是真正身份驗證，不可聲稱具備 production security
+- 所有可插入 UI 的 fixture/user text 經 React escaping；不使用 `dangerouslySetInnerHTML`
 - Content Security Policy 至少限制 `default-src 'self'`，並按圖片 host 同 dev server 需要開放 `img-src`
 - Production 只使用 HTTPS；service worker 只於 production 或 localhost 啟用
 - 登出或切換本地 session 時清除 Zustand auth／draft state、AI preview、draft 同圖片 object URL
 - 不在 console、analytics、error tracking 記錄密碼、完整單據圖 URL 或完整 local data snapshot
-- `returnTo`、external image URL 同 local error message 不可直接變成 executable URL／HTML
+- `returnTo`、external image URL 及 local error message 不可直接變成 executable URL／HTML
 
 ---
 
@@ -508,31 +508,31 @@ Prototype 可用 deterministic fixtures 起步；使用者新增、修改、刪�
 - `display: standalone`
 - `start_url: /`
 - `scope: /`
-- `theme_color` 同 app header 一致
+- `theme_color` 及 app header 一致
 - `background_color` 使用 neutral background
-- 提供 192×192、512×512 maskable icon，同 Apple touch icon
-- App icon 要係正式 bitmap asset，不使用臨時 Vite logo
+- 提供 192×192、512×512 maskable icon，及 Apple touch icon
+- App icon 須為正式 bitmap asset，不使用臨時 Vite logo
 
 ### 8.2 Service worker / caching
 
-- Precache hashed JS、CSS、fonts、icons 同 offline fallback shell
-- Navigation 採 Network First，有短 timeout，失敗先回 app shell
-- Local domain data 唔寫入 Cache Storage；只可經指定 browser storage persistence
+- Precache hashed JS、CSS、fonts、icons 及 offline fallback shell
+- Navigation 採 Network First，有短 timeout，失敗時回退至 app shell
+- Local domain data 不寫入 Cache Storage；只可經指定 browser storage persistence
 - Receipt fixture images 不 precache；browser 自然 cache 已足夠
 - 新版本採 prompt update：顯示「有新版本」toast，由用戶按「重新載入」套用
-- 不可在用戶填緊表單時自動 reload
+- 不可在用戶填寫表單時自動 reload
 
 ### 8.3 Offline UX
 
 - 全局顯示低干擾 offline banner
-- 已載入且仍在 memory 嘅資料可繼續查看，標示「資料可能未更新」
+- 已載入且仍在 memory 的資料可繼續查看，標示「資料可能未更新」
 - Reload 後無網絡仍可由 local persistence 還原資料；需要外部圖片或 AI mock asset 時顯示 unavailable fallback
 - Create、edit、delete、refund、duplicate 同 recurring actions 離線照常運作
-- Draft form 可存於 session storage；唔需要 background sync
+- Draft form 可存於 session storage；不需要 background sync
 
 ### 8.4 Install UX
 
-- Android／desktop 捕捉 `beforeinstallprompt`，只喺用戶有互動並使用 app 一段時間後顯示一次安裝入口
+- Android／desktop 捕捉 `beforeinstallprompt`，只在用戶有互動並使用 app 一段時間後顯示一次安裝入口
 - iOS 提供簡短「加入主畫面」指引，但只在 Safari 且未 standalone 時顯示
 - 已安裝或用戶 dismiss 後，不反覆彈出提示
 
@@ -544,7 +544,7 @@ Prototype 可用 deterministic fixtures 起步；使用者新增、修改、刪�
 - 寫入操作：按鈕內 progress，disable 同一 action；頁面其餘安全操作可繼續
 - 成功 create/update/delete：toast 簡短確認，重要結果同時反映於頁面
 - Validation：欄位下方錯誤 + form summary；focus 第一個錯誤欄位
-- Empty state 要分「完全冇資料」同「filter 無結果」
+- Empty state 要區分「完全沒有資料」與「filter 無結果」
 - 全頁 fatal error 提供重設本地資料、返回首頁等復原入口
 - 使用 Error Boundary 隔離 route-level render error
 - Toast 使用 `aria-live="polite"`；阻塞錯誤使用 `role="alert"`
@@ -558,7 +558,7 @@ Prototype 可用 deterministic fixtures 起步；使用者新增、修改、刪�
 - 全部操作可用 keyboard 完成，focus 順序合理且 focus ring 清晰
 - Modal／drawer 有 focus trap、Escape 關閉、關閉後 focus 返回觸發元素
 - Icon-only button 有 accessible name 同 tooltip
-- Form 每個 input 有 persistent label；唔以 placeholder 代替 label
+- Form 每個 input 有 persistent label；不以 placeholder 代替 label
 - Error 透過 `aria-describedby` 連到欄位
 - Segmented control、tabs、menu 使用正確 ARIA pattern
 - 色彩對比達 AA；狀態不可只靠顏色
@@ -588,13 +588,13 @@ Prototype 可用 deterministic fixtures 起步；使用者新增、修改、刪�
 - 香港日期／日週月 boundary formatting
 - Local repository error normalization
 - URL filter serialize／parse
-- Recurring frequency label 同 payload mapping
+- Recurring frequency label 及 payload mapping
 
 ### 12.2 Component / integration
 
 - Local session redirect、logout、returnTo validation
-- Zustand stores 嘅 hydration、selector、persist／migration、跨 tab logout cleanup
-- Transaction form 三種 kind 嘅欄位切換同 validation
+- Zustand stores 的 hydration、selector、persist／migration、跨 tab logout cleanup
+- Transaction form 三種 kind 的欄位切換及 validation
 - Local UUID 唯一性同重複提交保護
 - Filter、sort、pagination 與 URL 同步
 - Refund 上限、轉帳不可退款、delete confirmation
@@ -604,7 +604,7 @@ Prototype 可用 deterministic fixtures 起步；使用者新增、修改、刪�
 
 ### 12.3 E2E critical paths
 
-1. Register -> 自動登入 -> 見到預設現金帳戶及分類
+1. Register -> 自動登入 -> 看到預設現金帳戶及分類
 2. 新增支出 -> Dashboard／交易列表反映結果
 3. 新增轉帳 -> 報表不計入收入／支出
 4. 搜尋及篩選交易 -> reload 後條件保留
@@ -633,13 +633,13 @@ VITE_APP_ENV=development
 - Production build 必須有 SPA fallback，未知 route 回 `index.html`
 - 部署時 frontend origin、asset URL 同 CSP 要一致
 - CI 次序：typecheck -> lint -> unit/integration -> build -> Playwright smoke
-- Production source map 如上傳 error tracker，唔應公開提供
+- Production source map 如上傳 error tracker，不應公開提供
 
 ---
 
 ## 14. Definition of Done
 
-一個 feature 只有符合以下條件先算完成：
+一個 feature 只有符合以下條件才算完成：
 
 - 實作本 spec 所列正常、loading、empty、error、offline 狀態
 - Mobile、tablet、desktop layout 經實機或 Playwright screenshot 驗證
@@ -655,9 +655,9 @@ VITE_APP_ENV=development
 
 ## 15. Pure frontend 限制／開發前要留意
 
-1. 本地 auth 只供 prototype route gating，唔提供真正安全邊界。
-2. `localStorage` 容量有限，單據圖片只保留 object URL／fixture URL，唔將大型 base64 persist。
-3. AI 辨識使用 deterministic mock result，唔聲稱係真實 OCR／AI output。
+1. 本地 auth 只供 prototype route gating，不提供真正安全邊界。
+2. `localStorage` 容量有限，單據圖片只保留 object URL／fixture URL，不將大型 base64 persist。
+3. AI 辨識使用 deterministic mock result，不聲稱是真實 OCR／AI output。
 4. 資料只存在當前 browser profile，清除 site data 會失去所有變更。
 5. 跨裝置同步、多人協作、server backup 同 recovery 不在 MVP 範圍。
 6. Hard delete 不可復原，frontend 不應提供虛假 undo。

@@ -129,7 +129,7 @@ export type PageTotals = {
     netCents: number;
 };
 
-/** 單筆交易對淨額的影響；轉帳只係搬錢，唔計。 */
+/** 單筆交易對淨額的影響；轉帳只是搬錢，不計。 */
 function netEffectCents(transaction: TransactionRow): number {
     if (transaction.kind === "transfer") return 0;
     return transaction.kind === "income" ? transaction.amount_cents : -transaction.amount_cents;
@@ -154,7 +154,7 @@ export function groupTransactionsByDate(transactions: TransactionRow[]): Transac
     return groups;
 }
 
-/** 本頁合計。API 只回當頁資料，所以呢個數字係「本頁」而唔係全部符合條件的交易。 */
+/** 本頁合計。API 只回當頁資料，所以此數字是「本頁」而非全部符合條件的交易。 */
 export function summarisePage(transactions: TransactionRow[]): PageTotals {
     let incomeCents = 0;
     let expenseCents = 0;

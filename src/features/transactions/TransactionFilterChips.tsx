@@ -11,7 +11,7 @@ type TransactionFilterChipsProps = {
     onClearAll: () => void;
 };
 
-/** 生效中的篩選，逐個可移除；比起淨係顯示一個數字，用戶睇得出實際條件。 */
+/** 生效中的篩選，逐個可移除；比起只顯示一個數字，用戶看得出實際條件。 */
 export const TransactionFilterChips = ({chips, onRemove, onClearAll}: TransactionFilterChipsProps) => {
     const intl = useIntl();
 

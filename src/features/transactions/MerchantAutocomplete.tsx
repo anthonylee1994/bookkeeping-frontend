@@ -13,7 +13,7 @@ type MerchantAutocompleteProps = {
     value: string;
     onChange: (merchant: Merchant | null) => void;
     error?: string;
-    /** 未對到現有商戶時嘅初始搜尋字（例如 AI 由單據讀到嘅名）。 */
+    /** 未對應到現有商戶時的初始搜尋字（例如 AI 由單據讀到的名稱）。 */
     defaultQuery?: string;
 };
 

@@ -5,7 +5,7 @@ type PageHeaderProps = {
     title: string;
     description?: string;
     actions?: React.ReactNode;
-    /** Mobile 時 actions 撐滿一行（例如 dashboard 嘅月份導覽）。 */
+    /** Mobile 時 actions 撐滿一行（例如 dashboard 的月份導覽）。 */
     actionsFullWidth?: boolean;
 };
 

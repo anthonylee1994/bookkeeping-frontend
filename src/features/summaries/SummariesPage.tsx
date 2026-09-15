@@ -29,7 +29,7 @@ export const SummariesPage = () => {
     const page = params.page ?? 1;
     const {summary, isLoading, error, reload} = useSummary(period, date, page);
 
-    // 換期間或日期一律由第一頁重新開始；serialize 唔帶 page 就等於清除。
+    // 換期間或日期一律由第一頁重新開始；serialize 不帶 page 就等於清除。
     const commit = (next: SummaryParams) => setSearchParams(serializeSummaryParams(next));
     const changePeriod = (nextPeriod: SummaryPeriod) => commit({period: nextPeriod, date: params.date});
     const changeDate = (nextDate: string) => commit({period, date: nextDate === "" ? undefined : nextDate});

@@ -51,7 +51,7 @@ export const TransactionsPage = () => {
         setSearchParams(serializeTransactionFilters(next));
     };
 
-    /** 改變條件一律返回第一頁，否則會停喺一個唔存在的頁數。 */
+    /** 改變條件一律返回第一頁，否則會停在一個不存在的頁數。 */
     const commitFromFirstPage = (next: TransactionFilters) => {
         commit({...next, page: undefined});
     };
@@ -90,7 +90,7 @@ export const TransactionsPage = () => {
     };
     const activeFilterCount = countActiveFilters(filters);
     const chips = describeActiveFilters(filters, names);
-    /** Mobile list 冇日期欄，靠分組顯示日期；但只有按日期排序時分組才有意義。 */
+    /** Mobile list 沒有日期欄，靠分組顯示日期；但只有按日期排序時分組才有意義。 */
     const grouped = sort === "occurred_at";
 
     const renderBody = () => {
@@ -187,7 +187,7 @@ export const TransactionsPage = () => {
             <PageHeader
                 title={intl.formatMessage(messages.nav.transactions)}
                 actions={
-                    // Mobile 已經有 FAB，唔好再放多粒同樣動作嘅 button 霸位。
+                    // Mobile 已經有 FAB，不要再放多一粒同樣動作的 button 佔位。
                     <Button asChild display={{base: "none", md: "inline-flex"}}>
                         <Link to={ROUTES.transactionNew}>
                             <PlusIcon />

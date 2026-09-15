@@ -201,7 +201,7 @@ describe("RecurringRulesPage", () => {
         await user.click(screen.getByRole("button", {name: "刪除"}));
 
         const dialog = await screen.findByRole("alertdialog");
-        expect(within(dialog).getByText("只會刪除呢條規則，已產生嘅交易會保留。")).toBeInTheDocument();
+        expect(within(dialog).getByText("只會刪除此規則，已產生的交易會保留。")).toBeInTheDocument();
         await user.click(within(dialog).getByRole("button", {name: "刪除"}));
 
         await waitFor(() => expect(deleteMock).toHaveBeenCalledWith(activeRule.id));
@@ -211,7 +211,7 @@ describe("RecurringRulesPage", () => {
         listMock.mockResolvedValue({ok: true, value: []});
         renderRecurringPage();
 
-        expect(await screen.findByText("沒有進行中嘅定期交易")).toBeInTheDocument();
+        expect(await screen.findByText("沒有進行中的定期交易")).toBeInTheDocument();
         expect(screen.getAllByRole("button", {name: /新增定期交易/}).length).toBeGreaterThan(0);
     });
 

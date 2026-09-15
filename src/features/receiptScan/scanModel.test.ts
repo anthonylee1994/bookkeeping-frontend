@@ -40,7 +40,7 @@ describe("previewToReviewValues", () => {
     });
 
     it("prefers the backend-resolved category id over the category hint", () => {
-        const values = previewToReviewValues(preview({amount_cents: 1250, kind: "expense", category_hint: "唔存在"}, "success", domainTestState.categories[1].id), reference);
+        const values = previewToReviewValues(preview({amount_cents: 1250, kind: "expense", category_hint: "不存在"}, "success", domainTestState.categories[1].id), reference);
 
         expect(values.categoryId).toBe(domainTestState.categories[1].id);
     });
@@ -52,7 +52,7 @@ describe("previewToReviewValues", () => {
     });
 
     it("leaves unmatched merchants and categories blank instead of guessing", () => {
-        const values = previewToReviewValues(preview({amount_cents: 1250, kind: "expense", merchant_name: "未見過的店", category_hint: "唔存在"}), reference);
+        const values = previewToReviewValues(preview({amount_cents: 1250, kind: "expense", merchant_name: "未見過的店", category_hint: "不存在"}), reference);
 
         expect(values.merchantId).toBe("");
         expect(values.categoryId).toBe("");
@@ -60,7 +60,7 @@ describe("previewToReviewValues", () => {
     });
 
     it("falls back to now when the parsed date is missing or unusable", () => {
-        expect(previewToReviewValues(preview({occurred_at: "唔係日期"}), reference).occurredAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+        expect(previewToReviewValues(preview({occurred_at: "不是日期"}), reference).occurredAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
         expect(previewToReviewValues(preview(null), reference)).toMatchObject({kind: "expense", amount: "", categoryId: "", merchantId: ""});
     });
 });

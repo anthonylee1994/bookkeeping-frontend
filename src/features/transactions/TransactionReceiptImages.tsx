@@ -19,7 +19,7 @@ const FallbackTile = ({label, boxSize}: {label: string; boxSize: string}) => {
     );
 };
 
-/** 單據圖：可放大查看；載入失敗轉 fallback，唔會重複重試。 */
+/** 單據圖：可放大查看；載入失敗轉 fallback，不會重複重試。 */
 export const TransactionReceiptImages = ({urls}: TransactionReceiptImagesProps) => {
     const intl = useIntl();
     const [failedUrls, setFailedUrls] = React.useState<string[]>([]);

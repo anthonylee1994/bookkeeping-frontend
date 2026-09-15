@@ -21,7 +21,7 @@ type TransactionFiltersPanelProps = {
 };
 
 /**
- * 進階篩選：desktop 用貼住按鈕的 popover（唔好霸成頁），mobile 用底部彈出的 drawer。
+ * 進階篩選：desktop 用貼住按鈕的 popover（不要佔滿整頁），mobile 用底部彈出的 drawer。
  * 草稿只在按「套用篩選」時才寫入 URL，避免每改一個欄位就重新查詢。
  */
 export const TransactionFiltersPanel = ({filters, activeCount, accounts, categories, merchants, onApply, onReset}: TransactionFiltersPanelProps) => {
@@ -31,7 +31,7 @@ export const TransactionFiltersPanel = ({filters, activeCount, accounts, categor
     const [draft, setDraft] = React.useState<TransactionFilterDraft>(() => toFilterDraft(filters));
 
     React.useEffect(() => {
-        // 每次打開都以目前生效的 filter 為準，唔好留低上次未套用的草稿。
+        // 每次打開都以目前生效的 filter 為準，不要留下上次未套用的草稿。
         // eslint-disable-next-line react-hooks/set-state-in-effect
         if (open) setDraft(toFilterDraft(filters));
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,7 +87,7 @@ export const TransactionFiltersPanel = ({filters, activeCount, accounts, categor
                     </Field.Root>
                 </SimpleGrid>
 
-                {/* 四個下拉排成兩欄，popover 先至唔使碌。 */}
+                {/* 四個下拉排成兩欄，popover 才不用滾動。 */}
                 <SimpleGrid columns={{base: 1, sm: 2}} gap="3">
                     <Field.Root>
                         <Field.Label>{intl.formatMessage(messages.transactions.filters.kind)}</Field.Label>

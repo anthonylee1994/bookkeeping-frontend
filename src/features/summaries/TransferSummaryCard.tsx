@@ -9,7 +9,7 @@ type TransferSummaryCardProps = {
     transfers: TransferSummary;
 };
 
-/** 轉帳獨立一卡，明文講清楚唔計入收入／支出／淨額。 */
+/** 轉帳獨立一卡，明文講清楚不計入收入／支出／淨額。 */
 export const TransferSummaryCard = ({transfers}: TransferSummaryCardProps) => {
     const intl = useIntl();
 

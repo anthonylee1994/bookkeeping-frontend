@@ -4,7 +4,7 @@ import {formatMessage, messages} from "@/lib/i18n";
 import {dollarsToCents} from "@/lib/money";
 import type {Account, AiPreview, Category, Merchant, TransactionInput} from "@/data/types";
 
-/** 低於呢個信心度就要明顯提示用戶逐項核對。 */
+/** 低於此信心度即須明顯提示用戶逐項核對。 */
 export const LOW_CONFIDENCE_THRESHOLD = 0.6;
 
 export type ScanReviewField = "amount" | "kind" | "occurredAt" | "merchant";
@@ -35,7 +35,7 @@ function findByName<Item extends {name: string}>(items: Item[], name: string | n
     return items.find(item => item.name.localeCompare(target, "zh-HK", {sensitivity: "accent"}) === 0) ?? null;
 }
 
-/** AI 可能回無效或缺失日期，一律退回「而家」，唔會令表單出 NaN。 */
+/** AI 可能回傳無效或缺失日期，一律退回「現在」，不會令表單出現 NaN。 */
 function toDateTimeLocal(iso: string | null | undefined): string {
     const value = iso?.trim() ?? "";
     const parsed = value === "" ? new Date(Number.NaN) : new Date(value);
@@ -51,7 +51,7 @@ export function confidencePercent(preview: AiPreview): number {
     return Math.round((preview.parsed?.confidence ?? 0) * 100);
 }
 
-/** AI 未能辨識嘅欄位；UI 會逐個標「需覆核」。 */
+/** AI 未能辨識的欄位；UI 會逐個標示「需覆核」。 */
 export function missingReviewFields(preview: AiPreview): ScanReviewField[] {
     const parsed = preview.parsed;
     const missing: ScanReviewField[] = [];
@@ -63,8 +63,8 @@ export function missingReviewFields(preview: AiPreview): ScanReviewField[] {
 }
 
 /**
- * Backend 已經用當前用戶嘅分類將 AI hint resolve 做 category id，優先信佢；
- * 冇（例如舊 cache 或 hint 對唔到）先退返落前端按名比對。
+ * Backend 已經用當前用戶的分類將 AI hint resolve 做 category id，優先相信它；
+ * 沒有（例如舊 cache 或 hint 無法對應）才退回前端按名稱比對。
  */
 function findSuggestedCategory(preview: AiPreview, categories: Category[], kind: ScanReviewValues["kind"]): Category | null {
     const suggestedId = preview.suggested_category_id;
@@ -78,7 +78,7 @@ function findSuggestedCategory(preview: AiPreview, categories: Category[], kind:
     );
 }
 
-/** 解析結果只做建議：對唔到名嘅商戶／分類留空，唔會亂猜。 */
+/** 解析結果只作建議：無法對應名稱的商戶／分類留空，不會亂猜。 */
 export function previewToReviewValues(preview: AiPreview, reference: ScanReference): ScanReviewValues {
     const parsed = preview.parsed;
     const kind = parsed?.kind ?? "expense";
@@ -98,7 +98,7 @@ export function previewToReviewValues(preview: AiPreview, reference: ScanReferen
     };
 }
 
-/** 對唔到現有商戶時，仍然將 AI 讀到嘅名帶入 autocomplete，畀用戶一撳就建立。 */
+/** 無法對應現有商戶時，仍然將 AI 讀到的名稱帶入 autocomplete，讓用戶一按即可建立。 */
 export function suggestedMerchantName(preview: AiPreview): string {
     return preview.parsed?.merchant_name?.trim() ?? "";
 }

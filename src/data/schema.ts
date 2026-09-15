@@ -1,6 +1,6 @@
 import {z} from "zod";
 
-/* ---------- 共用 primitive：input schema、entity schema、API response schema 都重用呢批 ---------- */
+/* ---------- 共用 primitive：input schema、entity schema、API response schema 都重用這批 ---------- */
 
 export const uuidSchema = z.string().uuid();
 export const currencySchema = z.literal("HKD");

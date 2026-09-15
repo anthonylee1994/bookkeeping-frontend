@@ -1,7 +1,7 @@
 /*
- * 全部視覺都行 Chakra 嘅 design system（src/theme/system.ts）。
- * 呢度淨返 Chakra 管唔到嘅嘢：safe-area 高度同頁面切換動畫。
- * 字體行 system stack（見 theme），因為 CSP 唔容許外部 font host。
+ * 全部視覺都採用 Chakra 的 design system（src/theme/system.ts）。
+ * 這裡只剩 Chakra 管不到的內容：safe-area 高度與頁面切換動畫。
+ * 字體採用 system stack（見 theme），因為 CSP 不容許外部 font host。
  */
 
 html {
@@ -11,7 +11,7 @@ html {
 body {
     margin: 0;
     min-height: 100dvh;
-    /* Vendor-prefixed，Chakra 嘅 SystemStyleObject 唔收，所以留喺呢度。 */
+    /* Vendor-prefixed，Chakra 的 SystemStyleObject 不接受，所以留在這裡。 */
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
 }

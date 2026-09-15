@@ -13,16 +13,16 @@ type CategoryBreakdownChartProps = {
     kind: CategoryBreakdownKind;
     title: string;
     description: string;
-    /** 每種分類最多顯示幾個；唔填即 5 個。 */
+    /** 每種分類最多顯示幾個；不填即 5 個。 */
     limit?: number;
-    /** 冇資料時嘅文案。 */
+    /** 沒有資料時的文案。 */
     emptyMessage: string;
 };
 
 /**
- * 單一種類（收入或支出）嘅分類 donut chart。Recharts 內建 accessibility layer，
+ * 單一種類（收入或支出）的分類 donut chart。Recharts 內建 accessibility layer，
  * 圖表可以用鍵盤 focus 再用方向鍵移動 tooltip；旁邊同時提供完整資料表。
- * 收入同支出各自一張卡，唔用 tab 切換。
+ * 收入與支出各自一張卡，不用 tab 切換。
  */
 export const CategoryBreakdownChart = ({breakdown, kind, title, description, limit, emptyMessage}: CategoryBreakdownChartProps) => {
     const intl = useIntl();

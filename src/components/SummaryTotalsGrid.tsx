@@ -19,7 +19,7 @@ type SummaryTile = {
 };
 
 /**
- * 淨額／收入／支出三個數字卡。Mobile 用緊湊 2-column：淨額橫跨兩格，收入同支出各佔一格；
+ * 淨額／收入／支出三個數字卡。Mobile 用緊湊 2-column：淨額橫跨兩格，收入與支出各佔一格；
  * 金額用 `clamp()` 隨 viewport 縮放，避免窄機時數字斷行。
  */
 export const SummaryTotalsGrid = ({netCents, incomeCents, expenseCents, netLabel, incomeLabel, expenseLabel}: SummaryTotalsGridProps) => {
