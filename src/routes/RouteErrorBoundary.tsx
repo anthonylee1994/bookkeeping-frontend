@@ -2,7 +2,7 @@ import React from "react";
 import {TriangleAlertIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
-import {Button} from "@/components/ui/Button";
+import {Button, Heading, Icon, Stack, Text, Wrap} from "@chakra-ui/react";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 
@@ -25,20 +25,26 @@ export const FatalErrorFallback = ({onRetry}: FatalErrorFallbackProps) => {
     };
 
     return (
-        <div role="alert" className="mx-auto flex max-w-md flex-col items-center gap-3 py-16 text-center">
-            <TriangleAlertIcon aria-hidden className="text-expense size-8" />
-            <h1 className="text-foreground text-lg font-medium">{intl.formatMessage(messages.fatal.title)}</h1>
-            <p className="text-muted-foreground text-sm">{intl.formatMessage(messages.fatal.description)}</p>
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+        <Stack role="alert" mx="auto" maxW="md" align="center" gap="3" py="16" textAlign="center">
+            <Icon size="xl" color="fg.error" aria-hidden>
+                <TriangleAlertIcon />
+            </Icon>
+            <Heading as="h1" size="lg">
+                {intl.formatMessage(messages.fatal.title)}
+            </Heading>
+            <Text fontSize="sm" color="fg.muted">
+                {intl.formatMessage(messages.fatal.description)}
+            </Text>
+            <Wrap mt="2" gap="2" justify="center" align="center">
                 <Button onClick={onRetry}>{intl.formatMessage(messages.fatal.retry)}</Button>
-                <Button variant="outline" asChild>
+                <Button asChild variant="outline">
                     <Link to={ROUTES.dashboard}>{intl.formatMessage(messages.fatal.home)}</Link>
                 </Button>
                 <Button variant="ghost" onClick={resetLocalData}>
                     {intl.formatMessage(messages.fatal.reset)}
                 </Button>
-            </div>
-        </div>
+            </Wrap>
+        </Stack>
     );
 };
 

@@ -1,22 +1,34 @@
 import React from "react";
-import {cn} from "@/lib/utils";
+import {Box, Flex, HStack, Heading, Text} from "@chakra-ui/react";
 
 type PageHeaderProps = {
     title: string;
     description?: string;
     actions?: React.ReactNode;
-    className?: string;
 };
 
-/** 每個 page 頂部嘅標題區。 */
-export const PageHeader = ({title, description, actions, className}: PageHeaderProps) => {
+/**
+ * 每個 page 頂部嘅標題區。Mobile 標題由 app bar 負責，所以呢度只留 screen reader 用嘅 h1；
+ * desktop 冇 app bar 標題，就顯示大標題。
+ */
+export const PageHeader = ({title, description, actions}: PageHeaderProps) => {
     return (
-        <header className={cn("flex flex-wrap items-start justify-between gap-3", className)}>
-            <div className="min-w-0">
-                <h1 className="text-foreground text-xl font-semibold">{title}</h1>
-                {description === undefined ? null : <p className="text-muted-foreground mt-1 text-sm">{description}</p>}
-            </div>
-            {actions === undefined ? null : <div className="flex items-center gap-2">{actions}</div>}
-        </header>
+        <Flex as="header" wrap="wrap" align="flex-start" justify="space-between" gap="3" mb="4">
+            <Box minW="0">
+                <Heading as="h1" size="2xl" letterSpacing="tight" srOnly={{base: true, md: false}}>
+                    {title}
+                </Heading>
+                {description === undefined ? null : (
+                    <Text mt="1" fontSize="sm" color="fg.muted">
+                        {description}
+                    </Text>
+                )}
+            </Box>
+            {actions === undefined ? null : (
+                <HStack gap="2" align="center">
+                    {actions}
+                </HStack>
+            )}
+        </Flex>
     );
 };

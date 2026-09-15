@@ -1,5 +1,4 @@
 import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
 import {fileURLToPath, URL} from "node:url";
 import {loadEnv} from "vite";
 import type {Plugin} from "vite";
@@ -38,7 +37,6 @@ export default defineConfig(({mode}) => {
         },
         plugins: [
             react(),
-            tailwindcss(),
             contentSecurityPolicy(env.VITE_API_URL),
             VitePWA({
                 registerType: "autoUpdate",

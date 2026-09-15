@@ -1,16 +1,12 @@
 import React from "react";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {Loader2Icon} from "lucide-react";
 import {useForm} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {useNavigate} from "react-router";
 import {z} from "zod";
-import {Banner} from "@/components/ui/Banner";
-import {Button} from "@/components/ui/Button";
-import {TextField} from "@/components/ui/TextField";
+import {Alert, Button, Field, Input, Stack} from "@chakra-ui/react";
 import {AuthRepository} from "@/data/authRepository";
 import {PasswordField} from "@/features/auth/PasswordField";
-import {useToast} from "@/hooks/useToast";
 import {formatMessage, messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 import {useAuthStore} from "@/stores/authStore";
@@ -38,7 +34,6 @@ type RegisterFormProps = {
 export const RegisterForm = ({returnTo}: RegisterFormProps) => {
     const intl = useIntl();
     const navigate = useNavigate();
-    const {pushToast} = useToast();
     const [formError, setFormError] = React.useState<string | null>(null);
     const {register, handleSubmit, reset, formState} = useForm<RegisterValues>({
         resolver: zodResolver(registerSchema),
@@ -54,20 +49,27 @@ export const RegisterForm = ({returnTo}: RegisterFormProps) => {
             return;
         }
         useAuthStore.getState().setSession(result.value.token, result.value.user);
-        pushToast({kind: "success", message: intl.formatMessage(messages.auth.registerSuccess)});
         navigate(returnTo ?? ROUTES.dashboard, {replace: true});
     });
 
     return (
-        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
-            <TextField label={intl.formatMessage(messages.auth.username)} autoComplete="username" autoFocus error={formState.errors.username?.message} {...register("username")} />
+        <Stack as="form" onSubmit={onSubmit} gap="4">
+            <Field.Root invalid={formState.errors.username !== undefined}>
+                <Field.Label>{intl.formatMessage(messages.auth.username)}</Field.Label>
+                <Input autoComplete="username" autoFocus {...register("username")} />
+                {formState.errors.username === undefined ? null : <Field.ErrorText>{formState.errors.username.message}</Field.ErrorText>}
+            </Field.Root>
             <PasswordField label={intl.formatMessage(messages.auth.password)} autoComplete="new-password" error={formState.errors.password?.message} {...register("password")} />
             <PasswordField label={intl.formatMessage(messages.auth.confirmPassword)} autoComplete="new-password" error={formState.errors.confirmPassword?.message} {...register("confirmPassword")} />
-            {formError === null ? null : <Banner variant="error">{formError}</Banner>}
-            <Button type="submit" disabled={formState.isSubmitting}>
-                {formState.isSubmitting ? <Loader2Icon aria-hidden className="animate-spin" /> : null}
+            {formError === null ? null : (
+                <Alert.Root status="error" role="alert" rounded="lg">
+                    <Alert.Indicator />
+                    <Alert.Title>{formError}</Alert.Title>
+                </Alert.Root>
+            )}
+            <Button type="submit" width="full" loading={formState.isSubmitting}>
                 {intl.formatMessage(messages.auth.registerSubmit)}
             </Button>
-        </form>
+        </Stack>
     );
 };

@@ -1,53 +1,121 @@
-import {ChevronLeftIcon, ChevronRightIcon, WalletIcon} from "lucide-react";
+import {Box, Circle, Flex, HStack, Icon, Stack, Text} from "@chakra-ui/react";
+import {PlusIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, NavLink} from "react-router";
 import {NAV_ITEMS} from "@/components/layout/navItems";
-import {IconButton} from "@/components/ui/IconButton";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
-import {cn} from "@/lib/utils";
+import {useAuthStore} from "@/stores/authStore";
+
+export const SIDEBAR_WIDTH = "15rem";
+export const SIDEBAR_COLLAPSED_WIDTH = "4.5rem";
 
 type SidebarNavProps = {
     collapsed: boolean;
-    onToggle: () => void;
 };
 
-/** Tablet／desktop 左側 navigation；tablet 可以收起。 */
-export const SidebarNav = ({collapsed, onToggle}: SidebarNavProps) => {
+/** Tablet／desktop 左側 navigation rail；collapsed 時淨返 icon。 */
+export const SidebarNav = ({collapsed}: SidebarNavProps) => {
     const intl = useIntl();
+    const username = useAuthStore(state => state.user?.username);
+    const addLabel = intl.formatMessage(messages.layout.addTransaction);
 
     return (
-        <aside className={cn("border-border bg-card fixed inset-y-0 left-0 z-40 hidden flex-col border-r md:flex", collapsed ? "w-16" : "w-60")}>
-            <div className="border-border flex h-14 items-center gap-2 border-b px-3">
-                <Link to={ROUTES.dashboard} className="flex min-w-0 items-center gap-2">
-                    <WalletIcon aria-hidden className="text-primary size-5 shrink-0" />
-                    <span className={cn("text-foreground truncate font-medium", collapsed && "sr-only")}>{intl.formatMessage(messages.app.name)}</span>
+        <Flex
+            as="aside"
+            direction="column"
+            position="fixed"
+            insetY="0"
+            left="0"
+            zIndex="40"
+            display={{base: "none", md: "flex"}}
+            width={collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}
+            bg="bg.panel"
+            borderRightWidth="1px"
+            borderColor="border"
+            transition="width 200ms ease"
+        >
+            <HStack h="16" px="3" gap="2.5">
+                <Link to={ROUTES.dashboard} aria-label={intl.formatMessage(messages.app.name)}>
+                    <HStack gap="2.5" px="1.5" py="1">
+                        <Circle size="9" bg="brand.solid" color="brand.contrast" flexShrink="0">
+                            <Icon size="md">
+                                <WalletIcon />
+                            </Icon>
+                        </Circle>
+                        <Text fontWeight="semibold" letterSpacing="tight" truncate srOnly={collapsed}>
+                            {intl.formatMessage(messages.app.name)}
+                        </Text>
+                    </HStack>
                 </Link>
-                <IconButton label={intl.formatMessage(collapsed ? messages.layout.expandSidebar : messages.layout.collapseSidebar)} onClick={onToggle} showTooltip size="icon-sm" className="ml-auto">
-                    {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-                </IconButton>
-            </div>
-            <nav aria-label={intl.formatMessage(messages.layout.primaryNav)} className="flex-1 space-y-1 overflow-y-auto p-2">
+            </HStack>
+
+            <Box px={collapsed ? "3.5" : "3"} pb="2">
+                <Link to={ROUTES.transactionNew} aria-label={addLabel} title={addLabel}>
+                    <HStack
+                        h="11"
+                        justify="center"
+                        gap="2"
+                        rounded="xl"
+                        bg="brand.solid"
+                        color="brand.contrast"
+                        fontSize="sm"
+                        fontWeight="medium"
+                        shadow="sm"
+                        transition="background 150ms ease"
+                        _hover={{bg: "brand.emphasized"}}
+                    >
+                        <Icon size="md">
+                            <PlusIcon />
+                        </Icon>
+                        <Text srOnly={collapsed}>{addLabel}</Text>
+                    </HStack>
+                </Link>
+            </Box>
+
+            <Stack as="nav" aria-label={intl.formatMessage(messages.layout.primaryNav)} flex="1" gap="1" overflowY="auto" p="3">
                 {NAV_ITEMS.map(item => {
-                    const Icon = item.icon;
+                    const ItemIcon = item.icon;
+                    const label = intl.formatMessage(item.label);
                     return (
-                        <NavLink
-                            key={item.to}
-                            to={item.to}
-                            end={item.to === ROUTES.dashboard}
-                            className={({isActive}) =>
-                                cn(
-                                    "flex items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
-                                    isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                                )
-                            }
-                        >
-                            <Icon aria-hidden className="size-5 shrink-0" />
-                            <span className={cn("truncate", collapsed && "sr-only")}>{intl.formatMessage(item.label)}</span>
+                        <NavLink key={item.to} to={item.to} end={item.to === ROUTES.dashboard} title={collapsed ? label : undefined}>
+                            {({isActive}) => (
+                                <HStack
+                                    h="11"
+                                    px={collapsed ? "0" : "2.5"}
+                                    justify={collapsed ? "center" : "flex-start"}
+                                    gap="3"
+                                    rounded="lg"
+                                    fontSize="sm"
+                                    fontWeight="medium"
+                                    bg={isActive ? "brand.subtle" : "transparent"}
+                                    color={isActive ? "brand.fg" : "fg.muted"}
+                                    transition="background 150ms ease, color 150ms ease"
+                                    _hover={isActive ? undefined : {bg: "bg.subtle", color: "fg"}}
+                                >
+                                    <Icon size="md" flexShrink="0">
+                                        <ItemIcon />
+                                    </Icon>
+                                    <Text truncate srOnly={collapsed}>
+                                        {label}
+                                    </Text>
+                                </HStack>
+                            )}
                         </NavLink>
                     );
                 })}
-            </nav>
-        </aside>
+            </Stack>
+
+            {username === undefined ? null : (
+                <HStack borderTopWidth="1px" borderColor="border" p="3" gap="2.5" justify={collapsed ? "center" : "flex-start"}>
+                    <Circle size="9" bg="bg.subtle" color="fg.muted" fontSize="sm" fontWeight="medium" textTransform="uppercase" flexShrink="0" aria-hidden>
+                        {username.slice(0, 1)}
+                    </Circle>
+                    <Text fontSize="sm" truncate srOnly={collapsed}>
+                        {username}
+                    </Text>
+                </HStack>
+            )}
+        </Flex>
     );
 };

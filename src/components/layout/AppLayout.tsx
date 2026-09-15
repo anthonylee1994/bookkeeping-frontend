@@ -1,17 +1,20 @@
 import React from "react";
-import {Outlet} from "react-router";
-import {AddTransactionFab} from "@/components/layout/AddTransactionFab";
+import {Box, Container, Flex} from "@chakra-ui/react";
+import {Outlet, useLocation} from "react-router";
 import {AppHeader} from "@/components/layout/AppHeader";
-import {BottomNav} from "@/components/layout/BottomNav";
+import {MobileTabBar} from "@/components/layout/MobileTabBar";
 import {OfflineBanner} from "@/components/layout/OfflineBanner";
-import {SidebarNav} from "@/components/layout/SidebarNav";
+import {SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH, SidebarNav} from "@/components/layout/SidebarNav";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {RouteErrorBoundary} from "@/routes/RouteErrorBoundary";
-import {cn} from "@/lib/utils";
 
-/** App shell：mobile header + bottom nav；tablet／desktop 左側 sidebar。 */
+/**
+ * App shell 行 mobile-app 模式：mobile 係 app bar + 底部 floating tab bar，
+ * tablet／desktop 換成左側 sidebar rail，內容永遠置中喺 container 之內。
+ */
 export const AppLayout = () => {
     const isDesktop = useMediaQuery(DESKTOP_QUERY);
+    const location = useLocation();
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(!isDesktop);
 
     React.useEffect(() => {
@@ -23,19 +26,28 @@ export const AppLayout = () => {
     };
 
     return (
-        <div className="bg-background min-h-dvh">
-            <SidebarNav collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
-            <div className={cn("flex min-h-dvh flex-col", sidebarCollapsed ? "md:pl-16" : "md:pl-60")}>
+        <Box bg="bg" minH="100dvh">
+            <SidebarNav collapsed={sidebarCollapsed} />
+            <Flex direction="column" minH="100dvh" transition="padding 200ms ease" pl={{base: 0, md: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}}>
                 <AppHeader sidebarCollapsed={sidebarCollapsed} onToggleSidebar={toggleSidebar} />
                 <OfflineBanner />
-                <main id="main" className="mx-auto w-full max-w-[1280px] flex-1 px-4 pt-4 pb-24 md:pb-8">
+                <Container
+                    as="main"
+                    id="main"
+                    key={location.pathname}
+                    maxW="7xl"
+                    flex="1"
+                    px={{base: 4, md: 6}}
+                    pt={{base: 4, md: 6}}
+                    pb={{base: 28, md: 10}}
+                    animation="page-enter 220ms cubic-bezier(0.32, 0.72, 0, 1) both"
+                >
                     <RouteErrorBoundary>
                         <Outlet />
                     </RouteErrorBoundary>
-                </main>
-                <BottomNav />
-                <AddTransactionFab />
-            </div>
-        </div>
+                </Container>
+                <MobileTabBar />
+            </Flex>
+        </Box>
     );
 };

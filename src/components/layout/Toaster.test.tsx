@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it} from "vitest";
 import {screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {Toaster} from "@/components/ui/Toaster";
+import {Toaster} from "@/components/layout/Toaster";
 import {useUiStore} from "@/stores/uiStore";
 import {renderWithIntl} from "@/test/renderWithIntl";
 

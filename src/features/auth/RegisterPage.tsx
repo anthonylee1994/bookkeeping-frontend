@@ -1,4 +1,5 @@
 import React from "react";
+import {Link as ChakraLink} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {Link, useSearchParams} from "react-router";
 import {AuthCard} from "@/features/auth/AuthCard";
@@ -16,13 +17,12 @@ export const RegisterPage = () => {
     return (
         <AuthCard
             title={intl.formatMessage(messages.auth.registerTitle)}
-            description={intl.formatMessage(messages.app.description)}
             footer={
                 <React.Fragment>
                     {intl.formatMessage(messages.auth.haveAccount)}{" "}
-                    <Link to={loginHref} className="text-primary underline-offset-4 hover:underline">
-                        {intl.formatMessage(messages.auth.loginCta)}
-                    </Link>
+                    <ChakraLink asChild color="brand.fg" fontWeight="medium">
+                        <Link to={loginHref}>{intl.formatMessage(messages.auth.loginCta)}</Link>
+                    </ChakraLink>
                 </React.Fragment>
             }
         >

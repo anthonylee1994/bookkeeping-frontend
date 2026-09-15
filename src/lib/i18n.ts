@@ -24,6 +24,9 @@ export const messages = {
         summaries: {id: "nav.summaries", defaultMessage: "報表"},
         recurringRules: {id: "nav.recurringRules", defaultMessage: "定期交易"},
         settings: {id: "nav.settings", defaultMessage: "設定"},
+        accounts: {id: "nav.accounts", defaultMessage: "帳戶"},
+        categories: {id: "nav.categories", defaultMessage: "分類"},
+        merchants: {id: "nav.merchants", defaultMessage: "商戶"},
     },
     common: {
         create: {id: "common.create", defaultMessage: "新增"},
@@ -129,6 +132,9 @@ export const messages = {
     },
     transactions: {
         refundSuffix: {id: "transactions.refundSuffix", defaultMessage: "退款"},
+        newTitle: {id: "transactions.newTitle", defaultMessage: "新增交易"},
+        editTitle: {id: "transactions.editTitle", defaultMessage: "修改交易"},
+        detailTitle: {id: "transactions.detailTitle", defaultMessage: "交易詳情"},
     },
     pagination: {
         label: {id: "pagination.label", defaultMessage: "分頁"},
@@ -143,6 +149,9 @@ export const messages = {
         expandSidebar: {id: "layout.expandSidebar", defaultMessage: "展開側欄"},
         collapseSidebar: {id: "layout.collapseSidebar", defaultMessage: "收起側欄"},
         addTransaction: {id: "layout.addTransaction", defaultMessage: "新增交易"},
+        back: {id: "layout.back", defaultMessage: "返回"},
+        moreNav: {id: "layout.moreNav", defaultMessage: "更多"},
+        account: {id: "layout.account", defaultMessage: "帳戶"},
     },
     notFound: {
         title: {id: "notFound.title", defaultMessage: "搵唔到呢一頁"},

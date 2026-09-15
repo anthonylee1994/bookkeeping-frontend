@@ -1,19 +1,20 @@
+import React from "react";
 import {BrowserRouter} from "react-router";
 import {FullPageLoading} from "@/components/layout/FullPageLoading";
-import {Toaster} from "@/components/ui/Toaster";
-import {TooltipProvider} from "@/components/ui/Tooltip";
+import {Toaster} from "@/components/layout/Toaster";
 import {AppRoutes} from "@/routes/AppRoutes";
 import {useSessionBootstrap} from "@/routes/useSessionBootstrap";
 
+/** HeroUI v3 唔需要 Provider，所以呢度淨返 router 同全域 toast。 */
 export const App = () => {
     const sessionStatus = useSessionBootstrap();
 
     return (
         <BrowserRouter>
-            <TooltipProvider>
+            <React.Fragment>
                 {sessionStatus === "loading" ? <FullPageLoading /> : <AppRoutes />}
                 <Toaster />
-            </TooltipProvider>
+            </React.Fragment>
         </BrowserRouter>
     );
 };

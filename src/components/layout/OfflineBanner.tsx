@@ -1,6 +1,6 @@
+import {Alert, Box} from "@chakra-ui/react";
 import {WifiOffIcon} from "lucide-react";
 import {useIntl} from "react-intl";
-import {Banner} from "@/components/ui/Banner";
 import {useOffline} from "@/hooks/useOffline";
 import {messages} from "@/lib/i18n";
 
@@ -14,10 +14,13 @@ export const OfflineBanner = () => {
     }
 
     return (
-        <div className="px-4 pt-3">
-            <Banner variant="warning" icon={<WifiOffIcon />}>
-                {intl.formatMessage(messages.offline.banner)}
-            </Banner>
-        </div>
+        <Box px="4" pt="3">
+            <Alert.Root status="warning" role="status" rounded="lg">
+                <Alert.Indicator>
+                    <WifiOffIcon />
+                </Alert.Indicator>
+                <Alert.Title>{intl.formatMessage(messages.offline.banner)}</Alert.Title>
+            </Alert.Root>
+        </Box>
     );
 };

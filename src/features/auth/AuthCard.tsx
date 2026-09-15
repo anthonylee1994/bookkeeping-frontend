@@ -1,5 +1,5 @@
 import React from "react";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/Card";
+import {Card, Text} from "@chakra-ui/react";
 
 type AuthCardProps = {
     title: string;
@@ -11,15 +11,21 @@ type AuthCardProps = {
 /** 登入／註冊共用卡片外殼。 */
 export const AuthCard = ({title, description, children, footer}: AuthCardProps) => {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                {description === undefined ? null : <CardDescription>{description}</CardDescription>}
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
+        <Card.Root rounded="2xl" shadow="md" borderColor="border">
+            <Card.Header pb="4">
+                <Card.Title fontSize="lg" letterSpacing="tight">
+                    {title}
+                </Card.Title>
+                {description === undefined ? null : <Card.Description>{description}</Card.Description>}
+            </Card.Header>
+            <Card.Body gap="4" pt="0">
                 {children}
-                {footer === undefined ? null : <div className="text-muted-foreground text-center text-sm">{footer}</div>}
-            </CardContent>
-        </Card>
+                {footer === undefined ? null : (
+                    <Text fontSize="sm" color="fg.muted" textAlign="center">
+                        {footer}
+                    </Text>
+                )}
+            </Card.Body>
+        </Card.Root>
     );
 };

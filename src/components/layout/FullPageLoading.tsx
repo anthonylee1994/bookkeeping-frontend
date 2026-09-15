@@ -1,4 +1,4 @@
-import {Loader2Icon} from "lucide-react";
+import {Center, HStack, Spinner, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {messages} from "@/lib/i18n";
 
@@ -6,9 +6,11 @@ import {messages} from "@/lib/i18n";
 export const FullPageLoading = () => {
     const intl = useIntl();
     return (
-        <div role="status" aria-live="polite" className="text-muted-foreground flex min-h-dvh items-center justify-center gap-2">
-            <Loader2Icon aria-hidden className="size-5 animate-spin" />
-            <span>{intl.formatMessage(messages.common.loading)}</span>
-        </div>
+        <Center role="status" aria-live="polite" minH="100dvh" color="fg.muted">
+            <HStack gap="2">
+                <Spinner size="sm" />
+                <Text>{intl.formatMessage(messages.common.loading)}</Text>
+            </HStack>
+        </Center>
     );
 };

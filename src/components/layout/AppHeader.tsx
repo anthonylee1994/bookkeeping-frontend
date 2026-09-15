@@ -1,43 +1,79 @@
-import {LogOutIcon, MenuIcon, WalletIcon} from "lucide-react";
+import {Box, Center, Flex, Heading, Icon, IconButton} from "@chakra-ui/react";
+import {ArrowLeftIcon, LogOutIcon, PanelLeftIcon, ScanLineIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
-import {Link} from "react-router";
-import {IconButton} from "@/components/ui/IconButton";
+import {Link, useNavigate} from "react-router";
+import {useRouteMeta} from "@/components/layout/useRouteMeta";
 import {useLogout} from "@/hooks/useLogout";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
-import {useAuthStore} from "@/stores/authStore";
 
 type AppHeaderProps = {
     sidebarCollapsed: boolean;
     onToggleSidebar: () => void;
 };
 
+/**
+ * Mobile 做 native app bar（返回掣／置中標題／右側動作），
+ * desktop 做 sidebar 上方嘅工具列。兩者共用同一個 sticky blur 樣式。
+ */
 export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) => {
     const intl = useIntl();
-    const username = useAuthStore(state => state.user?.username);
+    const navigate = useNavigate();
     const logout = useLogout();
+    const {title, isRoot} = useRouteMeta();
+
+    const goBack = () => {
+        if (window.history.length > 1) {
+            void navigate(-1);
+            return;
+        }
+        void navigate(ROUTES.dashboard);
+    };
+
+    const sidebarLabel = intl.formatMessage(sidebarCollapsed ? messages.layout.expandSidebar : messages.layout.collapseSidebar);
+    const scanLabel = intl.formatMessage(messages.nav.scan);
+    const signOutLabel = intl.formatMessage(messages.auth.signOut);
 
     return (
-        <header className="border-border bg-background/95 sticky top-0 z-30 flex h-14 items-center gap-2 border-b px-4 backdrop-blur">
-            <IconButton
-                label={intl.formatMessage(sidebarCollapsed ? messages.layout.expandSidebar : messages.layout.collapseSidebar)}
-                onClick={onToggleSidebar}
-                showTooltip={false}
-                size="icon-sm"
-                className="hidden md:inline-flex"
-            >
-                <MenuIcon />
-            </IconButton>
-            <Link to={ROUTES.dashboard} className="flex items-center gap-2 md:hidden">
-                <WalletIcon aria-hidden className="text-primary size-5" />
-                <span className="text-foreground font-medium">{intl.formatMessage(messages.app.name)}</span>
-            </Link>
-            <div className="ml-auto flex items-center gap-2">
-                {username === undefined ? null : <span className="text-muted-foreground hidden max-w-40 truncate text-sm sm:inline">{username}</span>}
-                <IconButton label={intl.formatMessage(messages.auth.signOut)} onClick={logout} showTooltip size="icon-sm">
-                    <LogOutIcon />
-                </IconButton>
-            </div>
-        </header>
+        <Box as="header" position="sticky" top="0" zIndex="30" bg="bg/80" backdropFilter="blur(16px)">
+            <Flex h={{base: 14, md: 16}} maxW="7xl" mx="auto" px={{base: 2, md: 4}} align="center" gap="1" borderBottomWidth="1px" borderColor="border">
+                <Flex flexShrink="0" w={{base: 14, md: "auto"}} justify="flex-start">
+                    <IconButton aria-label={sidebarLabel} onClick={onToggleSidebar} variant="ghost" size="sm" display={{base: "none", md: "inline-flex"}}>
+                        <PanelLeftIcon />
+                    </IconButton>
+                    {isRoot ? (
+                        <Center asChild w="11" h="11" color="brand.fg" display={{base: "flex", md: "none"}}>
+                            <Link to={ROUTES.dashboard} aria-label={intl.formatMessage(messages.app.name)}>
+                                <Icon size="lg">
+                                    <WalletIcon />
+                                </Icon>
+                            </Link>
+                        </Center>
+                    ) : (
+                        <IconButton aria-label={intl.formatMessage(messages.layout.back)} onClick={goBack} variant="ghost" size="sm" display={{base: "inline-flex", md: "none"}}>
+                            <ArrowLeftIcon />
+                        </IconButton>
+                    )}
+                </Flex>
+
+                {/* Mobile 用 app bar 做標題；desktop 標題交返畀頁面內嘅 PageHeader。 */}
+                <Box flex="1" minW="0">
+                    <Heading as="h2" size="md" textAlign="center" truncate display={{base: "block", md: "none"}}>
+                        {intl.formatMessage(title)}
+                    </Heading>
+                </Box>
+
+                <Flex gap="1" align="center" justify="flex-end" flexShrink="0">
+                    <IconButton asChild aria-label={scanLabel} title={scanLabel} variant="ghost" size="sm">
+                        <Link to={ROUTES.scan}>
+                            <ScanLineIcon />
+                        </Link>
+                    </IconButton>
+                    <IconButton aria-label={signOutLabel} title={signOutLabel} onClick={logout} variant="ghost" size="sm">
+                        <LogOutIcon />
+                    </IconButton>
+                </Flex>
+            </Flex>
+        </Box>
     );
 };
