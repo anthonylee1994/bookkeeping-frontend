@@ -1,0 +1,16 @@
+export const ROUTES = {
+    login: "/login",
+    register: "/register",
+    dashboard: "/",
+    transactions: "/transactions",
+    transactionNew: "/transactions/new",
+    transactionDetail: "/transactions/:id",
+    transactionEdit: "/transactions/:id/edit",
+    scan: "/scan",
+    summaries: "/summaries",
+    recurringRules: "/recurring-rules",
+    settings: "/settings",
+    settingsAccounts: "/settings/accounts",
+    settingsCategories: "/settings/categories",
+    settingsMerchants: "/settings/merchants",
+} as const;

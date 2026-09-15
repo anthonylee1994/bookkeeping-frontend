@@ -310,28 +310,39 @@ Date（`Asia/Hong_Kong`）：
 
 **檔案**：`src/app.tsx`、`src/main.tsx`、`src/routes/*`、`src/components/layout/*`
 
-Routes 跟 spec §4。Lazy load：transactions、scan、summaries、recurring、settings、recharts。
+**Bootstrap** — `src/routes/useSessionBootstrap.ts`
 
-Guard：
+1. `hydrateAuthStore()` 由 localStorage 讀 token
+2. token 有效就 `AuthRepository.getMe`，成功 `setSession` 補返 user
+3. **只有 `unauthorized` 才 `clearSession`**（其他錯誤保留 token，避免 offline reload 被登出）
+4. 完成前 render `<FullPageLoading/>`，**唔閃 login**
+5. `subscribeToAuthStorageEvents()` 支援跨 tab logout
 
-1. Hydrate auth persist
-2. 有 token 就 `getMe`（本地）
-3. Hydration 完成前全頁 loading，**唔閃 login**
-4. 未登入 private → `/login?returnTo=`
-5. 已登入 `/login` `/register` → `/`
-6. 404 page
+**Routes** — `src/routes/AppRoutes.tsx`、`paths.ts`
 
-Layout：
+- `ROUTES` 集中 path（跟 spec §4）
+- `RedirectIfAuthenticated`：已登入入 `/login`／`/register` → `/`
+- `RequireAuth`：未登入 → `/login?returnTo=<pathname+search>`；`returnTo` 用 `parseReturnTo` 驗證
+- `LazyRoute`（`React.lazy` + `Suspense`）lazy load：transactions、scan、summaries、recurring、settings（+ settings 三頁）；dashboard／auth eager
+- `NotFoundPage`：catch-all 404
+- `RouteErrorBoundary`（per route）：fatal 提供「重試」／「返首頁」／「清除本機資料」
 
-- `<768`：header 56px + safe-area；bottom nav 5 項（首頁、交易、掃描置中相機 icon、報表、設定）；FAB 新增交易喺 nav 上方
-- `768–1023`：可收合 sidebar
-- `≥1024`：固定 sidebar（多「定期交易」）；content max 1280px；交易 table + 右側 detail panel
-- Offline banner 低干擾
-- Error boundary per route；fatal 提供重設本地資料／返首頁
+**Layout** — `src/components/layout/*`
 
-Browser back 關 modal／drawer：dialog 狀態用 URL search 或 history stack（`?dialog=` 或 `useBlocker`）。Create／edit 喺 desktop 用 modal／drawer，mobile 用全頁 route（spec 有 `/transactions/new` 同 `/:id/edit`，跟 route；寬屏可用同一 route 渲染成 modal overlay 都得，back 要關到）。
+- `AppLayout`：`<768` header 56px + bottom nav 5 項（掃描置中相機 icon）+ FAB；`768–1023` 可收合 sidebar；`≥1024` 固定 sidebar（多「定期交易」）；content max 1280px
+- `SidebarNav`／`BottomNav`：`NavLink` active 樣式、`<nav aria-label>`；collapsed 用 `sr-only` 保留 accessible name
+- `AppHeader`：sidebar toggle（md+）、app name（mobile）、sign out（`useLogout` 原子清 session／draft／domain）
+- `AddTransactionFab`：bottom nav 上方；`OfflineBanner`：`useOffline()` + `Banner`
+- `PublicLayout`、`PageHeader`、`FullPageLoading`
 
-**完成標準**：未登入入 `/` 會去 login 帶 returnTo；refresh 已登入唔閃 login。
+**PWA chrome**
+
+- Manifest／theme color 已喺 `vite.config.ts`（emerald `#047857`）；`index.html` 有 viewport `viewport-fit=cover`、CSP、`theme-color`
+- 正式 192／512 maskable icon、Apple touch icon、install prompt 留 Step 19
+
+Browser back 關 modal／drawer：dialog 狀態用 URL search 或 history stack（`?dialog=` 或 `useBlocker`）留 feature step（12–14）做。
+
+**完成標準**：`src/routes/*.test.tsx`：未登入 `/transactions?…` → `/login?returnTo=…`；未 hydrate 顯示全頁 loading 而唔係 login；有 token 直接 render private route 唔閃 login；已登入 `/login` → `/`。
 
 ---
 

@@ -129,6 +129,24 @@ export const messages = {
         goToPrevious: {id: "pagination.goToPrevious", defaultMessage: "去上一頁"},
         goToNext: {id: "pagination.goToNext", defaultMessage: "去下一頁"},
     },
+    layout: {
+        primaryNav: {id: "layout.primaryNav", defaultMessage: "主導航"},
+        expandSidebar: {id: "layout.expandSidebar", defaultMessage: "展開側欄"},
+        collapseSidebar: {id: "layout.collapseSidebar", defaultMessage: "收起側欄"},
+        addTransaction: {id: "layout.addTransaction", defaultMessage: "新增交易"},
+    },
+    notFound: {
+        title: {id: "notFound.title", defaultMessage: "搵唔到呢一頁"},
+        description: {id: "notFound.description", defaultMessage: "連結可能已經失效或者打錯咗。"},
+        action: {id: "notFound.action", defaultMessage: "返首頁"},
+    },
+    fatal: {
+        title: {id: "fatal.title", defaultMessage: "呢頁出咗錯"},
+        description: {id: "fatal.description", defaultMessage: "可以重試，或者清除本機資料再嚟過。"},
+        retry: {id: "fatal.retry", defaultMessage: "重試"},
+        reset: {id: "fatal.reset", defaultMessage: "清除本機資料"},
+        home: {id: "fatal.home", defaultMessage: "返首頁"},
+    },
 } as const;
 
 export type Messages = typeof messages;
