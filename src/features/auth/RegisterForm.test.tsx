@@ -98,5 +98,8 @@ describe("RegisterForm", () => {
 
         expect(await screen.findByText("用戶名稱或密碼錯誤")).toBeInTheDocument();
         expect(useAuthStore.getState().token).toBeNull();
+        expect(screen.getByLabelText("用戶名稱")).toHaveValue("");
+        expect(screen.getByLabelText("密碼")).toHaveValue("");
+        expect(screen.getByLabelText("確認密碼")).toHaveValue("");
     });
 });

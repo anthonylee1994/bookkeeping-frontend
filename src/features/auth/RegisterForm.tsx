@@ -40,7 +40,7 @@ export const RegisterForm = ({returnTo}: RegisterFormProps) => {
     const navigate = useNavigate();
     const {pushToast} = useToast();
     const [formError, setFormError] = React.useState<string | null>(null);
-    const {register, handleSubmit, formState} = useForm<RegisterValues>({
+    const {register, handleSubmit, reset, formState} = useForm<RegisterValues>({
         resolver: zodResolver(registerSchema),
         defaultValues: {username: "", password: "", confirmPassword: ""},
     });
@@ -50,6 +50,7 @@ export const RegisterForm = ({returnTo}: RegisterFormProps) => {
         const result = await new AuthRepository().register({username: values.username, password: values.password});
         if (!result.ok) {
             setFormError(result.error.message);
+            reset();
             return;
         }
         useAuthStore.getState().setSession(result.value.token, result.value.user);
