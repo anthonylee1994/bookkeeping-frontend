@@ -13,13 +13,15 @@ type MerchantAutocompleteProps = {
     value: string;
     onChange: (merchant: Merchant | null) => void;
     error?: string;
+    /** 未對到現有商戶時嘅初始搜尋字（例如 AI 由單據讀到嘅名）。 */
+    defaultQuery?: string;
 };
 
-export const MerchantAutocomplete = ({merchants, value, onChange, error}: MerchantAutocompleteProps) => {
+export const MerchantAutocomplete = ({merchants, value, onChange, error, defaultQuery = ""}: MerchantAutocompleteProps) => {
     const intl = useIntl();
     const token = useAuthStore(state => state.token);
     const selected = merchants.find(merchant => merchant.id === value) ?? null;
-    const [query, setQuery] = React.useState(selected?.name ?? "");
+    const [query, setQuery] = React.useState(selected?.name ?? defaultQuery);
     const [results, setResults] = React.useState(merchants);
     const [isCreating, setCreating] = React.useState(false);
     const [createError, setCreateError] = React.useState<string | null>(null);

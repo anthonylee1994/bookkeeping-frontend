@@ -72,7 +72,8 @@ Local domain type 必須補齊，唔可以只抄 swagger input：
 - `vite.config.ts`：PWA plugin（dev 唔 enable SW）、`test.environment = "jsdom"` + setup file
 - `tsconfig.app.json`：`strict: true`；Vitest types
 - `.env.example`：`VITE_APP_ENV=development`
-- `index.html`：`lang="zh-Hant-HK"`、viewport + `viewport-fit=cover`、CSP meta（`default-src 'self'`，img 按需要；`connect-src` 由 `VITE_API_URL` 嘅 origin 自動補，見 `vite.config.ts` `app-csp` plugin）、title 用繁中
+- `index.html`：`lang="zh-Hant-HK"`、viewport + `viewport-fit=cover`、title 用繁中
+    - **CSP 已於 2026-09-15 按用戶決定停用**：`index.html` 嘅 CSP meta 同 `vite.config.ts` 嘅 `app-csp` plugin 均已移除。原因係單據圖由 API origin 出，`img-src 'self'` 會擋住。已提出可改為只放寬 `img-src`，用戶選擇完全停用。想還原就重新加返 meta，並將 `VITE_API_URL` 嘅 origin 補入 `img-src` 同 `connect-src`
 - `src/index.css`：neutral-50 bg、emerald primary、touch 44px、letter-spacing 0、safe-area、`prefers-reduced-motion`
 - 建目錄：`src/{routes,components/{ui,layout},features/{auth,dashboard,transactions,receiptScan,summaries,recurringRules,accounts,categories,merchants},data,stores,hooks,lib,styles,test}`
 - 刪 Vite demo asset（`hero.png`、react/vite svg）如唔再使用
@@ -433,6 +434,8 @@ Actions：改、複製、退款、刪。
 
 ## Step 15 — AI 單據 `/scan`
 
+**狀態：已完成（2026-09-15）**
+
 步驟：選圖／拍 → 本地 mock parse → 覆核表單 → confirm。
 
 1. `input file` `accept="image/jpeg,image/png,image/webp"` `capture="environment"`
@@ -447,7 +450,17 @@ Actions：改、複製、退款、刪。
 
 Lazy load 呢個 feature。
 
-**完成標準**：upload／parse fail／confirm 路徑測試。
+實作備註：
+
+- `validateReceiptFile`／`RECEIPT_ACCEPT` 由 `receiptsRepository` 匯出，UI 同 repository 共用同一套類型／10 MiB 檢查；UI 喺上載前就用佢擋，唔合規唔會發 request
+- `ScanPage` 用 `runRef` generation counter 做取消：取消／換相之後，舊 run 回來發現 generation 唔同就唔再寫 state
+- Object URL 只留喺 component state（unmount 由 effect revoke），`draftStore.aiScan.imageUrl` 只存上載後嘅遠端 URL，所以 reload 之後 blob 失效都唔會卡住
+- 實際步驟由 `phase` + draft 推導（`step` derived），reload 後冇圖就自動退回 idle，唔會停喺假「解析中」
+- `scanModel.ts`：`missingReviewFields`（逐欄「需覆核」badge）、`isLowConfidence`（< 0.6 出警告 banner）、`previewToReviewValues`（對唔到名嘅商戶／分類留空，唔亂猜）
+- Idempotency key 喺 `ScanReviewForm` mount 時生成；confirm 失敗重試沿用同一條 key
+- `MerchantAutocomplete` 加 `defaultQuery`，AI 讀到但未建立嘅商戶名會帶入，一撳即建立
+
+**完成標準（已達成）**：類型／大小本地擋、upload → parse → 覆核預填、低信心度同缺欄位標示、parse 失敗保留圖片可重試（唔重複上載）／轉手動、取消解析、confirm payload（`source: "ai"`／`ai_import_log_id`／idempotency key）同轉去新詳情、confirm 失敗重用同一條 key、reload 後失效 object URL 退回 idle，全部有測試；Prettier、完整 Vitest（195 個）同 production build 通過。
 
 ---
 
@@ -486,7 +499,9 @@ Tabs：active／paused／ended。Create／edit 欄位跟 spec 5.8。Actions 確�
 
 ---
 
-## Step 19 — PWA、install、offline、CSP
+## Step 19 — PWA、install、offline
+
+> CSP 已按用戶決定停用（見 Step 0），呢步唔再包含 CSP 項目。
 
 - Manifest 繁中 name／short_name；`display: standalone`；`start_url`／`scope` `/`；theme 同 header；192／512 maskable + apple touch（正式 bitmap，唔用 Vite logo）
 - SW：precache JS／CSS／fonts／icons／offline shell；navigation Network First + timeout → shell

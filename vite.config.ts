@@ -1,7 +1,5 @@
 import react from "@vitejs/plugin-react";
 import {fileURLToPath, URL} from "node:url";
-import {loadEnv} from "vite";
-import type {Plugin} from "vite";
 import {VitePWA} from "vite-plugin-pwa";
 import {defineConfig} from "vitest/config";
 
@@ -9,30 +7,8 @@ const IS_NODE_MODULE = /[\\/]node_modules[\\/]/;
 /** 圖表庫（recharts 同佢的 d3 依賴），只由 lazy 的圖表 component 使用。 */
 const IS_CHART_LIB = /[\\/](recharts|d3-[^\\/]+|victory-[^\\/]+|decimal\.js-light|internmap|fast-equals)[\\/]/;
 
-/** 將 `VITE_API_URL` 嘅 origin 加入 CSP `connect-src`，容許 dev／production 打 API。 */
-function contentSecurityPolicy(apiUrl: string | undefined): Plugin {
-    let apiOrigin = "";
-    if (apiUrl !== undefined && apiUrl !== "") {
-        try {
-            apiOrigin = new URL(apiUrl).origin;
-        } catch {
-            apiOrigin = "";
-        }
-    }
-
-    return {
-        name: "app-csp",
-        transformIndexHtml(html) {
-            const connectSrc = ["'self'", "ws:", "wss:", apiOrigin].filter(value => value !== "").join(" ");
-            return html.replace("connect-src 'self' ws: wss:;", `connect-src ${connectSrc};`);
-        },
-    };
-}
-
 // https://vite.dev/config/
-export default defineConfig(({mode}) => {
-    const env = loadEnv(mode, process.cwd(), "");
-
+export default defineConfig(() => {
     return {
         resolve: {
             alias: {
@@ -41,7 +17,6 @@ export default defineConfig(({mode}) => {
         },
         plugins: [
             react(),
-            contentSecurityPolicy(env.VITE_API_URL),
             VitePWA({
                 registerType: "autoUpdate",
                 devOptions: {
