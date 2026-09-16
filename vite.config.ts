@@ -19,7 +19,7 @@ export default defineConfig(() => {
             react(),
             VitePWA({
                 /**
-                 * `prompt`：新版本唔會自動 reload，由頁內 banner 提示用戶自行重新載入
+                 * `prompt`：新版本不會自動 reload，由頁內 banner 提示用戶自行重新載入
                  * （避免 dirty form 被中斷）。
                  */
                 registerType: "prompt",
@@ -47,21 +47,21 @@ export default defineConfig(() => {
                     ],
                 },
                 workbox: {
-                    // 只 precache 靜態 asset；domain data（API）一律唔入 Cache Storage。
+                    // 只 precache 靜態 asset；domain data（API）一律不寫入 Cache Storage。
                     globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2}"],
                     /**
-                     * VitePWA 預設會加一條 cache-first 嘅 `NavigationRoute("index.html")`，
-                     * 咁會 shadow 咗下面嘅 NetworkFirst。設 undefined 關掉，改由 NetworkFirst
-                     * 自己處理 navigation，再喺 timeout／失敗時用 precacheFallback 回落去 shell。
+                     * VitePWA 預設會加一條 cache-first 的 `NavigationRoute("index.html")`，
+                     * 會覆蓋下方的 NetworkFirst。設定 undefined 可關閉，改由 NetworkFirst
+                     * 自行處理 navigation，再於 timeout／失敗時以 precacheFallback 回落至 shell。
                      */
                     navigateFallback: undefined,
                     cleanupOutdatedCaches: true,
                     runtimeCaching: [
                         {
                             /**
-                             * Navigation：Network First + 3 秒 timeout；網絡慢或離線就回落去
-                             * precache 咗嘅 app shell（index.html），所以 offline 都開得返，
-                             * 可以讀本機 session／draft。API 冇任何 cache rule，唔會入 Cache Storage。
+                             * Navigation：Network First + 3 秒 timeout；網絡慢或離線時回落至
+                             * precache 了的 app shell（index.html），所以離線亦可開啟，
+                             * 並可讀取本機 session／draft。API 沒有任何 cache rule，不會寫入 Cache Storage。
                              */
                             urlPattern: ({request}) => request.mode === "navigate",
                             handler: "NetworkFirst",

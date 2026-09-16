@@ -32,7 +32,7 @@ type RecurringRuleListProps = {
 
 const STATUS_PALETTE: Record<RecurringRule["status"], string> = {active: "green", paused: "orange", ended: "gray"};
 
-/** Footer 動作：mobile 兩粒一行（各佔半行），desktop 跟內容自動闊度。 */
+/** Footer 動作：mobile 每行兩個（各佔半行），desktop 依內容自動寬度。 */
 const ACTION_WIDTH = {base: "calc(50% - 0.25rem)", md: "auto"};
 
 /** 定期交易清單；每張卡顯示排程、下次執行、帳戶／分類／商戶同可用動作。 */

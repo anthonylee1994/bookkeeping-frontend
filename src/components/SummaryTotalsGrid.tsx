@@ -20,7 +20,7 @@ type SummaryTile = {
 
 /**
  * 淨額／收入／支出三個數字卡。Mobile 用緊湊 2-column：淨額橫跨兩格，收入與支出各佔一格；
- * 三個數字用同一個字級，令三格睇落一致。
+ * 三個數字使用同一字級，令三格外觀一致。
  */
 export const SummaryTotalsGrid = ({netCents, incomeCents, expenseCents, netLabel, incomeLabel, expenseLabel}: SummaryTotalsGridProps) => {
     const tiles: SummaryTile[] = [

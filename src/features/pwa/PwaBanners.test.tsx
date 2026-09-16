@@ -65,7 +65,7 @@ describe("PwaBanners", () => {
         await user.click(screen.getByRole("button", {name: "安裝"}));
         expect(installMock.install).toHaveBeenCalledTimes(1);
 
-        await user.click(screen.getByRole("button", {name: "唔使喇"}));
+        await user.click(screen.getByRole("button", {name: "不用了"}));
         expect(installMock.dismiss).toHaveBeenCalledTimes(1);
     });
 });

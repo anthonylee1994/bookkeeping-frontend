@@ -16,9 +16,9 @@ type BannerContent = {
 };
 
 /**
- * 全 app 共用嘅 PWA 提示：一次只顯示一個，優先次序為
+ * 全 app 共用的 PWA 提示：一次只顯示一個，優先次序為
  * 新版本 → 安裝 → iOS 加入主畫面 → 已可離線。
- * 固定喺底部（mobile 喺 tab bar 之上），不會阻擋頁面主體。
+ * 固定於底部（mobile 位於 tab bar 之上），不會阻擋頁面主體。
  */
 export const PwaBanners = () => {
     const intl = useIntl();

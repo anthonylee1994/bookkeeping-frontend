@@ -8,7 +8,7 @@ type BeforeInstallPromptEvent = Event & {
 
 export const INSTALL_DISMISS_KEY = "bookkeeping.pwa.installDismissed";
 
-/** 有互動之後再等一等先彈，唔想一入 app 就騷擾用戶。 */
+/** 待用戶有互動後再稍等才顯示，避免一進入 app 即騷擾用戶。 */
 const ENGAGEMENT_DELAY_MS = 20_000;
 
 function readFlag(key: string): boolean {
@@ -24,13 +24,13 @@ function writeFlag(key: string): void {
     try {
         localStorage.setItem(key, "1");
     } catch {
-        // storage 唔可用都唔緊要，最多下次再問一次。
+        // storage 不可用亦無妨，最多下次再詢問一次。
     }
 }
 
 export {readFlag, writeFlag};
 
-/** 已經係 standalone（加到主畫面）就唔需要再提示安裝。 */
+/** 已是 standalone（已加到主畫面）則無需再提示安裝。 */
 export function isStandalone(): boolean {
     if (typeof window === "undefined") return false;
     const iosStandalone = (window.navigator as Navigator & {standalone?: boolean}).standalone === true;
@@ -38,15 +38,15 @@ export function isStandalone(): boolean {
 }
 
 export type InstallPromptState = {
-    /** 可以顯示安裝提示（已收到 beforeinstallprompt、過咗冷卻、未 dismiss）。 */
+    /** 可以顯示安裝提示（已收到 beforeinstallprompt、已過冷卻時間、未 dismiss）。 */
     canInstall: boolean;
     install: () => void;
     dismiss: () => void;
 };
 
 /**
- * `beforeinstallprompt` 只喺 Chromium 系出現，而且要用戶有互動先當「engaged」，
- * 之後再等 `ENGAGEMENT_DELAY_MS` 才顯示一次；dismiss 過就永遠唔再問（記入 localStorage）。
+ * `beforeinstallprompt` 只在 Chromium 系出現，且需用戶有互動才視為「engaged」，
+ * 之後再等 `ENGAGEMENT_DELAY_MS` 才顯示一次；曾 dismiss 便永遠不再詢問（記錄於 localStorage）。
  */
 export function useInstallPrompt(): InstallPromptState {
     const setInstallPrompt = useUiStore(state => state.setInstallPrompt);

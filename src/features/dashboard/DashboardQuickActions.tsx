@@ -6,8 +6,8 @@ import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 
 /**
- * Dashboard 快速新增交易同掃描單據。只喺 mobile 顯示：desktop／tablet 已經有 sidebar
- * 「新增交易」同 header 掃描 icon，唔需要重複佔位。
+ * Dashboard 快速新增交易與掃描單據。只於 mobile 顯示：desktop／tablet 已有 sidebar
+ * 「新增交易」及 header 掃描 icon，無需重複佔位。
  */
 export const DashboardQuickActions = () => {
     const intl = useIntl();

@@ -34,7 +34,7 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
     const intl = useIntl();
     const categoryById = React.useMemo(() => new Map((categories ?? []).map(category => [category.id, category])), [categories]);
 
-    // 太淺的分類色在白色底上做 donut 幾乎睇唔到，所以退回預設色序，並令頭像用同一個色。
+    // 太淺的分類色在白色底上作 donut 幾乎不可見，因此退回預設色序，並令頭像使用同一顏色。
     const colorOf = (categoryId: string | null): string | null => {
         if (categoryId === null) return null;
         const color = categoryById.get(categoryId)?.color ?? null;

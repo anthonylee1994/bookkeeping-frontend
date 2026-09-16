@@ -1,13 +1,13 @@
 import React from "react";
 
-/** 長開嘅 SPA 唔會 reload，所以定時主動查新版本。 */
+/** 長時間開啟的 SPA 不會 reload，因此定時主動檢查新版本。 */
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
 const SW_URL = "/sw.js";
 
 export type AppUpdateState = {
-    /** Service worker 有新版本等緊生效。 */
+    /** Service worker 有新版本等待生效。 */
     needRefresh: boolean;
-    /** App shell 已 cache，可以離線用。 */
+    /** App shell 已 cache，可以離線使用。 */
     offlineReady: boolean;
     applyUpdate: () => void;
     dismissUpdate: () => void;
@@ -15,9 +15,9 @@ export type AppUpdateState = {
 };
 
 /**
- * 自己註冊 service worker（唔用 `virtual:pwa-register`，免得拉入 workbox-window 依賴）。
- * `registerType: "prompt"` 之下新版本唔會自動 reload，一律由 UI 提示、用戶自己撳
- * 「重新載入」，所以唔會打斷填緊嘅 form。開發／測試環境（非 PROD）完全 no-op。
+ * 自行註冊 service worker（不使用 `virtual:pwa-register`，以免引入 workbox-window 依賴）。
+ * `registerType: "prompt"` 之下新版本不會自動 reload，一律由 UI 提示、用戶自行按下
+ * 「重新載入」，因此不會打斷正在填寫的 form。開發／測試環境（非 PROD）完全 no-op。
  */
 export function useAppUpdate(): AppUpdateState {
     const [needRefresh, setNeedRefresh] = React.useState(false);
@@ -45,7 +45,7 @@ export function useAppUpdate(): AppUpdateState {
                 if (installing === null) return;
                 installing.addEventListener("statechange", () => {
                     if (installing.state !== "installed") return;
-                    // 有 controller = 更新；冇 = 首次安裝，只係提示可離線用。
+                    // 有 controller = 更新；沒有 = 首次安裝，僅提示可離線使用。
                     if (navigator.serviceWorker.controller !== null) setNeedRefresh(true);
                     else setOfflineReady(true);
                 });
@@ -55,7 +55,7 @@ export function useAppUpdate(): AppUpdateState {
         };
 
         const onControllerChange = (): void => {
-            // 只有用戶撳「重新載入」觸發 skipWaiting 時才 reload，避免無故清走頁面狀態。
+            // 只有用戶按下「重新載入」觸發 skipWaiting 時才 reload，避免無故清除頁面狀態。
             if (reloadingRef.current) window.location.reload();
         };
         navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
@@ -68,7 +68,7 @@ export function useAppUpdate(): AppUpdateState {
                 interval = setInterval(() => void registration.update(), UPDATE_CHECK_INTERVAL_MS);
             })
             .catch(() => {
-                // 註冊失敗唔影響 app 本身運作。
+                // 註冊失敗不影響 app 本身運作。
             });
 
         return () => {
