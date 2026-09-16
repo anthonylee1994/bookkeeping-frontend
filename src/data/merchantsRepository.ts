@@ -22,6 +22,12 @@ export class MerchantsRepository {
         return apiRequest(this.#token, {method: "POST", url: "/merchants", data: parsed.data}, merchantResponseSchema);
     }
 
+    async update(id: UUID, input: MerchantInput): Promise<LocalResult<Merchant>> {
+        const parsed = merchantInputSchema.safeParse(input);
+        if (!parsed.success) return localValidation(formatMessage(messages.validation.merchantInvalid));
+        return apiRequest(this.#token, {method: "PATCH", url: `/merchants/${id}`, data: parsed.data}, merchantResponseSchema);
+    }
+
     async delete(id: UUID): Promise<LocalResult<true>> {
         return apiDelete(this.#token, `/merchants/${id}`);
     }

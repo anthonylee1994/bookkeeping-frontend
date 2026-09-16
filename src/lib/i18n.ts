@@ -331,6 +331,7 @@ export const messages = {
     merchants: {
         title: {id: "merchants.title", defaultMessage: "商戶"},
         createTitle: {id: "merchants.createTitle", defaultMessage: "新增商戶"},
+        editTitle: {id: "merchants.editTitle", defaultMessage: "編輯商戶"},
         createAction: {id: "merchants.createAction", defaultMessage: "新增商戶"},
         name: {id: "merchants.name", defaultMessage: "名稱"},
         defaultCategory: {id: "merchants.defaultCategory", defaultMessage: "預設分類"},

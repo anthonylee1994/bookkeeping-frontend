@@ -1,41 +1,31 @@
 import React from "react";
-import {Alert, Box, Button, Card, Dialog, HStack, Heading, Input, Portal, Stack, Text} from "@chakra-ui/react";
+import {Alert, Box, Button, Card, HStack, Heading, Input, Stack, Text} from "@chakra-ui/react";
 import {PlusIcon} from "lucide-react";
 import {useIntl} from "react-intl";
-import {MerchantsRepository} from "@/data/merchantsRepository";
 import type {Merchant} from "@/data/types";
 import {MerchantFormDrawer} from "@/features/settings/MerchantFormDrawer";
 import {useDomainReference} from "@/hooks/useDomainReference";
 import {messages} from "@/lib/i18n";
 import {useAppStore} from "@/stores/appStore";
-import {useAuthStore} from "@/stores/authStore";
 
 export const MerchantsPage = () => {
     const intl = useIntl();
-    const token = useAuthStore(state => state.token);
     const {merchants, categories, isLoading, error} = useDomainReference();
     const [searchQuery, setSearchQuery] = React.useState("");
-    const [createOpen, setCreateOpen] = React.useState(false);
-    const [deleteTarget, setDeleteTarget] = React.useState<Merchant | null>(null);
-    const [deleteError, setDeleteError] = React.useState<string | null>(null);
+    const [drawerMerchant, setDrawerMerchant] = React.useState<Merchant | null | undefined>(undefined);
 
     const handleSaved = (merchant: Merchant) => {
         const current = useAppStore.getState().merchants;
-        useAppStore.getState().setMerchants([merchant, ...current]);
-        setCreateOpen(false);
+        const existing = current.find(m => m.id === merchant.id);
+        const next = existing === undefined ? [merchant, ...current] : current.map(m => (m.id === merchant.id ? merchant : m));
+        useAppStore.getState().setMerchants(next);
+        setDrawerMerchant(undefined);
     };
 
-    const handleDelete = async () => {
-        if (token === null || deleteTarget === null) return;
-        setDeleteError(null);
-        const result = await new MerchantsRepository(token).delete(deleteTarget.id);
-        if (!result.ok) {
-            setDeleteError(result.error.message);
-            return;
-        }
+    const handleDeleted = (id: string) => {
         const current = useAppStore.getState().merchants;
-        useAppStore.getState().setMerchants(current.filter(m => m.id !== deleteTarget.id));
-        setDeleteTarget(null);
+        useAppStore.getState().setMerchants(current.filter(m => m.id !== id));
+        setDrawerMerchant(undefined);
     };
 
     if (isLoading) {
@@ -70,7 +60,7 @@ export const MerchantsPage = () => {
             <Box maxW="7xl" mx="auto">
                 <HStack justify="space-between" mb="6">
                     <Heading size="xl">{intl.formatMessage(messages.merchants.title)}</Heading>
-                    <Button size="sm" onClick={() => setCreateOpen(true)}>
+                    <Button size="sm" onClick={() => setDrawerMerchant(null)}>
                         <PlusIcon />
                         {intl.formatMessage(messages.merchants.createAction)}
                     </Button>
@@ -88,7 +78,7 @@ export const MerchantsPage = () => {
                                 <Text color="fg.muted" textAlign="center">
                                     {intl.formatMessage(messages.merchants.emptyDescription)}
                                 </Text>
-                                <Button onClick={() => setCreateOpen(true)}>
+                                <Button onClick={() => setDrawerMerchant(null)}>
                                     <PlusIcon />
                                     {intl.formatMessage(messages.merchants.createAction)}
                                 </Button>
@@ -108,7 +98,7 @@ export const MerchantsPage = () => {
                         {filtered.map(merchant => {
                             const defaultCategory = merchant.default_category_id === null ? null : categories.find(c => c.id === merchant.default_category_id);
                             return (
-                                <Card.Root key={merchant.id} cursor="pointer" onClick={() => setDeleteTarget(merchant)} _hover={{bg: "brand.active"}}>
+                                <Card.Root key={merchant.id} cursor="pointer" onClick={() => setDrawerMerchant(merchant)} _hover={{bg: "brand.active"}}>
                                     <Card.Body>
                                         <HStack justify="space-between">
                                             <Box>
@@ -130,39 +120,9 @@ export const MerchantsPage = () => {
                 )}
             </Box>
 
-            {createOpen ? <MerchantFormDrawer categories={categories} onSaved={handleSaved} onClose={() => setCreateOpen(false)} /> : null}
-
-            <Dialog.Root open={deleteTarget !== null} placement="center" role="alertdialog" onOpenChange={event => (!event.open ? setDeleteTarget(null) : undefined)}>
-                <Portal>
-                    <Dialog.Backdrop />
-                    <Dialog.Positioner>
-                        <Dialog.Content>
-                            <Dialog.Header>
-                                <Dialog.Title>{intl.formatMessage(messages.merchants.deleteTitle)}</Dialog.Title>
-                            </Dialog.Header>
-                            <Dialog.Body>
-                                <Stack gap="3">
-                                    <Text>{intl.formatMessage(messages.merchants.deleteDescription)}</Text>
-                                    {deleteError === null ? null : (
-                                        <Alert.Root status="error" role="alert" rounded="lg">
-                                            <Alert.Indicator />
-                                            <Alert.Title>{deleteError}</Alert.Title>
-                                        </Alert.Root>
-                                    )}
-                                </Stack>
-                            </Dialog.Body>
-                            <Dialog.Footer>
-                                <Button type="button" variant="outline" onClick={() => setDeleteTarget(null)}>
-                                    {intl.formatMessage(messages.common.cancel)}
-                                </Button>
-                                <Button type="button" colorPalette="red" onClick={handleDelete}>
-                                    {intl.formatMessage(messages.common.delete)}
-                                </Button>
-                            </Dialog.Footer>
-                        </Dialog.Content>
-                    </Dialog.Positioner>
-                </Portal>
-            </Dialog.Root>
+            {drawerMerchant === undefined ? null : (
+                <MerchantFormDrawer merchant={drawerMerchant} categories={categories} onSaved={handleSaved} onDeleted={handleDeleted} onClose={() => setDrawerMerchant(undefined)} />
+            )}
         </React.Fragment>
     );
 };

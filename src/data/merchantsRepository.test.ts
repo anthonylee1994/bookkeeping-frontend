@@ -25,6 +25,20 @@ describe("MerchantsRepository", () => {
         expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/merchants", data: expect.objectContaining({name: merchant.name})}));
     });
 
+    it("updates a merchant's name and default category", async () => {
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {merchant}});
+
+        expect(await new MerchantsRepository(TOKEN).update(merchant.id, {name: "New name", default_category_id: null})).toMatchObject({ok: true});
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "PATCH", url: `/merchants/${merchant.id}`, data: {name: "New name", default_category_id: null}}));
+    });
+
+    it("rejects blank names locally before updating", async () => {
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {merchant}});
+
+        expect(await new MerchantsRepository(TOKEN).update(merchant.id, {name: " "})).toMatchObject({ok: false, error: {code: "validation"}});
+        expect(request).not.toHaveBeenCalled();
+    });
+
     it("deletes a merchant and rejects blank names locally", async () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValueOnce({data: null});
         const repository = new MerchantsRepository(TOKEN);
