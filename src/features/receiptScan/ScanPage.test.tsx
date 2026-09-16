@@ -51,6 +51,20 @@ function receiptFile(name = "receipt.png", type = "image/png"): File {
     return new File(["receipt-bytes"], name, {type});
 }
 
+/** 模擬 viewport：setup 預設 matchMedia 永遠 false（mobile），desktop 測試逐個覆蓋。 */
+function setViewport(isDesktop: boolean): void {
+    window.matchMedia = ((query: string) => ({
+        matches: isDesktop ? query.includes("1024px") : false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+    })) as unknown as typeof window.matchMedia;
+}
+
 function renderScanPage(): void {
     const router = createMemoryRouter(
         [
@@ -68,6 +82,7 @@ function renderScanPage(): void {
 }
 
 beforeEach(() => {
+    setViewport(false);
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
     useAppStore.setState({...domainTestState, referenceLoaded: true});
     useDraftStore.setState({transactionDraft: null, aiScan: null});
@@ -231,5 +246,31 @@ describe("ScanPage", () => {
         expect(screen.getByLabelText("選擇單據相片")).toBeInTheDocument();
         expect(screen.queryByText("覆核解析結果")).not.toBeInTheDocument();
         expect(screen.queryByAltText("單據預覽")).not.toBeInTheDocument();
+    });
+
+    it("opens the review as a bottom sheet and lets the user reopen it after closing", async () => {
+        const user = userEvent.setup();
+        renderScanPage();
+
+        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        expect(await screen.findByRole("dialog")).toHaveTextContent("覆核解析結果");
+
+        await user.click(screen.getByRole("button", {name: "關閉"}));
+        await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+
+        await user.click(screen.getByRole("button", {name: "繼續覆核"}));
+        expect(await screen.findByRole("dialog")).toHaveTextContent("覆核解析結果");
+    });
+
+    it("renders the review inline beside the preview on desktop without a sheet", async () => {
+        setViewport(true);
+        const user = userEvent.setup();
+        renderScanPage();
+
+        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+
+        expect(await screen.findByText("覆核解析結果")).toBeInTheDocument();
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.getByLabelText("金額")).toHaveValue("12.50");
     });
 });

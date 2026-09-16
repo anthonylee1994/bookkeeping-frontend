@@ -352,6 +352,8 @@ export const messages = {
         manualEntry: {id: "scan.manualEntry", defaultMessage: "改為手動入帳"},
         reviewTitle: {id: "scan.reviewTitle", defaultMessage: "覆核解析結果"},
         reviewDescription: {id: "scan.reviewDescription", defaultMessage: "以下欄位由單據自動填入，入帳前請自行覆核。"},
+        continueReview: {id: "scan.continueReview", defaultMessage: "繼續覆核"},
+        parsingHint: {id: "scan.parsingHint", defaultMessage: "正在讀取商戶、金額及日期…"},
         lowConfidence: {id: "scan.lowConfidence", defaultMessage: "解析信心度只有 {percent}%，請逐項核對。"},
         partialResult: {id: "scan.partialResult", defaultMessage: "部分欄位未能辨識，已標示為需覆核。"},
         needsReview: {id: "scan.needsReview", defaultMessage: "需覆核"},

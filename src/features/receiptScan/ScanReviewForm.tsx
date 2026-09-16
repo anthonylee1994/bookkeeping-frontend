@@ -17,14 +17,16 @@ import {useAuthStore} from "@/stores/authStore";
 type ScanReviewFormProps = {
     preview: AiPreview;
     reference: ScanReference;
+    variant?: "inline" | "sheet";
     onConfirmed: () => void;
     onStartOver: () => void;
 };
 
 const KINDS: ScanReviewValues["kind"][] = ["income", "expense"];
 
-export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: ScanReviewFormProps) => {
+export const ScanReviewForm = ({preview, reference, variant = "inline", onConfirmed, onStartOver}: ScanReviewFormProps) => {
     const intl = useIntl();
+    const isSheet = variant === "sheet";
     const navigate = useNavigate();
     const token = useAuthStore(state => state.token);
     // 同一次覆核重用同一條 key：submit 失敗再試也不會重複入帳。
@@ -205,14 +207,28 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
                     </Alert.Root>
                 )}
 
-                <HStack justify={{base: "flex-start", md: "flex-end"}} gap="3" wrap="wrap" direction={{base: "column", md: "row"}} py="2">
+                <Stack
+                    direction={{base: "column", md: "row"}}
+                    justify={{md: "flex-end"}}
+                    gap="3"
+                    pt={isSheet ? "4" : "2"}
+                    pb="2"
+                    mx={isSheet ? "-6" : undefined}
+                    px={isSheet ? "6" : undefined}
+                    position={isSheet ? "sticky" : undefined}
+                    bottom={isSheet ? "0" : undefined}
+                    zIndex={isSheet ? "1" : undefined}
+                    bg={isSheet ? "bg.panel" : undefined}
+                    borderTopWidth={isSheet ? "1px" : undefined}
+                    borderColor="border"
+                >
                     <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={onStartOver}>
                         {intl.formatMessage(messages.scan.startOver)}
                     </Button>
                     <Button type="submit" w={{base: "full", md: "auto"}} loading={formState.isSubmitting} disabled={reference.accounts.length === 0}>
                         {intl.formatMessage(messages.scan.confirm)}
                     </Button>
-                </HStack>
+                </Stack>
             </Stack>
         </form>
     );

@@ -40,3 +40,21 @@ body {
         transform: none;
     }
 }
+
+/* 單據解析中：一條光線由上而下掃過預覽圖，令等待有方向感。 */
+@keyframes scan-sweep {
+    0% {
+        top: 6%;
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+    }
+    85% {
+        opacity: 1;
+    }
+    100% {
+        top: 94%;
+        opacity: 0;
+    }
+}

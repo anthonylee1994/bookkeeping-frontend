@@ -1,14 +1,16 @@
 import React from "react";
-import {Alert, Box, Button, Card, Field, Flex, HStack, Image, Input, Stack, Text} from "@chakra-ui/react";
-import {CameraIcon, ImageOffIcon, PencilIcon, RotateCcwIcon} from "lucide-react";
+import {Alert, Button, Grid, Stack} from "@chakra-ui/react";
+import {ClipboardCheckIcon, PencilIcon, RotateCcwIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {useNavigate} from "react-router";
 import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {PageHeader} from "@/components/layout/PageHeader";
 import {RECEIPT_ACCEPT, ReceiptsRepository, validateReceiptFile} from "@/data/receiptsRepository";
 import type {AiScanStep} from "@/data/types";
-import {ScanReviewForm} from "@/features/receiptScan/ScanReviewForm";
+import {ScanReviewPanel} from "@/features/receiptScan/ScanReviewPanel";
+import {ScanStage} from "@/features/receiptScan/ScanStage";
 import {useDomainReference} from "@/hooks/useDomainReference";
+import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 import {useAuthStore} from "@/stores/authStore";
@@ -23,6 +25,7 @@ export const ScanPage = () => {
     const navigate = useNavigate();
     const token = useAuthStore(state => state.token);
     const reference = useDomainReference();
+    const isDesktop = useMediaQuery(DESKTOP_QUERY);
     const draft = useDraftStore(state => state.aiScan);
     const setAiScan = useDraftStore(state => state.setAiScan);
     const [file, setFile] = React.useState<File | null>(null);
@@ -30,10 +33,9 @@ export const ScanPage = () => {
     const [imageFailed, setImageFailed] = React.useState(false);
     const [banner, setBanner] = React.useState<Banner | null>(null);
     const [phase, setPhase] = React.useState<RunPhase>(null);
-    const [dragging, setDragging] = React.useState(false);
+    const [reviewOpen, setReviewOpen] = React.useState(false);
     // 取消／重新開始會遞增；舊 run 回來時發現 generation 不同就不再寫 state。
     const runRef = React.useRef(0);
-    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     React.useEffect(() => {
         return () => {
@@ -92,6 +94,7 @@ export const ScanPage = () => {
             setAiScan({step: "failed", imageUrl, preview: parsed.value});
             return;
         }
+        setReviewOpen(true);
         setAiScan({step: "review", imageUrl, preview: parsed.value});
     };
 
@@ -109,45 +112,15 @@ export const ScanPage = () => {
         setObjectUrl(URL.createObjectURL(selected));
         setImageFailed(false);
         setFile(selected);
+        setReviewOpen(false);
         setAiScan({step: "selected", imageUrl: null, preview: null});
         await run(selected, null);
-    };
-
-    const pickFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selected = event.target.files?.[0] ?? null;
-        event.target.value = "";
-        void startScan(selected);
-    };
-
-    const dragHasFiles = (event: React.DragEvent) => event.dataTransfer.types.includes("Files");
-
-    const onDragEnter = (event: React.DragEvent) => {
-        if (!dragHasFiles(event)) return;
-        event.preventDefault();
-        setDragging(true);
-    };
-
-    const onDragOver = (event: React.DragEvent) => {
-        if (!dragHasFiles(event)) return;
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "copy";
-        setDragging(true);
-    };
-
-    const onDragLeave = (event: React.DragEvent) => {
-        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
-        setDragging(false);
-    };
-
-    const onDrop = (event: React.DragEvent) => {
-        event.preventDefault();
-        setDragging(false);
-        void startScan(event.dataTransfer.files?.[0] ?? null);
     };
 
     const cancelRun = () => {
         runRef.current += 1;
         setPhase(null);
+        setReviewOpen(false);
         setBanner({status: "info", message: intl.formatMessage(messages.scan.cancelled)});
         setAiScan({step: "selected", imageUrl: uploadedUrl, preview: null});
     };
@@ -160,184 +133,120 @@ export const ScanPage = () => {
         setImageFailed(false);
         setPhase(null);
         setBanner(null);
+        setReviewOpen(false);
         setAiScan(null);
     };
 
-    const body = (() => {
-        if (reference.isLoading) return <LoadingIndicator minH="24rem" />;
-        if (step === "parsing") {
-            return (
-                <Stack gap="3" align="center">
-                    <LoadingIndicator minH="10rem" />
-                    <Text fontSize="sm" color="fg.muted">
-                        {intl.formatMessage(phase === "uploading" ? messages.scan.uploading : messages.scan.parsing)}
-                    </Text>
-                    <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={cancelRun}>
-                        {intl.formatMessage(messages.scan.cancelParse)}
-                    </Button>
-                </Stack>
-            );
-        }
-        if (step === "failed") {
-            return (
-                <Stack gap="3">
-                    <Alert.Root status="error" role="alert" rounded="lg">
-                        <Alert.Indicator />
-                        <Alert.Content>
-                            <Alert.Title>{intl.formatMessage(messages.scan.failedTitle)}</Alert.Title>
-                            <Alert.Description>{intl.formatMessage(messages.scan.failedDescription)}</Alert.Description>
-                        </Alert.Content>
-                    </Alert.Root>
-                    <HStack gap="3" wrap="wrap" direction={{base: "column", md: "row"}}>
-                        <Button type="button" w={{base: "full", md: "auto"}} onClick={() => void run(file, uploadedUrl)}>
-                            <RotateCcwIcon />
-                            {intl.formatMessage(messages.scan.retry)}
+    const reviewPreview = step === "review" && !reference.isLoading ? preview : null;
+    const showInlineReview = reviewPreview !== null && isDesktop;
+
+    const retryActions = (
+        <Stack direction={{base: "column", md: "row"}} gap="3">
+            <Button type="button" w={{base: "full", md: "auto"}} onClick={() => void run(file, uploadedUrl)}>
+                <RotateCcwIcon aria-hidden="true" />
+                {intl.formatMessage(messages.scan.retry)}
+            </Button>
+            <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={() => navigate(ROUTES.transactionNew)}>
+                <PencilIcon aria-hidden="true" />
+                {intl.formatMessage(messages.scan.manualEntry)}
+            </Button>
+        </Stack>
+    );
+
+    const stageColumn = (
+        <Stack gap="4" w="full" position={showInlineReview ? "sticky" : "static"} top={showInlineReview ? "20" : undefined}>
+            <ScanStage
+                phase={phase}
+                imageSrc={imageSrc}
+                imageFailed={imageFailed}
+                accept={RECEIPT_ACCEPT}
+                onFile={selected => void startScan(selected)}
+                onImageError={() => setImageFailed(true)}
+                onChangeImage={startOver}
+                onCancel={cancelRun}
+            />
+
+            {reference.isLoading ? <LoadingIndicator minH="8rem" /> : null}
+
+            {reference.isLoading ? null : (
+                <React.Fragment>
+                    {reference.accounts.length === 0 ? (
+                        <Alert.Root status="warning" rounded="lg">
+                            <Alert.Indicator />
+                            <Alert.Title>{intl.formatMessage(messages.scan.noAccounts)}</Alert.Title>
+                        </Alert.Root>
+                    ) : null}
+
+                    {banner === null ? null : (
+                        <Alert.Root status={banner.status} role={banner.status === "error" ? "alert" : undefined} rounded="lg">
+                            <Alert.Indicator />
+                            <Alert.Title>{banner.message}</Alert.Title>
+                        </Alert.Root>
+                    )}
+
+                    {reference.error === null ? null : (
+                        <Alert.Root status="error" role="alert" rounded="lg">
+                            <Alert.Indicator />
+                            <Alert.Title>{reference.error.message}</Alert.Title>
+                        </Alert.Root>
+                    )}
+
+                    {step === "failed" ? (
+                        <Stack gap="3">
+                            <Alert.Root status="error" role="alert" rounded="lg">
+                                <Alert.Indicator />
+                                <Alert.Content>
+                                    <Alert.Title>{intl.formatMessage(messages.scan.failedTitle)}</Alert.Title>
+                                    <Alert.Description>{intl.formatMessage(messages.scan.failedDescription)}</Alert.Description>
+                                </Alert.Content>
+                            </Alert.Root>
+                            {retryActions}
+                        </Stack>
+                    ) : null}
+
+                    {step === "selected" ? retryActions : null}
+
+                    {reviewPreview !== null && !isDesktop && !reviewOpen ? (
+                        <Button type="button" size="lg" w="full" onClick={() => setReviewOpen(true)}>
+                            <ClipboardCheckIcon aria-hidden="true" />
+                            {intl.formatMessage(messages.scan.continueReview)}
                         </Button>
-                        <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={() => navigate(ROUTES.transactionNew)}>
-                            <PencilIcon />
-                            {intl.formatMessage(messages.scan.manualEntry)}
-                        </Button>
-                    </HStack>
-                </Stack>
-            );
-        }
-        if (step === "review" && preview !== null) {
-            return (
-                <ScanReviewForm
-                    preview={preview}
+                    ) : null}
+                </React.Fragment>
+            )}
+        </Stack>
+    );
+
+    return (
+        <Stack gap={{base: "4", md: "6"}} w="full" maxW={showInlineReview ? "5xl" : "3xl"} mx="auto">
+            <PageHeader title={intl.formatMessage(messages.scan.title)} description={intl.formatMessage(messages.scan.description)} />
+
+            <Grid templateColumns={showInlineReview ? "minmax(0, 1fr) minmax(0, 1fr)" : "minmax(0, 1fr)"} gap={{base: "4", md: "6"}} alignItems="start">
+                {stageColumn}
+                {showInlineReview ? (
+                    <ScanReviewPanel
+                        variant="inline"
+                        open
+                        onOpenChange={() => undefined}
+                        preview={reviewPreview}
+                        reference={{accounts: reference.accounts, categories: reference.categories, merchants: reference.merchants}}
+                        onConfirmed={startOver}
+                        onStartOver={startOver}
+                    />
+                ) : null}
+            </Grid>
+
+            {reviewPreview !== null && !isDesktop ? (
+                <ScanReviewPanel
+                    variant="sheet"
+                    open={reviewOpen}
+                    onOpenChange={setReviewOpen}
+                    preview={reviewPreview}
                     reference={{accounts: reference.accounts, categories: reference.categories, merchants: reference.merchants}}
                     onConfirmed={startOver}
                     onStartOver={startOver}
                 />
-            );
-        }
-        if (step === "selected") {
-            return (
-                <HStack gap="3" wrap="wrap" direction={{base: "column", md: "row"}}>
-                    <Button type="button" w={{base: "full", md: "auto"}} onClick={() => void run(file, uploadedUrl)}>
-                        <RotateCcwIcon />
-                        {intl.formatMessage(messages.scan.retry)}
-                    </Button>
-                    <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={() => navigate(ROUTES.transactionNew)}>
-                        <PencilIcon />
-                        {intl.formatMessage(messages.scan.manualEntry)}
-                    </Button>
-                </HStack>
-            );
-        }
-        return null;
-    })();
-
-    return (
-        <Stack gap="5" w="full" maxW="3xl" mx="auto">
-            <PageHeader title={intl.formatMessage(messages.scan.title)} description={intl.formatMessage(messages.scan.description)} />
-
-            {reference.accounts.length === 0 && !reference.isLoading ? (
-                <Alert.Root status="warning" rounded="lg">
-                    <Alert.Indicator />
-                    <Alert.Title>{intl.formatMessage(messages.scan.noAccounts)}</Alert.Title>
-                </Alert.Root>
             ) : null}
-
-            <Card.Root>
-                <Card.Body>
-                    <Stack gap="4">
-                        <Field.Root>
-                            <Field.Label>{intl.formatMessage(messages.scan.pickTitle)}</Field.Label>
-                            <Input
-                                ref={fileInputRef}
-                                type="file"
-                                accept={RECEIPT_ACCEPT}
-                                capture="environment"
-                                aria-label={intl.formatMessage(messages.scan.pickTitle)}
-                                position="absolute"
-                                boxSize="1px"
-                                opacity={0}
-                                overflow="hidden"
-                                onChange={pickFile}
-                            />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                w="full"
-                                h="auto"
-                                py={{base: "7", md: "6"}}
-                                borderStyle="dashed"
-                                borderColor={dragging ? "colorPalette.solid" : "border.emphasized"}
-                                bg={dragging ? "bg.subtle" : undefined}
-                                _hover={{bg: "bg.subtle", borderColor: "colorPalette.solid"}}
-                                onClick={() => fileInputRef.current?.click()}
-                                onDragEnter={onDragEnter}
-                                onDragOver={onDragOver}
-                                onDragLeave={onDragLeave}
-                                onDrop={onDrop}
-                            >
-                                <Stack align="center" gap="1">
-                                    <CameraIcon aria-hidden="true" />
-                                    <Text fontWeight="medium">{intl.formatMessage(dragging ? messages.scan.dropHere : messages.scan.pickAction)}</Text>
-                                    <Text fontSize="xs" color="fg.muted">
-                                        {intl.formatMessage(messages.scan.pickHint)}
-                                    </Text>
-                                </Stack>
-                            </Button>
-                        </Field.Root>
-
-                        {imageSrc === null ? null : (
-                            <Box>
-                                {imageFailed ? (
-                                    <Flex direction="column" align="center" justify="center" gap="1" h="12rem" rounded="lg" borderWidth="1px" borderColor="border" bg="bg.muted" color="fg.muted">
-                                        <ImageOffIcon aria-hidden="true" />
-                                        <Text fontSize="xs">{intl.formatMessage(messages.scan.imageFailed)}</Text>
-                                    </Flex>
-                                ) : (
-                                    <Image
-                                        src={imageSrc}
-                                        alt={intl.formatMessage(messages.scan.imageAlt)}
-                                        display="block"
-                                        w="full"
-                                        maxH={{base: "20rem", md: "16rem"}}
-                                        rounded="lg"
-                                        borderWidth="1px"
-                                        borderColor="border"
-                                        bg="bg.muted"
-                                        objectFit="contain"
-                                        onError={() => setImageFailed(true)}
-                                    />
-                                )}
-                                <Button type="button" mt="3" size={{base: "md", md: "sm"}} variant="outline" w={{base: "full", md: "auto"}} onClick={startOver}>
-                                    {intl.formatMessage(messages.scan.changeImage)}
-                                </Button>
-                            </Box>
-                        )}
-                    </Stack>
-                </Card.Body>
-            </Card.Root>
-
-            {banner === null ? null : (
-                <Alert.Root status={banner.status} role={banner.status === "error" ? "alert" : undefined} rounded="lg">
-                    <Alert.Indicator />
-                    <Alert.Title>{banner.message}</Alert.Title>
-                </Alert.Root>
-            )}
-
-            {reference.error === null ? null : (
-                <Alert.Root status="error" role="alert" rounded="lg">
-                    <Alert.Indicator />
-                    <Alert.Title>{reference.error.message}</Alert.Title>
-                </Alert.Root>
-            )}
-
-            {step === "review" && preview !== null ? (
-                <Card.Root>
-                    <Card.Header>
-                        <Card.Title>{intl.formatMessage(messages.scan.reviewTitle)}</Card.Title>
-                        <Card.Description>{intl.formatMessage(messages.scan.reviewDescription)}</Card.Description>
-                    </Card.Header>
-                    <Card.Body>{body}</Card.Body>
-                </Card.Root>
-            ) : (
-                body
-            )}
         </Stack>
     );
 };
