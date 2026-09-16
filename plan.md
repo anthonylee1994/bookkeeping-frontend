@@ -530,6 +530,8 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。Actions 確�
 
 ## Step 19 — PWA、install、offline
 
+**狀態：已完成（2026-09-16）**
+
 > CSP 已按用戶決定停用（見 Step 0），本步不再包含 CSP 項目。
 
 - Manifest 繁中 name／short_name；`display: standalone`；`start_url`／`scope` `/`；theme 及 header；192／512 maskable + apple touch（正式 bitmap，不使用 Vite logo）
@@ -540,7 +542,19 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。Actions 確�
 - iOS Safari 非 standalone：短「加入主畫面」指引
 - Production 才 enable SW（localhost 可）
 
-**完成標準**：manifest 存在；offline 可讀 local data。
+實作備註：
+
+- Icons 由 `favicon.svg` 嘅圖形重新合成 full-bleed 版本（綠底 + 置中圖示，落在 maskable safe zone 內），用 ImageMagick render `pwa-192x192.png`、`pwa-512x512.png`、`maskable-512x512.png`、`apple-touch-icon.png`；`index.html` 加 apple-touch icon 及 apple/web-app meta
+- `registerType: "prompt"` + `injectRegister: null`：app 自己註冊 SW（`useAppUpdate`），唔用 `virtual:pwa-register`，避免拉入 `workbox-window` 依賴
+- SW navigation：**NetworkFirst + `networkTimeoutSeconds: 3` + `precacheFallback: {fallbackURL: "/index.html"}`**。要顯式設 `workbox.navigateFallback: undefined`，因為 VitePWA 預設會加一條 cache-first 嘅 `NavigationRoute("index.html")` 蓋過 NetworkFirst
+- Domain data 完全冇 cache rule（API 唔會入 Cache Storage）；只 precache 靜態 asset（js／css／html／svg／png／ico／woff）
+- `useAppUpdate`：監聽 `updatefound`／`statechange`／`controllerchange`，有 controller = 更新（出「有新版本」），冇 controller = 首次安裝（出「已可離線」）；撳「重新載入」才 `postMessage({type: "SKIP_WAITING"})`，唔會 auto reload，dirty form 唔會被清
+- `useInstallPrompt`：捕捉 `beforeinstallprompt`（並 `preventDefault`），要用戶有互動再等 20 秒才顯示一次；dismiss 寫入 localStorage，之後唔再問；已 standalone 直接跳過
+- `useIosInstallHint`：iOS（含 iPadOS MacIntel 判斷）非 standalone 時，8 秒後出「分享 → 加入主畫面」文字指引，dismiss 後記入 localStorage
+- `PwaBanners` 於 `app.tsx` 全域掛載，一次只顯示一個（新版本 → 安裝 → iOS 指引 → 已可離線），固定底部、mobile 喺 tab bar 之上
+- 非 PROD（dev／test）`useAppUpdate` 完全 no-op，唔會註冊 SW
+
+**完成標準（已達成）**：manifest 存在（3 個 icons + scope + standalone）；production build 出到 SW（NetworkFirst + PrecacheFallback）；offline reload 會由 precache 攞返 app shell，本機 session／draft 讀得到；`useInstallPrompt`／`useAppUpdate` 有 Vitest 覆蓋；`tsc`、完整 Vitest 及 production build 通過。
 
 ---
 

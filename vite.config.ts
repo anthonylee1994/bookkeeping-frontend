@@ -18,8 +18,16 @@ export default defineConfig(() => {
         plugins: [
             react(),
             VitePWA({
-                registerType: "autoUpdate",
+                /**
+                 * `prompt`：新版本唔會自動 reload，由頁內 banner 提示用戶自行重新載入
+                 * （避免 dirty form 被中斷）。
+                 */
+                registerType: "prompt",
+                includeAssets: ["favicon.svg", "apple-touch-icon.png"],
+                /** 由 app 內 `useAppUpdate` 自行註冊，方便控制「有新版本」提示。 */
+                injectRegister: null,
                 devOptions: {
+                    // SW 只在 production build 啟用，避免 dev 時 cache 住 stale asset。
                     enabled: false,
                 },
                 manifest: {
@@ -28,15 +36,41 @@ export default defineConfig(() => {
                     description: "簡單清晰的本地記帳工具",
                     lang: "zh-Hant-HK",
                     start_url: "/",
+                    scope: "/",
                     display: "standalone",
                     background_color: "#fafafa",
                     theme_color: "#047857",
                     icons: [
+                        {src: "/pwa-192x192.png", sizes: "192x192", type: "image/png", purpose: "any"},
+                        {src: "/pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any"},
+                        {src: "/maskable-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable"},
+                    ],
+                },
+                workbox: {
+                    // 只 precache 靜態 asset；domain data（API）一律唔入 Cache Storage。
+                    globPatterns: ["**/*.{js,css,html,svg,png,ico,woff,woff2}"],
+                    /**
+                     * VitePWA 預設會加一條 cache-first 嘅 `NavigationRoute("index.html")`，
+                     * 咁會 shadow 咗下面嘅 NetworkFirst。設 undefined 關掉，改由 NetworkFirst
+                     * 自己處理 navigation，再喺 timeout／失敗時用 precacheFallback 回落去 shell。
+                     */
+                    navigateFallback: undefined,
+                    cleanupOutdatedCaches: true,
+                    runtimeCaching: [
                         {
-                            src: "/favicon.svg",
-                            sizes: "any",
-                            type: "image/svg+xml",
-                            purpose: "any",
+                            /**
+                             * Navigation：Network First + 3 秒 timeout；網絡慢或離線就回落去
+                             * precache 咗嘅 app shell（index.html），所以 offline 都開得返，
+                             * 可以讀本機 session／draft。API 冇任何 cache rule，唔會入 Cache Storage。
+                             */
+                            urlPattern: ({request}) => request.mode === "navigate",
+                            handler: "NetworkFirst",
+                            options: {
+                                cacheName: "pages",
+                                networkTimeoutSeconds: 3,
+                                expiration: {maxEntries: 30},
+                                precacheFallback: {fallbackURL: "/index.html"},
+                            },
                         },
                     ],
                 },
