@@ -1,5 +1,7 @@
 import {Table, Text} from "@chakra-ui/react";
+import {LandmarkIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {CardEmptyState} from "@/components/CardEmptyState";
 import {SectionCard} from "@/components/layout/SectionCard";
 import type {AccountBreakdown} from "@/data/types";
 import {messages} from "@/lib/i18n";
@@ -17,9 +19,7 @@ export const SummaryAccountBreakdown = ({accounts}: SummaryAccountBreakdownProps
     return (
         <SectionCard title={intl.formatMessage(messages.summaries.accountTitle)} description={intl.formatMessage(messages.summaries.accountDescription)}>
             {rows.length === 0 ? (
-                <Text fontSize="sm" color="fg.muted">
-                    {intl.formatMessage(messages.summaries.noAccountData)}
-                </Text>
+                <CardEmptyState icon={<LandmarkIcon />} message={intl.formatMessage(messages.summaries.noAccountData)} />
             ) : (
                 <Table.Root size="sm">
                     <Table.Header>

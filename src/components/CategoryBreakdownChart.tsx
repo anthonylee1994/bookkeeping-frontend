@@ -1,9 +1,10 @@
 import React from "react";
 import {Box, Flex, Table, Text} from "@chakra-ui/react";
-import {TagIcon} from "lucide-react";
+import {PieChartIcon, TagIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Cell, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import {EntityAvatar} from "@/components/EntityAvatar";
+import {CardEmptyState} from "@/components/CardEmptyState";
 import {SectionCard} from "@/components/layout/SectionCard";
 import type {Category, CategoryBreakdown} from "@/data/types";
 import {formatShare, rankCategories} from "@/lib/categoryBreakdown";
@@ -46,9 +47,7 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
     return (
         <SectionCard title={title} description={description}>
             {slices.length === 0 ? (
-                <Text fontSize="sm" color="fg.muted">
-                    {emptyMessage}
-                </Text>
+                <CardEmptyState icon={<PieChartIcon />} message={emptyMessage} />
             ) : (
                 <Flex direction={{base: "column", md: "row"}} gap="4" align="center">
                     <Box w={{base: "full", md: "12rem"}} h={{base: "10rem", md: "12rem"}} flexShrink="0">

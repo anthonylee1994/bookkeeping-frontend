@@ -1,7 +1,9 @@
 import {Box, Button, Flex, HStack, Stack, Text} from "@chakra-ui/react";
+import {ReceiptTextIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import {TransactionKindIcon} from "@/components/TransactionKindIcon";
+import {CardEmptyState} from "@/components/CardEmptyState";
 import {SectionCard} from "@/components/layout/SectionCard";
 import type {Paginated, TransactionRow} from "@/data/types";
 import {toDisplayDate} from "@/lib/date";
@@ -22,9 +24,7 @@ export const SummaryTransactions = ({transactions, onPageChange}: SummaryTransac
     return (
         <SectionCard title={intl.formatMessage(messages.summaries.transactionsTitle)} description={intl.formatMessage(messages.summaries.transactionsDescription)}>
             {transactions.data.length === 0 ? (
-                <Text fontSize="sm" color="fg.muted">
-                    {intl.formatMessage(messages.summaries.noTransactions)}
-                </Text>
+                <CardEmptyState icon={<ReceiptTextIcon />} message={intl.formatMessage(messages.summaries.noTransactions)} />
             ) : (
                 <Flex direction="column" gap="3">
                     <Stack gap="1">
