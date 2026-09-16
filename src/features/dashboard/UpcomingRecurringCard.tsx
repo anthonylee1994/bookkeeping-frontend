@@ -1,9 +1,9 @@
-import {Box, Button, Center, Flex, Stack, Text} from "@chakra-ui/react";
-import {ArrowDownLeftIcon, ArrowUpRightIcon} from "lucide-react";
+import {Box, Button, Flex, Stack, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
-import type {RecurringRuleSummary} from "@/data/types";
+import {TransactionKindIcon} from "@/components/TransactionKindIcon";
 import {SectionCard} from "@/components/layout/SectionCard";
+import type {RecurringRuleSummary} from "@/data/types";
 import {daysFromToday, toDisplayDate} from "@/lib/date";
 import {kindLabel} from "@/lib/transactionDisplay";
 import {messages} from "@/lib/i18n";
@@ -42,27 +42,22 @@ export const UpcomingRecurringCard = ({rules}: UpcomingRecurringCardProps) => {
                 </Text>
             ) : (
                 <Stack gap="2">
-                    {rules.map(rule => {
-                        const KindIcon = rule.kind === "income" ? ArrowDownLeftIcon : ArrowUpRightIcon;
-                        return (
-                            <Flex key={rule.id} align="center" gap="3" rounded="lg" borderWidth="1px" borderColor="border" px="3" py="2.5">
-                                <Center boxSize="8" rounded="lg" bg="bg.subtle" color={rule.kind} flexShrink="0" aria-hidden="true">
-                                    <KindIcon size={16} />
-                                </Center>
-                                <Box minW="0" flex="1">
-                                    <Text fontSize="sm" fontWeight="medium" truncate>
-                                        {rule.note ?? kindLabel(rule.kind)}
-                                    </Text>
-                                    <Text fontSize="xs" color="fg.muted">
-                                        {whenLabel(rule.next_run_at)}
-                                    </Text>
-                                </Box>
-                                <Text fontSize="sm" fontWeight="semibold" color={rule.kind} flexShrink="0" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
-                                    {formatSignedAmount({cents: rule.amount_cents, kind: rule.kind})}
+                    {rules.map(rule => (
+                        <Flex key={rule.id} align="center" gap="3" rounded="lg" borderWidth="1px" borderColor="border" px="3" py="2.5">
+                            <TransactionKindIcon kind={rule.kind} color={rule.kind} />
+                            <Box minW="0" flex="1">
+                                <Text fontSize="sm" fontWeight="medium" truncate>
+                                    {rule.note ?? kindLabel(rule.kind)}
                                 </Text>
-                            </Flex>
-                        );
-                    })}
+                                <Text fontSize="xs" color="fg.muted">
+                                    {whenLabel(rule.next_run_at)}
+                                </Text>
+                            </Box>
+                            <Text fontSize="sm" fontWeight="semibold" color={rule.kind} flexShrink="0" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
+                                {formatSignedAmount({cents: rule.amount_cents, kind: rule.kind})}
+                            </Text>
+                        </Flex>
+                    ))}
                 </Stack>
             )}
         </SectionCard>

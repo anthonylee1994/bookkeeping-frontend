@@ -12,18 +12,15 @@ type SectionCardProps = {
 export const SectionCard = ({title, description, action, children}: SectionCardProps) => {
     return (
         <Card.Root as="section" rounded="xl" borderColor="border" shadow="xs">
-            <Card.Header gap="1" px={{base: "4", md: "6"}} pt={{base: "4", md: "6"}}>
+            {/* Card.Header 只有 padding-top，body 又 pt=0，所以要自己補 padding-bottom，
+                否則標題／描述／action 會癡住下面內容。 */}
+            <Card.Header gap="1" px={{base: "4", md: "6"}} pt={{base: "4", md: "6"}} pb={{base: "3", md: "4"}}>
                 <Flex justify="space-between" align="flex-start" gap="3">
                     <Box minW="0">
                         <Card.Title fontSize="md">{title}</Card.Title>
                         {description === undefined ? null : <Card.Description mt="0.5">{description}</Card.Description>}
                     </Box>
-                    {/* Header 本身冇 padding-bottom，而 action 通常高過標題，所以要自己留位，免得癡住內容。 */}
-                    {action === undefined ? null : (
-                        <Box flexShrink="0" mb="2">
-                            {action}
-                        </Box>
-                    )}
+                    {action === undefined ? null : <Box flexShrink="0">{action}</Box>}
                 </Flex>
             </Card.Header>
             <Card.Body pt="0" px={{base: "4", md: "6"}} pb={{base: "4", md: "6"}} gap="3">
