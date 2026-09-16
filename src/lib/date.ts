@@ -1,4 +1,4 @@
-import {addCalendarDays, addCalendarMonths, daysInMonth, parseCalendarDate, parseDate, toHongKongCalendar, toHongKongInstant} from "./calendar";
+import {addCalendarDays, addCalendarMonths, compareCalendarDates, daysInMonth, parseCalendarDate, parseDate, toHongKongCalendar, toHongKongInstant} from "./calendar";
 import type {CalendarDate, DateInput} from "./calendar";
 import {formatMessage, intl, messages} from "./i18n";
 import type {SummaryPeriod} from "../data/types";
@@ -56,6 +56,13 @@ export function addPeriod(input: DateInput, period: SummaryPeriod, amount = 1): 
 /** 香港時區的今日，格式 `YYYY-MM-DD`。 */
 export function todayDate(): string {
     return toIsoDate(new Date());
+}
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** 目標日期距離香港「今日」的分日數；正數代表未來。 */
+export function daysFromToday(input: DateInput): number {
+    return Math.round(compareCalendarDates(toHongKongCalendar(input), toHongKongCalendar(new Date())) / MS_PER_DAY);
 }
 
 /** 將任何 datetime 轉為香港時區的 `YYYY-MM-DD`（供 URL filter 使用）。 */

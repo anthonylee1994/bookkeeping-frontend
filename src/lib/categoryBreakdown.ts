@@ -18,6 +18,8 @@ type RankCategoriesOptions = {
     limit?: number;
     /** 分類名為 null 時顯示的文案；預設「未分類」。 */
     uncategorizedLabel?: string;
+    /** 用分類自己設定的顏色；回 null 即用預設色序（例如未設定或顏色太淺）。 */
+    colorOf?: (categoryId: string | null) => string | null;
 };
 
 function amountOf(item: CategoryBreakdown, kind: CategoryBreakdownKind): number {
@@ -25,7 +27,7 @@ function amountOf(item: CategoryBreakdown, kind: CategoryBreakdownKind): number 
 }
 
 /** 按指定種類（收入／支出）排序，取頭 N 個分類；share 相對同種類總額計算。 */
-export function rankCategories(breakdown: CategoryBreakdown[], kind: CategoryBreakdownKind, {limit = 5, uncategorizedLabel}: RankCategoriesOptions = {}): CategorySlice[] {
+export function rankCategories(breakdown: CategoryBreakdown[], kind: CategoryBreakdownKind, {limit = 5, uncategorizedLabel, colorOf}: RankCategoriesOptions = {}): CategorySlice[] {
     const total = breakdown.reduce((sum, item) => sum + Math.max(amountOf(item, kind), 0), 0);
     const label = uncategorizedLabel ?? formatMessage(messages.common.uncategorized);
 
@@ -38,7 +40,7 @@ export function rankCategories(breakdown: CategoryBreakdown[], kind: CategoryBre
             name: item.name ?? label,
             cents: amountOf(item, kind),
             share: total === 0 ? 0 : amountOf(item, kind) / total,
-            color: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
+            color: colorOf?.(item.category_id) ?? CATEGORY_COLORS[index % CATEGORY_COLORS.length],
         }));
 }
 

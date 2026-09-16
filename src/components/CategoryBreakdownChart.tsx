@@ -1,10 +1,14 @@
+import React from "react";
 import {Box, Flex, Table, Text} from "@chakra-ui/react";
+import {TagIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Cell, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
+import {EntityAvatar} from "@/components/EntityAvatar";
 import {SectionCard} from "@/components/layout/SectionCard";
-import type {CategoryBreakdown} from "@/data/types";
+import type {Category, CategoryBreakdown} from "@/data/types";
 import {formatShare, rankCategories} from "@/lib/categoryBreakdown";
 import type {CategoryBreakdownKind} from "@/lib/categoryBreakdown";
+import {isLightColor} from "@/lib/colors";
 import {messages} from "@/lib/i18n";
 import {centsToDollars} from "@/lib/money";
 
@@ -17,6 +21,8 @@ type CategoryBreakdownChartProps = {
     limit?: number;
     /** 沒有資料時的文案。 */
     emptyMessage: string;
+    /** 分類參考資料（含 color／icon）；有提供即用分類自己的顏色，否則用預設色序。 */
+    categories?: Category[];
 };
 
 /**
@@ -24,9 +30,18 @@ type CategoryBreakdownChartProps = {
  * 圖表可以用鍵盤 focus 再用方向鍵移動 tooltip；旁邊同時提供完整資料表。
  * 收入與支出各自一張卡，不用 tab 切換。
  */
-export const CategoryBreakdownChart = ({breakdown, kind, title, description, limit, emptyMessage}: CategoryBreakdownChartProps) => {
+export const CategoryBreakdownChart = ({breakdown, kind, title, description, limit, emptyMessage, categories}: CategoryBreakdownChartProps) => {
     const intl = useIntl();
-    const slices = rankCategories(breakdown, kind, {limit, uncategorizedLabel: intl.formatMessage(messages.common.uncategorized)});
+    const categoryById = React.useMemo(() => new Map((categories ?? []).map(category => [category.id, category])), [categories]);
+
+    // 太淺的分類色在白色底上做 donut 幾乎睇唔到，所以退回預設色序，並令頭像用同一個色。
+    const colorOf = (categoryId: string | null): string | null => {
+        if (categoryId === null) return null;
+        const color = categoryById.get(categoryId)?.color ?? null;
+        return color === null || isLightColor(color) ? null : color;
+    };
+
+    const slices = rankCategories(breakdown, kind, {limit, uncategorizedLabel: intl.formatMessage(messages.common.uncategorized), colorOf});
 
     return (
         <SectionCard title={title} description={description}>
@@ -36,7 +51,7 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
                 </Text>
             ) : (
                 <Flex direction={{base: "column", md: "row"}} gap="4" align="center">
-                    <Box w={{base: "full", md: "12rem"}} h="12rem" flexShrink="0">
+                    <Box w={{base: "full", md: "12rem"}} h={{base: "10rem", md: "12rem"}} flexShrink="0">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie data={slices} dataKey="cents" nameKey="name" innerRadius="58%" outerRadius="92%" paddingAngle={2} stroke="none">
@@ -49,7 +64,7 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
                         </ResponsiveContainer>
                     </Box>
                     <Table.Root size="sm" w="full">
-                        <Table.Caption captionSide="bottom" color="fg.muted" mt={2}>
+                        <Table.Caption captionSide="bottom" color="fg.muted" mt={2} fontSize="xs">
                             {intl.formatMessage(messages.common.chartCaption)}
                         </Table.Caption>
                         <Table.Header>
@@ -64,7 +79,7 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
                                 <Table.Row key={slice.id}>
                                     <Table.Cell>
                                         <Flex align="center" gap="2">
-                                            <Box boxSize="2.5" rounded="full" bg={slice.color} flexShrink="0" />
+                                            <EntityAvatar size="xs" icon={categoryById.get(slice.id)?.icon ?? null} color={slice.color} fallbackIcon={TagIcon} />
                                             <Text truncate>{slice.name}</Text>
                                         </Flex>
                                     </Table.Cell>

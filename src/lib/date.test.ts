@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
-import {addMonthsToDate, addPeriod, endOfPeriod, nowIso, startOfPeriod, toDisplayDate, toDisplayDateTime, toDisplayMonth, toIsoDate, todayDate} from "./date";
+import {addMonthsToDate, addPeriod, daysFromToday, endOfPeriod, nowIso, startOfPeriod, toDisplayDate, toDisplayDateTime, toDisplayMonth, toIsoDate, todayDate} from "./date";
 
 describe("Hong Kong date formatting", () => {
     it("formats across the UTC to Hong Kong day boundary", () => {
@@ -59,5 +59,14 @@ describe("Hong Kong date-string helpers", () => {
 
     it("formats the display month", () => {
         expect(toDisplayMonth("2026-09-14")).toBe("2026年9月");
+    });
+
+    it("counts whole Hong Kong days from today", () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date("2026-09-14T04:00:00.000Z"));
+        expect(daysFromToday("2026-09-14T12:00:00+08:00")).toBe(0);
+        expect(daysFromToday("2026-09-15T12:00:00+08:00")).toBe(1);
+        expect(daysFromToday("2026-09-11T12:00:00+08:00")).toBe(-3);
+        vi.useRealTimers();
     });
 });

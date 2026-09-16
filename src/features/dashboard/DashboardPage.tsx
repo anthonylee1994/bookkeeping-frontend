@@ -13,6 +13,7 @@ import {MonthNavigator} from "@/features/dashboard/MonthNavigator";
 import {RecentTransactionsCard} from "@/features/dashboard/RecentTransactionsCard";
 import {UpcomingRecurringCard} from "@/features/dashboard/UpcomingRecurringCard";
 import {useDashboard} from "@/features/dashboard/useDashboard";
+import {useDomainReference} from "@/hooks/useDomainReference";
 import {addMonthsToDate, toDisplayMonth, toIsoDate, todayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
 
@@ -32,6 +33,7 @@ export const DashboardPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const date = resolveDashboardDate(searchParams.get("date"));
     const {dashboard, isLoading, error, reload} = useDashboard(date);
+    const reference = useDomainReference();
 
     const changeMonth = (amount: number) => {
         setSearchParams(previous => {
@@ -83,6 +85,7 @@ export const DashboardPage = () => {
                             title={intl.formatMessage(messages.dashboard.expenseCategoryTitle)}
                             description={intl.formatMessage(messages.dashboard.expenseCategoryDescription)}
                             emptyMessage={intl.formatMessage(messages.dashboard.noCategoryData, {kind: kindName("expense")})}
+                            categories={reference.categories}
                         />
                     </React.Suspense>
                     <React.Suspense fallback={<LoadingIndicator minH={{base: "26rem", md: "18rem"}} />}>
@@ -92,11 +95,12 @@ export const DashboardPage = () => {
                             title={intl.formatMessage(messages.dashboard.incomeCategoryTitle)}
                             description={intl.formatMessage(messages.dashboard.incomeCategoryDescription)}
                             emptyMessage={intl.formatMessage(messages.dashboard.noCategoryData, {kind: kindName("income")})}
+                            categories={reference.categories}
                         />
                     </React.Suspense>
                 </SimpleGrid>
                 <SimpleGrid columns={{base: 1, lg: 2}} gap="4">
-                    <AccountBalancesCard balances={balances} from={toIsoDate(dashboard.range.from)} to={toIsoDate(dashboard.range.to)} />
+                    <AccountBalancesCard balances={balances} accounts={reference.accounts} from={toIsoDate(dashboard.range.from)} to={toIsoDate(dashboard.range.to)} />
                     <UpcomingRecurringCard rules={upcoming} />
                 </SimpleGrid>
                 <RecentTransactionsCard transactions={dashboard.recent_transactions.slice(0, RECENT_TRANSACTION_LIMIT)} />

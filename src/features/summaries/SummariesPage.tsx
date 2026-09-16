@@ -14,6 +14,7 @@ import {SummaryTransactions} from "@/features/summaries/SummaryTransactions";
 import {TransferSummaryCard} from "@/features/summaries/TransferSummaryCard";
 import {periodRangeLabel, shiftPeriod} from "@/features/summaries/summariesFormat";
 import {useSummary} from "@/features/summaries/useSummary";
+import {useDomainReference} from "@/hooks/useDomainReference";
 import {todayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
 import {parseSummaryParams, serializeSummaryParams} from "@/lib/searchParams";
@@ -28,6 +29,7 @@ export const SummariesPage = () => {
     const date = params.date ?? todayDate();
     const page = params.page ?? 1;
     const {summary, isLoading, error, reload} = useSummary(period, date, page);
+    const reference = useDomainReference();
 
     // 換期間或日期一律由第一頁重新開始；serialize 不帶 page 就等於清除。
     const commit = (next: SummaryParams) => setSearchParams(serializeSummaryParams(next));
@@ -65,6 +67,7 @@ export const SummariesPage = () => {
                         description={intl.formatMessage(messages.summaries.expenseCategoryDescription)}
                         limit={summary.by_category.length}
                         emptyMessage={intl.formatMessage(messages.summaries.noCategoryData, {kind: kindName("expense")})}
+                        categories={reference.categories}
                     />
                     <CategoryBreakdownChart
                         breakdown={summary.by_category}
@@ -73,6 +76,7 @@ export const SummariesPage = () => {
                         description={intl.formatMessage(messages.summaries.incomeCategoryDescription)}
                         limit={summary.by_category.length}
                         emptyMessage={intl.formatMessage(messages.summaries.noCategoryData, {kind: kindName("income")})}
+                        categories={reference.categories}
                     />
                 </SimpleGrid>
                 <SummaryAccountBreakdown accounts={summary.by_account} />

@@ -4,7 +4,9 @@ import userEvent from "@testing-library/user-event";
 import {MemoryRouter, Route, Routes} from "react-router";
 import type {Dashboard, LocalResult, TransactionRow} from "@/data/types";
 import {DashboardPage} from "@/features/dashboard/DashboardPage";
+import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
+import {domainTestState} from "@/test/domainFixtures";
 import {renderWithIntl} from "@/test/renderWithIntl";
 
 vi.mock("recharts", () => ({
@@ -96,6 +98,7 @@ function renderDashboard(entry = "/?date=2026-09-14"): void {
 beforeEach(() => {
     getMock.mockReset();
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
+    useAppStore.setState({...domainTestState, referenceLoaded: true});
 });
 
 describe("DashboardPage", () => {

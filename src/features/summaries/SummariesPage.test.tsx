@@ -4,7 +4,9 @@ import userEvent from "@testing-library/user-event";
 import {MemoryRouter, Route, Routes} from "react-router";
 import type {Summary, TransactionRow} from "@/data/types";
 import {SummariesPage} from "@/features/summaries/SummariesPage";
+import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
+import {domainTestState} from "@/test/domainFixtures";
 import {renderWithIntl} from "@/test/renderWithIntl";
 
 vi.mock("recharts", () => ({
@@ -75,6 +77,7 @@ function renderSummaries(entry = "/summaries?period=monthly&date=2026-09-16"): v
 beforeEach(() => {
     getMock.mockReset();
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
+    useAppStore.setState({...domainTestState, referenceLoaded: true});
 });
 
 describe("SummariesPage", () => {
