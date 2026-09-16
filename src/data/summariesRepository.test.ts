@@ -10,7 +10,7 @@ function summaryResponse() {
         income_cents: 0,
         expense_cents: 0,
         net_cents: 0,
-        daily: [{date: "2026-09-14", income_cents: 0, expense_cents: 0, net_cents: 0}],
+        daily: [{date: "2026-09-14", net_cents: 0}],
         by_category: [],
         by_account: [],
         transfers: {count: 1, total_cents: 20000},

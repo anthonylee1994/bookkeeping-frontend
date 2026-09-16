@@ -51,8 +51,8 @@ const summaryFixture: Summary = {
     expense_cents: 50000,
     net_cents: 50000,
     daily: [
-        {date: "2026-09-13", income_cents: 0, expense_cents: 0, net_cents: 0},
-        {date: "2026-09-14", income_cents: 100000, expense_cents: 50000, net_cents: 50000},
+        {date: "2026-09-13", net_cents: 0},
+        {date: "2026-09-14", net_cents: 50000},
     ],
     by_category: [
         {category_id: CATEGORY_ID, name: "飲食", income_cents: 0, expense_cents: 50000},

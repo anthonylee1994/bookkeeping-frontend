@@ -80,7 +80,7 @@ export const SummariesPage = () => {
                         categories={reference.categories}
                     />
                 </SimpleGrid>
-                {period === "monthly" ? <SummaryCalendarCard daily={summary.daily} date={date} incomeCents={summary.income_cents} netCents={summary.net_cents} /> : null}
+                {period === "monthly" ? <SummaryCalendarCard daily={summary.daily} date={date} netCents={summary.net_cents} /> : null}
                 <SummaryAccountBreakdown accounts={summary.by_account} />
                 <SummaryTransactions transactions={summary.transactions} onPageChange={changePage} />
             </Stack>

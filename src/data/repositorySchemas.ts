@@ -74,8 +74,6 @@ export const paginatedTransactionRowsResponseSchema = z.union([
 const rangeSchema = z.object({from: z.string(), to: z.string()});
 const dailyBreakdownSchema = z.object({
     date: z.iso.date(),
-    income_cents: z.number().int(),
-    expense_cents: z.number().int(),
     net_cents: z.number().int(),
 });
 const categoryBreakdownSchema = z.object({

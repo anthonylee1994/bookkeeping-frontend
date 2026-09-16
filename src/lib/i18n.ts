@@ -445,7 +445,7 @@ export const messages = {
         transactionsDescription: {id: "summaries.transactionsDescription", defaultMessage: "只包括收入及支出，轉帳另計。"},
         noTransactions: {id: "summaries.noTransactions", defaultMessage: "期間內沒有交易"},
         calendarTitle: {id: "summaries.calendarTitle", defaultMessage: "收支日曆"},
-        calendarDescription: {id: "summaries.calendarDescription", defaultMessage: "每日淨收支；百分比為該日佔當月收入比例"},
+        calendarDescription: {id: "summaries.calendarDescription", defaultMessage: "每日淨收支"},
         calendarNetLabel: {id: "summaries.calendarNetLabel", defaultMessage: "本月淨收支 · HKD"},
         calendarWeekdaySun: {id: "summaries.calendarWeekdaySun", defaultMessage: "日"},
         calendarWeekdayMon: {id: "summaries.calendarWeekdayMon", defaultMessage: "一"},
@@ -454,7 +454,7 @@ export const messages = {
         calendarWeekdayThu: {id: "summaries.calendarWeekdayThu", defaultMessage: "四"},
         calendarWeekdayFri: {id: "summaries.calendarWeekdayFri", defaultMessage: "五"},
         calendarWeekdaySat: {id: "summaries.calendarWeekdaySat", defaultMessage: "六"},
-        calendarDayLabel: {id: "summaries.calendarDayLabel", defaultMessage: "{date}：淨收支 {amount}，佔本月收入 {percent}"},
+        calendarDayLabel: {id: "summaries.calendarDayLabel", defaultMessage: "{date}：淨收支 {amount}"},
         loadFailed: {id: "summaries.loadFailed", defaultMessage: "無法載入報表資料"},
     },
     recurring: {

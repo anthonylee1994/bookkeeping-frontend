@@ -250,8 +250,6 @@ export type TransferSummary = {
 
 export type DailyBreakdown = {
     date: string;
-    income_cents: number;
-    expense_cents: number;
     net_cents: number;
 };
 
