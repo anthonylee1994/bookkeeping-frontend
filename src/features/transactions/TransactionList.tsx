@@ -1,57 +1,68 @@
 import React from "react";
 import type {ReactNode} from "react";
 import {Box, Flex, HStack, Icon, Text} from "@chakra-ui/react";
-import {ArrowLeftRightIcon, ChevronRightIcon} from "lucide-react";
-import {useIntl} from "react-intl";
+import {ArrowLeftRightIcon, ChevronRightIcon, TagIcon, WalletIcon} from "lucide-react";
 import {Link} from "react-router";
+import {EntityAvatar} from "@/components/EntityAvatar";
 import type {Transaction} from "@/data/types";
 import {describeTransaction, groupTransactionsByDate} from "@/features/transactions/transactionsFormat";
-import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
+import type {TransactionAvatarMaps, TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {toDisplayDate} from "@/lib/date";
-import {messages} from "@/lib/i18n";
 import {centsToDollars, signedAmountTone} from "@/lib/money";
 import {transactionDetailPath} from "@/routes/paths";
 
 type TransactionListProps = {
     transactions: Transaction[];
     names: TransactionNameMaps;
+    avatars: TransactionAvatarMaps;
     /** 只有按日期排序時分組才有意義。 */
     grouped: boolean;
 };
 
 /**
  * Mobile 交易列表：按日期分組，組內用分隔線而不是逐張卡，
- * 這樣同樣高度可以多看幾行，掃描亦更容易。
+ * 這樣同樣高度可以多看幾行，掃描亦更容易。左邊分類頭像令每行一眼分辨到。
  */
-export const TransactionList = ({transactions, names, grouped}: TransactionListProps) => {
-    const intl = useIntl();
-
+export const TransactionList = ({transactions, names, avatars, grouped}: TransactionListProps) => {
     const renderRow = (transaction: Transaction) => {
         const view = describeTransaction(transaction, names);
+        const isTransfer = transaction.kind === "transfer";
+        const categoryMeta = transaction.category_id != null ? avatars.categories.get(transaction.category_id) : undefined;
+        const accountMeta = avatars.accounts.get(transaction.account_id);
         return (
             <Box as="li" key={transaction.id} listStyleType="none" _notLast={{borderBottomWidth: "1px", borderColor: "border"}}>
-                <Flex asChild align="center" justify="space-between" gap="3" px="4" py="3" transition="background 150ms ease" _hover={{bg: "brand.active/40"}} _active={{bg: "brand.active/60"}}>
+                <Flex asChild align="center" gap="3" px="4" py="3" transition="background 150ms ease" _hover={{bg: "brand.active/40"}} _active={{bg: "brand.active/60"}}>
                     <Link to={transactionDetailPath(transaction.id)}>
+                        <EntityAvatar
+                            size="md"
+                            icon={isTransfer ? null : (categoryMeta?.icon ?? null)}
+                            color={isTransfer ? "transfer" : (categoryMeta?.color ?? null)}
+                            fallbackIcon={isTransfer ? ArrowLeftRightIcon : TagIcon}
+                        />
                         <Box minW="0" flex="1">
-                            <HStack gap="1.5">
-                                {transaction.kind === "transfer" ? (
-                                    <Icon size="xs" color="transfer" aria-label={intl.formatMessage(messages.transactions.transfer)}>
-                                        <ArrowLeftRightIcon />
-                                    </Icon>
-                                ) : null}
-                                <Text fontWeight="medium" truncate>
-                                    {view.primary}
-                                </Text>
-                            </HStack>
-                            <Text fontSize="xs" color="fg.muted" truncate>
-                                {[view.category, view.account, view.secondary].filter(value => value !== null).join(" · ")}
+                            <Text fontWeight="medium" truncate>
+                                {view.primary}
                             </Text>
+                            <Flex align="center" gap="1.5" mt="0.5" fontSize="xs" color="fg.muted" minW="0">
+                                <Text truncate>{view.category}</Text>
+                                <Text aria-hidden="true">·</Text>
+                                <Flex align="center" gap="1" minW="0">
+                                    <EntityAvatar size="xs" icon={accountMeta?.icon ?? null} color={accountMeta?.color ?? null} fallbackIcon={WalletIcon} />
+                                    <Text truncate>{view.account}</Text>
+                                </Flex>
+                                {view.secondary === null ? null : (
+                                    <React.Fragment>
+                                        <Text aria-hidden="true">·</Text>
+                                        <Text truncate>{view.secondary}</Text>
+                                    </React.Fragment>
+                                )}
+                            </Flex>
                         </Box>
                         <HStack gap="1" flexShrink="0">
                             <Text fontWeight="semibold" color={view.tone} whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
                                 {view.amount}
                             </Text>
-                            <Icon size="sm" color="fg.subtle" aria-hidden>
+                            <Icon size="sm" color="fg.subtle" aria-hidden="true">
                                 <ChevronRightIcon />
                             </Icon>
                         </HStack>

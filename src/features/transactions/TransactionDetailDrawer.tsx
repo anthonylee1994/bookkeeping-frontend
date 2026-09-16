@@ -6,7 +6,8 @@ import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
 import {TransactionDetailActions} from "@/features/transactions/TransactionDetailActions";
 import {TransactionDetailContent} from "@/features/transactions/TransactionDetailContent";
-import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
+import {buildTransactionAvatarMaps} from "@/features/transactions/transactionsFormat";
+import type {TransactionAvatarMaps, TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {useDomainReference} from "@/hooks/useDomainReference";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {messages} from "@/lib/i18n";
@@ -52,6 +53,8 @@ export const TransactionDetailDrawer = () => {
         merchants: React.useMemo(() => new Map(reference.merchants.map(merchant => [merchant.id, merchant.name])), [reference.merchants]),
     };
 
+    const avatars: TransactionAvatarMaps = React.useMemo(() => buildTransactionAvatarMaps(reference.accounts, reference.categories), [reference.accounts, reference.categories]);
+
     const close = () => navigate(ROUTES.transactions);
 
     return (
@@ -76,7 +79,7 @@ export const TransactionDetailDrawer = () => {
                             )}
                             {!isLoading && !reference.isLoading && error === null && reference.error === null && transaction !== null ? (
                                 <Stack gap="4">
-                                    <TransactionDetailContent transaction={transaction} names={names} />
+                                    <TransactionDetailContent transaction={transaction} names={names} avatars={avatars} />
                                     <TransactionDetailActions transaction={transaction} onDeleted={close} />
                                 </Stack>
                             ) : null}

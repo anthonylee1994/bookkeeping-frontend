@@ -1,4 +1,4 @@
-import type {TransactionFilters, TransactionKind, TransactionRow, TransactionSource} from "@/data/types";
+import type {Account, Category, TransactionFilters, TransactionKind, TransactionRow, TransactionSource} from "@/data/types";
 import {formatMessage, messages} from "@/lib/i18n";
 import {centsToDollars} from "@/lib/money";
 import {kindLabel, transactionDisplayAmount, transactionTitle, transactionTone} from "@/lib/transactionDisplay";
@@ -9,6 +9,24 @@ export type TransactionNameMaps = {
     categories: Map<string, string>;
     merchants: Map<string, string>;
 };
+
+export type TransactionAvatarMeta = {
+    icon: string | null;
+    color: string | null;
+};
+
+/** 列表／表格顯示頭像用；只保留 icon 同 color，名稱由 TransactionNameMaps 提供。 */
+export type TransactionAvatarMaps = {
+    accounts: Map<string, TransactionAvatarMeta>;
+    categories: Map<string, TransactionAvatarMeta>;
+};
+
+export function buildTransactionAvatarMaps(accounts: Account[], categories: Category[]): TransactionAvatarMaps {
+    return {
+        accounts: new Map(accounts.map(account => [account.id, {icon: account.icon ?? null, color: account.color ?? null}])),
+        categories: new Map(categories.map(category => [category.id, {icon: category.icon ?? null, color: category.color ?? null}])),
+    };
+}
 
 export type TransactionRowView = {
     primary: string;
@@ -107,7 +125,7 @@ export function describeTransaction(transaction: TransactionRow, names: Transact
     return {
         primary: transactionPrimaryLabel(transaction, merchantName),
         secondary,
-        category: categoryName ?? formatMessage(messages.transactions.list.uncategorized),
+        category: transaction.kind === "transfer" ? formatMessage(messages.transactions.transfer) : (categoryName ?? formatMessage(messages.transactions.list.uncategorized)),
         account: accountName ?? formatMessage(messages.transactions.list.unknownAccount),
         kind: kindLabel(transaction.kind),
         amount: transactionDisplayAmount(transaction),

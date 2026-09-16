@@ -1,15 +1,17 @@
 import {Box, HStack, Icon, Table, Text} from "@chakra-ui/react";
-import {ArrowDownIcon, ArrowUpIcon, ArrowLeftRightIcon} from "lucide-react";
+import {ArrowDownIcon, ArrowUpIcon, ArrowLeftRightIcon, TagIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {EntityAvatar} from "@/components/EntityAvatar";
 import type {SortOrder, Transaction, TransactionSortField} from "@/data/types";
 import {describeTransaction} from "@/features/transactions/transactionsFormat";
-import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
+import type {TransactionAvatarMaps, TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {toDisplayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
 
 type TransactionsTableProps = {
     transactions: Transaction[];
     names: TransactionNameMaps;
+    avatars: TransactionAvatarMaps;
     sort: TransactionSortField;
     order: SortOrder;
     onSelect: (transaction: Transaction) => void;
@@ -26,7 +28,7 @@ type SortableColumn = {
  * Desktop 交易表格：表頭可排序，整行可點擊或用鍵盤開啟詳情。
  * 沒有做日期分組——表格本身已經有日期欄，再加分組行等於每筆交易佔兩行。
  */
-export const TransactionsTable = ({transactions, names, sort, order, onSelect, onSortChange}: TransactionsTableProps) => {
+export const TransactionsTable = ({transactions, names, avatars, sort, order, onSelect, onSortChange}: TransactionsTableProps) => {
     const intl = useIntl();
 
     const sortableColumns: SortableColumn[] = [
@@ -60,6 +62,9 @@ export const TransactionsTable = ({transactions, names, sort, order, onSelect, o
     const renderRows = (rows: Transaction[]) =>
         rows.map(transaction => {
             const view = describeTransaction(transaction, names);
+            const isTransfer = transaction.kind === "transfer";
+            const categoryMeta = transaction.category_id != null ? avatars.categories.get(transaction.category_id) : undefined;
+            const accountMeta = avatars.accounts.get(transaction.account_id);
             const select = () => onSelect(transaction);
             return (
                 <Table.Row
@@ -96,8 +101,27 @@ export const TransactionsTable = ({transactions, names, sort, order, onSelect, o
                             </Text>
                         )}
                     </Table.Cell>
-                    <Table.Cell color="fg.muted">{view.category}</Table.Cell>
-                    <Table.Cell color="fg.muted">{view.account}</Table.Cell>
+                    <Table.Cell>
+                        <HStack gap="2">
+                            <EntityAvatar
+                                size="sm"
+                                icon={isTransfer ? null : (categoryMeta?.icon ?? null)}
+                                color={isTransfer ? "transfer" : (categoryMeta?.color ?? null)}
+                                fallbackIcon={isTransfer ? ArrowLeftRightIcon : TagIcon}
+                            />
+                            <Text color="fg.muted" truncate>
+                                {view.category}
+                            </Text>
+                        </HStack>
+                    </Table.Cell>
+                    <Table.Cell>
+                        <HStack gap="2">
+                            <EntityAvatar size="sm" icon={accountMeta?.icon ?? null} color={accountMeta?.color ?? null} fallbackIcon={WalletIcon} />
+                            <Text color="fg.muted" truncate>
+                                {view.account}
+                            </Text>
+                        </HStack>
+                    </Table.Cell>
                     <Table.Cell textAlign="end" fontWeight="semibold" color={view.tone} whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
                         {view.amount}
                     </Table.Cell>

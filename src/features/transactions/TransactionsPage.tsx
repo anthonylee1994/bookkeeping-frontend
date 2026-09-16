@@ -14,8 +14,8 @@ import {TransactionsTable} from "@/features/transactions/TransactionsTable";
 import {matchQuickRange, quickRangeToFilters} from "@/features/transactions/transactionQuickRanges";
 import type {QuickRange} from "@/features/transactions/transactionQuickRanges";
 import {TransactionsToolbar} from "@/features/transactions/TransactionsToolbar";
-import {countActiveFilters, describeActiveFilters, summarisePage} from "@/features/transactions/transactionsFormat";
-import type {TransactionNameMaps} from "@/features/transactions/transactionsFormat";
+import {buildTransactionAvatarMaps, countActiveFilters, describeActiveFilters, summarisePage} from "@/features/transactions/transactionsFormat";
+import type {TransactionAvatarMaps, TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {useTransactions} from "@/features/transactions/useTransactions";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {useDomainReference} from "@/hooks/useDomainReference";
@@ -46,6 +46,8 @@ export const TransactionsPage = () => {
         categories: React.useMemo(() => new Map(reference.categories.map(category => [category.id, category.name])), [reference.categories]),
         merchants: React.useMemo(() => new Map(reference.merchants.map(merchant => [merchant.id, merchant.name])), [reference.merchants]),
     };
+
+    const avatars: TransactionAvatarMaps = React.useMemo(() => buildTransactionAvatarMaps(reference.accounts, reference.categories), [reference.accounts, reference.categories]);
 
     const commit = (next: TransactionFilters) => {
         setSearchParams(serializeTransactionFilters(next));
@@ -145,9 +147,9 @@ export const TransactionsPage = () => {
             <Stack gap="3">
                 <TransactionsSummaryBar total={page.meta.total} totals={summarisePage(page.data)} />
                 {isDesktop ? (
-                    <TransactionsTable transactions={page.data} names={names} sort={sort} order={order} onSelect={openTransaction} onSortChange={changeSort} />
+                    <TransactionsTable transactions={page.data} names={names} avatars={avatars} sort={sort} order={order} onSelect={openTransaction} onSortChange={changeSort} />
                 ) : (
-                    <TransactionList transactions={page.data} names={names} grouped={grouped} />
+                    <TransactionList transactions={page.data} names={names} avatars={avatars} grouped={grouped} />
                 )}
 
                 <Flex wrap="wrap" align="center" justify="space-between" gap="3" pt="1">
