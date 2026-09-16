@@ -65,6 +65,44 @@ describe("AuthRepository API client", () => {
         expect(wrong).toEqual(missing);
     });
 
+    it("changes the password with the stored token", async () => {
+        const storage = createMemoryStorage();
+        storage.setItem(AUTH_TOKEN_STORAGE_KEY, "stored-token");
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {user}});
+
+        const result = await new AuthRepository(storage).changePassword({password_challenge: "secret123", password: "newsecret123", password_confirmation: "newsecret123"});
+
+        expect(result).toEqual({ok: true, value: user});
+        expect(request).toHaveBeenCalledWith(
+            expect.objectContaining({
+                method: "PATCH",
+                url: "/me/password",
+                data: {password_challenge: "secret123", password: "newsecret123", password_confirmation: "newsecret123"},
+                headers: expect.objectContaining({Authorization: "Bearer stored-token"}),
+            })
+        );
+    });
+
+    it("surfaces the backend invalid-current-password message", async () => {
+        const storage = createMemoryStorage();
+        storage.setItem(AUTH_TOKEN_STORAGE_KEY, "stored-token");
+        const data = {error: {code: "invalid_current_password", message: "目前密碼不正確"}};
+        vi.spyOn(apiClient, "request").mockRejectedValue({response: {status: 422, data}});
+
+        const result = await new AuthRepository(storage).changePassword({password_challenge: "wrong-password", password: "newsecret123", password_confirmation: "newsecret123"});
+
+        expect(result).toEqual({ok: false, error: {code: "validation", message: "目前密碼不正確"}});
+    });
+
+    it("rejects invalid change-password input before making an API call", async () => {
+        const storage = createMemoryStorage();
+        storage.setItem(AUTH_TOKEN_STORAGE_KEY, "stored-token");
+        const request = vi.spyOn(apiClient, "request");
+
+        expect(await new AuthRepository(storage).changePassword({password_challenge: "", password: "short", password_confirmation: "short"})).toMatchObject({ok: false, error: {code: "validation"}});
+        expect(request).not.toHaveBeenCalled();
+    });
+
     it("uses the stored token for getMe", async () => {
         const storage = createMemoryStorage();
         storage.setItem(AUTH_TOKEN_STORAGE_KEY, "stored-token");

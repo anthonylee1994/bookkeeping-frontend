@@ -1,5 +1,5 @@
 import {Box, Card, Heading, HStack, Icon, Stack, Text} from "@chakra-ui/react";
-import {ChevronRightIcon, FolderIcon, LogOutIcon, TagIcon, WalletIcon} from "lucide-react";
+import {ChevronRightIcon, FolderIcon, KeyRoundIcon, LogOutIcon, TagIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import {messages} from "@/lib/i18n";
@@ -98,6 +98,29 @@ export const SettingsPage = () => {
                         {intl.formatMessage(messages.settings.system)}
                     </Text>
                     <Stack gap="2">
+                        <Card.Root asChild>
+                            <Link to={ROUTES.settingsPassword}>
+                                <Card.Body cursor="pointer" _hover={{bg: "brand.active"}}>
+                                    <HStack justify="space-between">
+                                        <HStack gap="3">
+                                            <Icon fontSize="xl" color="brand.fg">
+                                                <KeyRoundIcon />
+                                            </Icon>
+                                            <Box>
+                                                <Text fontWeight="semibold">{intl.formatMessage(messages.settings.changePassword)}</Text>
+                                                <Text fontSize="sm" color="fg.muted">
+                                                    {intl.formatMessage(messages.settings.changePasswordDescription)}
+                                                </Text>
+                                            </Box>
+                                        </HStack>
+                                        <Icon>
+                                            <ChevronRightIcon />
+                                        </Icon>
+                                    </HStack>
+                                </Card.Body>
+                            </Link>
+                        </Card.Root>
+
                         <Card.Root>
                             <Card.Body cursor="pointer" onClick={logout} _hover={{bg: "brand.active"}}>
                                 <HStack justify="space-between">

@@ -2,8 +2,8 @@ import {formatMessage, messages} from "../lib/i18n";
 import {apiRequest, publicApiRequest} from "./apiRepository";
 import {localStorageFailure, localSuccess, localUnauthorized, localValidation} from "./localResult";
 import {authResponseSchema, userResponseSchema} from "./repositorySchemas";
-import {authInputSchema} from "./schema";
-import type {AuthInput, AuthSession, LocalResult, User} from "./types";
+import {authInputSchema, changePasswordInputSchema} from "./schema";
+import type {AuthInput, AuthSession, ChangePasswordInput, LocalResult, User} from "./types";
 
 export const AUTH_TOKEN_STORAGE_KEY = "bookkeeping.auth.token";
 export const AUTH_FAILURE_MESSAGE = formatMessage(messages.auth.genericFailure);
@@ -72,6 +72,12 @@ export class AuthRepository {
     async getMe(token = getStoredAuthToken(this.#storage)): Promise<LocalResult<User>> {
         if (token === null || token.trim() === "") return localUnauthorized(AUTH_FAILURE_MESSAGE);
         return apiRequest(token, {method: "GET", url: "/me"}, userResponseSchema);
+    }
+
+    async changePassword(input: ChangePasswordInput): Promise<LocalResult<User>> {
+        const parsed = changePasswordInputSchema.safeParse(input);
+        if (!parsed.success) return localValidation(formatMessage(messages.validation.changePasswordInvalid));
+        return apiRequest(getStoredAuthToken(this.#storage) ?? "", {method: "PATCH", url: "/me/password", data: parsed.data}, userResponseSchema);
     }
 
     logout(): void {

@@ -13,6 +13,12 @@ export type AuthInput = {
     password: string;
 };
 
+export type ChangePasswordInput = {
+    password_challenge: string;
+    password: string;
+    password_confirmation: string;
+};
+
 export type AccountInput = {
     name: string;
     kind: AccountKind;

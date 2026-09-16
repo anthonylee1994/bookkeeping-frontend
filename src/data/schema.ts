@@ -16,6 +16,14 @@ export const authInputSchema = z.object({
     password: z.string().min(8),
 });
 
+export const changePasswordInputSchema = z
+    .object({
+        password_challenge: z.string().min(1),
+        password: z.string().min(8),
+        password_confirmation: z.string().min(1),
+    })
+    .refine(value => value.password === value.password_confirmation);
+
 export const accountInputSchema = z.object({
     name: z.string().trim().min(1),
     kind: z.enum(["cash", "bank", "credit_card", "e_wallet", "other"]),

@@ -21,6 +21,7 @@ const SettingsPage = React.lazy(() => import("@/features/settings/SettingsPage")
 const AccountsPage = React.lazy(() => import("@/features/settings/AccountsPage").then(module => ({default: module.AccountsPage})));
 const CategoriesPage = React.lazy(() => import("@/features/settings/CategoriesPage").then(module => ({default: module.CategoriesPage})));
 const MerchantsPage = React.lazy(() => import("@/features/settings/MerchantsPage").then(module => ({default: module.MerchantsPage})));
+const ChangePasswordPage = React.lazy(() => import("@/features/settings/ChangePasswordPage").then(module => ({default: module.ChangePasswordPage})));
 
 export const AppRoutes = () => {
     return (
@@ -120,6 +121,14 @@ export const AppRoutes = () => {
                         element={
                             <LazyRoute>
                                 <MerchantsPage />
+                            </LazyRoute>
+                        }
+                    />
+                    <Route
+                        path={ROUTES.settingsPassword}
+                        element={
+                            <LazyRoute>
+                                <ChangePasswordPage />
                             </LazyRoute>
                         }
                     />

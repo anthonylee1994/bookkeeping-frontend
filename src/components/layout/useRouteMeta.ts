@@ -25,6 +25,7 @@ const ROUTE_META: readonly RouteMetaEntry[] = [
     {path: ROUTES.settingsAccounts, title: messages.nav.accounts, isRoot: false},
     {path: ROUTES.settingsCategories, title: messages.nav.categories, isRoot: false},
     {path: ROUTES.settingsMerchants, title: messages.nav.merchants, isRoot: false},
+    {path: ROUTES.settingsPassword, title: messages.settings.changePassword, isRoot: false},
 ];
 
 const FALLBACK_META: RouteMeta = {title: messages.app.name, isRoot: true};

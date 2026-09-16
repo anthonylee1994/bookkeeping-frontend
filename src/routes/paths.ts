@@ -13,6 +13,7 @@ export const ROUTES = {
     settingsAccounts: "/settings/accounts",
     settingsCategories: "/settings/categories",
     settingsMerchants: "/settings/merchants",
+    settingsPassword: "/settings/password",
 } as const;
 
 /** 交易詳情 URL；集中在此處，避免各 feature 自行組合 path。 */
