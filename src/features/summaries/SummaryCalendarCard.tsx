@@ -56,7 +56,7 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
                     <Text fontSize="2xs" color="fg.muted">
                         {intl.formatMessage(messages.summaries.calendarNetLabel)}
                     </Text>
-                    <Text fontSize={{base: "md", md: "lg"}} fontWeight="bold" color={netColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
+                    <Text fontSize={{base: "md", md: "2xl"}} fontWeight="bold" color={netColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
                         {formatSignedAmount({cents: netCents, kind: netTone})}
                     </Text>
                 </Stack>
@@ -65,7 +65,7 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
             <Box overflowX="auto">
                 <SimpleGrid columns={7} gap={{base: "0.5", md: "1"}} minW={{base: "19rem", md: "100%"}}>
                     {WEEKDAY_MESSAGES.map((message, index) => (
-                        <Text key={index} textAlign="center" fontSize={{base: "xs", md: "sm"}} color="fg.muted" pb="1.5">
+                        <Text key={index} textAlign="center" fontSize={{base: "xs", md: "md"}} color="fg.muted" pb="1.5">
                             {intl.formatMessage(message)}
                         </Text>
                     ))}
@@ -87,7 +87,7 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
                                 gap={{base: "0.5", md: "1"}}
                                 align="center"
                                 justify="center"
-                                minH={{base: "3rem", md: "3.75rem"}}
+                                minH={{base: "3rem", md: "4.5rem"}}
                                 rounded="md"
                                 bg={background}
                                 aria-label={intl.formatMessage(messages.summaries.calendarDayLabel, {
@@ -95,10 +95,10 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
                                     amount: formatSignedAmount({cents: net, kind: amountTone}),
                                 })}
                             >
-                                <Text fontSize={{base: "sm", md: "md"}} fontWeight="medium" fontVariantNumeric="tabular-nums" lineHeight="1.1">
+                                <Text fontSize={{base: "sm", md: "xl"}} fontWeight="medium" fontVariantNumeric="tabular-nums" lineHeight="1.1">
                                     {day}
                                 </Text>
-                                <Text fontSize={{base: "2xs", md: "xs"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap" lineHeight="1.1">
+                                <Text fontSize={{base: "2xs", md: "md"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap" lineHeight="1.1">
                                     {isFuture ? "\u00A0" : formatCompactSignedCents(net)}
                                 </Text>
                             </Stack>
