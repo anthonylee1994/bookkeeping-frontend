@@ -86,12 +86,12 @@ describe("SummariesPage", () => {
         renderSummaries();
 
         expect(await screen.findByText("淨額")).toBeInTheDocument();
-        expect(screen.getByText("+HK$1,000.00")).toBeInTheDocument();
-        expect(screen.getAllByText("-HK$500.00").length).toBeGreaterThan(0);
-        expect(screen.getByText("+HK$500.00")).toBeInTheDocument();
+        expect(screen.getByText("+$1,000.00")).toBeInTheDocument();
+        expect(screen.getAllByText("-$500.00").length).toBeGreaterThan(0);
+        expect(screen.getByText("+$500.00")).toBeInTheDocument();
 
         expect(screen.getByText("1 筆轉帳")).toBeInTheDocument();
-        expect(screen.getByText("HK$200.00")).toBeInTheDocument();
+        expect(screen.getByText("$200.00")).toBeInTheDocument();
 
         expect(screen.getByText("飲食")).toBeInTheDocument();
         expect(screen.getAllByText("100%")).toHaveLength(2);

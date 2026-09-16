@@ -11,6 +11,7 @@ import type {Account, AccountKind} from "@/data/types";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {FLAT_UI_COLORS} from "@/lib/colors";
 import {formatMessage, messages} from "@/lib/i18n";
+import {centsToDollars} from "@/lib/money";
 import {useAuthStore} from "@/stores/authStore";
 
 const accountFormSchema = z.object({
@@ -171,7 +172,7 @@ export const AccountFormDrawer = ({account, onSaved, onDeleted, onClose}: Accoun
                                         {account === null ? null : (
                                             <Field.Root>
                                                 <Field.Label>{intl.formatMessage(messages.accounts.currentBalance)}</Field.Label>
-                                                <Input value={`HK$ ${(account.balance_cents ?? 0) / 100}`} readOnly disabled />
+                                                <Input value={centsToDollars(account.balance_cents ?? 0)} readOnly disabled />
                                             </Field.Root>
                                         )}
 

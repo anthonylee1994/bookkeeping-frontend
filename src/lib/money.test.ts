@@ -13,7 +13,7 @@ describe("dollarsToCents", () => {
         expect(dollarsToCents(input)).toBe(expected);
     });
 
-    it.each(["", "   ", "0", "0.00", "-1", "+1", "1.234", "1e3", "12,34.00", "01.00", "HK$1.00", "NaN"])("rejects %s", input => {
+    it.each(["", "   ", "0", "0.00", "-1", "+1", "1.234", "1e3", "12,34.00", "01.00", "$1.00", "NaN"])("rejects %s", input => {
         expect(dollarsToCents(input)).toMatchObject({code: expect.any(String)});
     });
 
@@ -23,15 +23,15 @@ describe("dollarsToCents", () => {
 });
 
 describe("money formatting", () => {
-    it("formats cents with the HKD symbol, grouping and two decimals", () => {
-        expect(centsToDollars(123450)).toBe("HK$1,234.50");
-        expect(centsToDollars(-123450)).toBe("-HK$1,234.50");
+    it("formats cents with the currency symbol, grouping and two decimals", () => {
+        expect(centsToDollars(123450)).toBe("$1,234.50");
+        expect(centsToDollars(-123450)).toBe("-$1,234.50");
     });
 
     it("formats income, expense and transfer signs", () => {
-        expect(formatSignedAmount({cents: 12345, kind: "income"})).toBe("+HK$123.45");
-        expect(formatSignedAmount({cents: 12345, kind: "expense"})).toBe("-HK$123.45");
-        expect(formatSignedAmount({cents: 12345, kind: "transfer"})).toBe("HK$123.45");
+        expect(formatSignedAmount({cents: 12345, kind: "income"})).toBe("+$123.45");
+        expect(formatSignedAmount({cents: 12345, kind: "expense"})).toBe("-$123.45");
+        expect(formatSignedAmount({cents: 12345, kind: "transfer"})).toBe("$123.45");
     });
 
     it("maps signed cents to amount colour", () => {

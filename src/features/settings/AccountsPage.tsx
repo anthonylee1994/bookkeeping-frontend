@@ -8,6 +8,7 @@ import {AccountFormDrawer} from "@/features/settings/AccountFormDrawer";
 import {useDomainReference} from "@/hooks/useDomainReference";
 import {isLightColor} from "@/lib/colors";
 import {messages} from "@/lib/i18n";
+import {centsToDollars} from "@/lib/money";
 import {useAppStore} from "@/stores/appStore";
 
 export const AccountsPage = () => {
@@ -119,7 +120,7 @@ export const AccountsPage = () => {
                                                 </Box>
                                             </HStack>
                                             <Text fontWeight="semibold" fontVariantNumeric="tabular-nums">
-                                                HK$ {((account.balance_cents ?? account.initial_balance_cents) / 100).toFixed(2)}
+                                                {centsToDollars(account.balance_cents ?? account.initial_balance_cents)}
                                             </Text>
                                         </HStack>
                                     </Card.Body>

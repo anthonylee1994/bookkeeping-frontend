@@ -18,7 +18,12 @@ export const SectionCard = ({title, description, action, children}: SectionCardP
                         <Card.Title fontSize="md">{title}</Card.Title>
                         {description === undefined ? null : <Card.Description mt="0.5">{description}</Card.Description>}
                     </Box>
-                    {action === undefined ? null : action}
+                    {/* Header 本身冇 padding-bottom，而 action 通常高過標題，所以要自己留位，免得癡住內容。 */}
+                    {action === undefined ? null : (
+                        <Box flexShrink="0" mb="2">
+                            {action}
+                        </Box>
+                    )}
                 </Flex>
             </Card.Header>
             <Card.Body pt="0" px={{base: "4", md: "6"}} pb={{base: "4", md: "6"}} gap="3">

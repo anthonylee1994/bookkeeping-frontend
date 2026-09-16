@@ -125,7 +125,7 @@ Input types 直接對應 swagger `*Input`。Fixtures 使用同一套 Zod parse�
 Money：
 
 - `dollarsToCents(input: string): number | MoneyError`
-- `centsToDollars(cents: number): string` → `HK$1,234.50`
+- `centsToDollars(cents: number): string` → `$1,234.50`
 - `formatSignedAmount({cents, kind})`：收入 `+`、支出 `-`、轉帳無正負號
 - 拒絕：負數、0、超過兩位小數、科學記數、空白以外的 trim 失敗、非數字
 - 加減只用 integer

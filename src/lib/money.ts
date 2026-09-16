@@ -62,7 +62,7 @@ export function centsToDollars(cents: number): string {
 
     const sign = cents < 0 ? "-" : "";
     const absoluteCents = Math.abs(cents);
-    return `${sign}HK$${groupedDollars(absoluteCents)}.${String(absoluteCents % 100).padStart(2, "0")}`;
+    return `${sign}$${groupedDollars(absoluteCents)}.${String(absoluteCents % 100).padStart(2, "0")}`;
 }
 
 /** 已帶正負號的金額顏色：負數紅、非負數綠。 */

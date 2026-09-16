@@ -62,7 +62,7 @@ describe("TransactionDetailDrawer", () => {
         renderDrawer();
 
         expect(await screen.findByRole("dialog")).toBeInTheDocument();
-        expect(screen.getByText("+HK$3,000.00")).toBeInTheDocument();
+        expect(screen.getByText("+$3,000.00")).toBeInTheDocument();
         expect(screen.getAllByText("工資")).toHaveLength(2);
         expect(screen.getByRole("link", {name: "修改"})).toHaveAttribute("href", `/transactions/${transaction.id}/edit`);
         expect(screen.getByRole("button", {name: "刪除"})).toBeInTheDocument();

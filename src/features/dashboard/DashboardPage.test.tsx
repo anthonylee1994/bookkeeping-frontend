@@ -124,9 +124,9 @@ describe("DashboardPage", () => {
         renderDashboard();
 
         expect(await screen.findByText("本月淨額")).toBeInTheDocument();
-        expect(screen.getByText("+HK$1,000.00")).toBeInTheDocument();
-        expect(screen.getAllByText("-HK$500.00").length).toBeGreaterThan(0);
-        expect(screen.getByText("+HK$500.00")).toBeInTheDocument();
+        expect(screen.getByText("+$1,000.00")).toBeInTheDocument();
+        expect(screen.getAllByText("-$500.00").length).toBeGreaterThan(0);
+        expect(screen.getByText("+$500.00")).toBeInTheDocument();
         expect(await screen.findByText("飲食")).toBeInTheDocument();
         expect(screen.getAllByText("100%")).toHaveLength(2);
         expect(screen.getByText("現金")).toBeInTheDocument();
@@ -138,9 +138,9 @@ describe("DashboardPage", () => {
         renderDashboard();
 
         expect(await screen.findByText("轉去銀行")).toBeInTheDocument();
-        expect(screen.getByText("+HK$1,000.00")).toBeInTheDocument();
-        expect(screen.getAllByText("-HK$500.00").length).toBeGreaterThan(0);
-        expect(screen.getByText("HK$200.00")).toBeInTheDocument();
+        expect(screen.getByText("+$1,000.00")).toBeInTheDocument();
+        expect(screen.getAllByText("-$500.00").length).toBeGreaterThan(0);
+        expect(screen.getByText("$200.00")).toBeInTheDocument();
     });
 
     it("shows separate expense and income category cards", async () => {

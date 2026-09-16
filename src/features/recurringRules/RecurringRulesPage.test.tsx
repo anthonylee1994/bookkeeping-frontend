@@ -110,7 +110,7 @@ describe("RecurringRulesPage", () => {
 
         expect(await screen.findByText("月費")).toBeInTheDocument();
         expect(screen.getByText("每月 1 日")).toBeInTheDocument();
-        expect(screen.getByText("-HK$120.00")).toBeInTheDocument();
+        expect(screen.getByText("-$120.00")).toBeInTheDocument();
         expect(screen.getByText("現金")).toBeInTheDocument();
         expect(screen.getByText("飲食")).toBeInTheDocument();
         expect(screen.getByText("街角咖啡")).toBeInTheDocument();
