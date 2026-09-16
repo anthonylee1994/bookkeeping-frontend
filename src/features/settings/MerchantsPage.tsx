@@ -119,7 +119,6 @@ export const MerchantsPage = () => {
                                                             {intl.formatMessage(messages.merchants.defaultCategory)}：{defaultCategory.name} ·{" "}
                                                         </React.Fragment>
                                                     )}
-                                                    {intl.formatMessage(messages.merchants.usageCount, {count: merchant.usage_count})}
                                                 </Text>
                                             </Box>
                                         </HStack>
