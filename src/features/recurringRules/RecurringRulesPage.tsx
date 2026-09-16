@@ -153,6 +153,8 @@ export const RecurringRulesPage = () => {
             <RecurringRuleList
                 rules={rules}
                 names={names}
+                accounts={reference.accounts}
+                categories={reference.categories}
                 onEdit={rule => setEditor({rule})}
                 onPause={pause}
                 onResume={resume}
