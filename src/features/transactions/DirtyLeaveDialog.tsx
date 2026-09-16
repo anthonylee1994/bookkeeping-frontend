@@ -14,7 +14,7 @@ export const DirtyLeaveDialog = ({blocker}: DirtyLeaveDialogProps) => {
 
     return (
         <React.Fragment>
-            <Dialog.Root open={isBlocked} role="alertdialog" onOpenChange={event => (!event.open && isBlocked ? blocker.reset() : undefined)}>
+            <Dialog.Root open={isBlocked} placement="center" role="alertdialog" onOpenChange={event => (!event.open && isBlocked ? blocker.reset() : undefined)}>
                 <Portal>
                     <Dialog.Backdrop />
                     <Dialog.Positioner>

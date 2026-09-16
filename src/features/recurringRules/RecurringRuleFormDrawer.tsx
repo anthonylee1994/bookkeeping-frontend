@@ -57,7 +57,7 @@ export const RecurringRuleFormDrawer = ({rule, accounts, categories, merchants, 
                 </Portal>
             </Drawer.Root>
 
-            <Dialog.Root open={confirmOpen} role="alertdialog" onOpenChange={event => setConfirmOpen(event.open)}>
+            <Dialog.Root open={confirmOpen} placement="center" role="alertdialog" onOpenChange={event => setConfirmOpen(event.open)}>
                 <Portal>
                     <Dialog.Backdrop />
                     <Dialog.Positioner>

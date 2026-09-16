@@ -50,7 +50,7 @@ export const TransactionReceiptImages = ({urls}: TransactionReceiptImagesProps) 
                 )}
             </Flex>
 
-            <Dialog.Root open={activeUrl !== null} size="lg" onOpenChange={event => (!event.open ? setActiveUrl(null) : undefined)}>
+            <Dialog.Root open={activeUrl !== null} placement="center" size="lg" onOpenChange={event => (!event.open ? setActiveUrl(null) : undefined)}>
                 <Portal>
                     <Dialog.Backdrop />
                     <Dialog.Positioner>

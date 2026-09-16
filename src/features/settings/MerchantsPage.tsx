@@ -133,7 +133,7 @@ export const MerchantsPage = () => {
 
             {createOpen ? <MerchantFormDrawer categories={categories} onSaved={handleSaved} onClose={() => setCreateOpen(false)} /> : null}
 
-            <Dialog.Root open={deleteTarget !== null} role="alertdialog" onOpenChange={event => (!event.open ? setDeleteTarget(null) : undefined)}>
+            <Dialog.Root open={deleteTarget !== null} placement="center" role="alertdialog" onOpenChange={event => (!event.open ? setDeleteTarget(null) : undefined)}>
                 <Portal>
                     <Dialog.Backdrop />
                     <Dialog.Positioner>

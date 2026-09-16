@@ -213,7 +213,7 @@ export const RecurringRulesPage = () => {
                 />
             )}
 
-            <Dialog.Root open={confirm !== null} role="alertdialog" onOpenChange={event => (!event.open ? setConfirm(null) : undefined)}>
+            <Dialog.Root open={confirm !== null} placement="center" role="alertdialog" onOpenChange={event => (!event.open ? setConfirm(null) : undefined)}>
                 <Portal>
                     <Dialog.Backdrop />
                     <Dialog.Positioner>
