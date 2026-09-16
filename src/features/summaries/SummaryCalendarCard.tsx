@@ -1,5 +1,4 @@
-import React from "react";
-import {Box, Flex, SimpleGrid, Stack, Text} from "@chakra-ui/react";
+import {Box, SimpleGrid, Stack, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {SectionCard} from "@/components/layout/SectionCard";
 import type {DailyBreakdown} from "@/data/types";
@@ -50,63 +49,63 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
     const netColor = signedAmountColor(netCents);
 
     return (
-        <SectionCard title={intl.formatMessage(messages.summaries.calendarTitle)}>
-            <Stack gap="4">
-                <Flex direction="column" gap="1">
-                    <Text fontSize="sm" color="fg.muted">
+        <SectionCard
+            title={intl.formatMessage(messages.summaries.calendarTitle)}
+            action={
+                <Stack gap="0" align="flex-end">
+                    <Text fontSize="2xs" color="fg.muted">
                         {intl.formatMessage(messages.summaries.calendarNetLabel)}
                     </Text>
-                    <Text fontSize={{base: "2xl", md: "3xl"}} fontWeight="bold" color={netColor} fontVariantNumeric="tabular-nums">
+                    <Text fontSize={{base: "md", md: "lg"}} fontWeight="bold" color={netColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
                         {formatSignedAmount({cents: netCents, kind: netTone})}
                     </Text>
-                </Flex>
+                </Stack>
+            }
+        >
+            <Box overflowX="auto">
+                <SimpleGrid columns={7} gap={{base: "0.5", md: "1"}} minW={{base: "19rem", md: "100%"}}>
+                    {WEEKDAY_MESSAGES.map((message, index) => (
+                        <Text key={index} textAlign="center" fontSize={{base: "xs", md: "sm"}} color="fg.muted" pb="1.5">
+                            {intl.formatMessage(message)}
+                        </Text>
+                    ))}
 
-                <Box overflowX="auto">
-                    <SimpleGrid columns={7} gap={{base: "1", md: "2"}} minW={{base: "21rem", md: "100%"}}>
-                        {WEEKDAY_MESSAGES.map((message, index) => (
-                            <Text key={index} textAlign="center" fontSize={{base: "xs", md: "md"}} color="fg.muted">
-                                {intl.formatMessage(message)}
-                            </Text>
-                        ))}
+                    {cells.map((day, index) => {
+                        if (day === null) return <Box key={`blank-${index}`} />;
 
-                        {cells.map((day, index) => {
-                            if (day === null) return <Box key={`blank-${index}`} />;
+                        const iso = dayKey(year, month, day);
+                        const net = byDate.get(iso)?.net_cents ?? 0;
+                        const amountTone = signedAmountTone(net);
+                        const textColor = signedAmountColor(net);
+                        const isFuture = iso > today;
+                        const background = iso === today ? "gray.100" : undefined;
 
-                            const iso = dayKey(year, month, day);
-                            const net = byDate.get(iso)?.net_cents ?? 0;
-                            const amountTone = signedAmountTone(net);
-                            const textColor = signedAmountColor(net);
-                            const isFuture = iso > today;
-                            const background = iso === today ? "gray.100" : undefined;
-
-                            return (
-                                <Stack
-                                    key={iso}
-                                    role="group"
-                                    gap={{base: "0.5", md: "1.5"}}
-                                    align="center"
-                                    py={{base: "1", md: "3.5"}}
-                                    rounded="md"
-                                    bg={background}
-                                    aria-label={intl.formatMessage(messages.summaries.calendarDayLabel, {
-                                        date: toDisplayDate(iso),
-                                        amount: formatSignedAmount({cents: net, kind: amountTone}),
-                                    })}
-                                >
-                                    <React.Fragment>
-                                        <Text fontSize={{base: "sm", md: "lg"}} fontWeight="medium" fontVariantNumeric="tabular-nums">
-                                            {day}
-                                        </Text>
-                                        <Text fontSize={{base: "2xs", md: "md"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
-                                            {isFuture ? "\u00A0" : formatCompactSignedCents(net)}
-                                        </Text>
-                                    </React.Fragment>
-                                </Stack>
-                            );
-                        })}
-                    </SimpleGrid>
-                </Box>
-            </Stack>
+                        return (
+                            <Stack
+                                key={iso}
+                                role="group"
+                                gap={{base: "0.5", md: "1"}}
+                                align="center"
+                                justify="center"
+                                minH={{base: "3rem", md: "3.75rem"}}
+                                rounded="md"
+                                bg={background}
+                                aria-label={intl.formatMessage(messages.summaries.calendarDayLabel, {
+                                    date: toDisplayDate(iso),
+                                    amount: formatSignedAmount({cents: net, kind: amountTone}),
+                                })}
+                            >
+                                <Text fontSize={{base: "sm", md: "md"}} fontWeight="medium" fontVariantNumeric="tabular-nums" lineHeight="1.1">
+                                    {day}
+                                </Text>
+                                <Text fontSize={{base: "2xs", md: "xs"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap" lineHeight="1.1">
+                                    {isFuture ? "\u00A0" : formatCompactSignedCents(net)}
+                                </Text>
+                            </Stack>
+                        );
+                    })}
+                </SimpleGrid>
+            </Box>
         </SectionCard>
     );
 };
