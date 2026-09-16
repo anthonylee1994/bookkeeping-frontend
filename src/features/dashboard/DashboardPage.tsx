@@ -101,9 +101,9 @@ export const DashboardPage = () => {
                 </SimpleGrid>
                 <SimpleGrid columns={{base: 1, lg: 2}} gap="4">
                     <AccountBalancesCard balances={balances} accounts={reference.accounts} from={toIsoDate(dashboard.range.from)} to={toIsoDate(dashboard.range.to)} />
-                    <UpcomingRecurringCard rules={upcoming} />
+                    <UpcomingRecurringCard rules={upcoming} categories={reference.categories} />
                 </SimpleGrid>
-                <RecentTransactionsCard transactions={dashboard.recent_transactions.slice(0, RECENT_TRANSACTION_LIMIT)} />
+                <RecentTransactionsCard transactions={dashboard.recent_transactions.slice(0, RECENT_TRANSACTION_LIMIT)} categories={reference.categories} />
             </Stack>
         );
     };
