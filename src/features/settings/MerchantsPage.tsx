@@ -116,7 +116,7 @@ export const MerchantsPage = () => {
                                                 <Text fontSize="sm" color="fg.muted">
                                                     {defaultCategory === null || defaultCategory === undefined ? null : (
                                                         <React.Fragment>
-                                                            {intl.formatMessage(messages.merchants.defaultCategory)}：{defaultCategory.name} ·{" "}
+                                                            {intl.formatMessage(messages.merchants.defaultCategory)}：{defaultCategory.name}
                                                         </React.Fragment>
                                                     )}
                                                 </Text>
