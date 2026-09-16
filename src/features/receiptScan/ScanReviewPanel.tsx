@@ -54,7 +54,8 @@ export const ScanReviewPanel = ({variant, open, onOpenChange, preview, reference
                                 <CloseButton aria-label={intl.formatMessage(messages.common.close)} />
                             </Drawer.CloseTrigger>
                         </Drawer.Header>
-                        <Drawer.Body pb={{base: "calc(1rem + env(safe-area-inset-bottom))", md: "6"}}>{form}</Drawer.Body>
+                        {/* Sheet 底部留白交由 form 內的 sticky footer 自行處理，令白色底伸延到最底，避免內容由罅隙透出。 */}
+                        <Drawer.Body pb="0">{form}</Drawer.Body>
                     </Drawer.Content>
                 </Drawer.Positioner>
             </Portal>

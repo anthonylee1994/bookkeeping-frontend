@@ -212,7 +212,7 @@ export const ScanReviewForm = ({preview, reference, variant = "inline", onConfir
                     justify={{md: "flex-end"}}
                     gap="3"
                     pt={isSheet ? "4" : "2"}
-                    pb="2"
+                    pb={isSheet ? "calc(0.5rem + env(safe-area-inset-bottom))" : "2"}
                     mx={isSheet ? "-6" : undefined}
                     px={isSheet ? "6" : undefined}
                     position={isSheet ? "sticky" : undefined}
