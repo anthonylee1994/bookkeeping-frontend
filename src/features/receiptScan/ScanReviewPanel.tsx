@@ -32,7 +32,7 @@ export const ScanReviewPanel = ({variant, open, onOpenChange, preview, reference
                     <Card.Title fontSize="md">{title}</Card.Title>
                     <Card.Description>{description}</Card.Description>
                 </Card.Header>
-                <Card.Body pt="0" px={{base: "4", md: "6"}} pb={{base: "4", md: "6"}}>
+                <Card.Body pt="3" px={{base: "4", md: "6"}} pb={{base: "4", md: "6"}}>
                     {form}
                 </Card.Body>
             </Card.Root>

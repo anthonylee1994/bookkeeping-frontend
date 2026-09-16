@@ -94,9 +94,9 @@ const config = defineConfig({
             },
             colors: {
                 bg: {
-                    DEFAULT: {value: {base: "{colors.gray.50}", _dark: "{colors.gray.950}"}},
-                    subtle: {value: {base: "{colors.gray.100}", _dark: "{colors.gray.900}"}},
-                    panel: {value: {base: "white", _dark: "{colors.gray.900}"}},
+                    DEFAULT: {value: {_light: "{colors.gray.50}", _dark: "{colors.gray.950}"}},
+                    subtle: {value: {_light: "{colors.gray.100}", _dark: "{colors.gray.900}"}},
+                    panel: {value: {_light: "white", _dark: "{colors.gray.900}"}},
                 },
                 brand: {
                     solid: {value: {base: "{colors.brand.700}", _dark: "{colors.brand.500}"}},
@@ -141,6 +141,22 @@ const config = defineConfig({
                         },
                         subtle: {
                             _hover: {bg: "brand.active", color: "brand.activeFg"},
+                        },
+                    },
+                },
+            },
+        },
+        /**
+         * Table 係 slot recipe，`line` variant 預設將 row 底色設成 `bg`；但本 app 所有 table
+         * 都放喺白色 card 內，頁面 `bg` 變灰白之後 row 就跟住變灰。改回 panel（白）令表身保持白色。
+         */
+        slotRecipes: {
+            table: {
+                slots: ["root", "header", "body", "row", "columnHeader", "cell", "footer", "caption"],
+                variants: {
+                    variant: {
+                        line: {
+                            row: {bg: "bg.panel"},
                         },
                     },
                 },
