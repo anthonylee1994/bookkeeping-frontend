@@ -11,7 +11,7 @@ export const SettingsPage = () => {
     const logout = useLogout();
 
     return (
-        <Box p={{base: 4, md: 6}} maxW="7xl" mx="auto">
+        <Box p={{base: 0, md: 6}} maxW="7xl" mx="auto">
             <Heading size="xl" mb="6">
                 {intl.formatMessage(messages.settings.title)}
             </Heading>
