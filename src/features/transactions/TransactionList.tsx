@@ -8,7 +8,7 @@ import type {Transaction} from "@/data/types";
 import {describeTransaction, groupTransactionsByDate} from "@/features/transactions/transactionsFormat";
 import type {TransactionAvatarMaps, TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {toDisplayDate} from "@/lib/date";
-import {centsToDollars, signedAmountTone} from "@/lib/money";
+import {centsToDollars, signedAmountColor} from "@/lib/money";
 import {transactionDetailPath} from "@/routes/paths";
 
 type TransactionListProps = {
@@ -96,7 +96,7 @@ export const TransactionList = ({transactions, names, avatars, grouped}: Transac
                     <Text fontSize="xs" fontWeight="semibold" color="fg.muted">
                         {toDisplayDate(group.date)}
                     </Text>
-                    <Text fontSize="xs" color={signedAmountTone(group.netCents)} fontVariantNumeric="tabular-nums">
+                    <Text fontSize="xs" color={signedAmountColor(group.netCents)} fontVariantNumeric="tabular-nums">
                         {`${group.netCents < 0 ? "" : "+"}${centsToDollars(group.netCents)}`}
                     </Text>
                 </Flex>

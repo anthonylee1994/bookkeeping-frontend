@@ -2,7 +2,7 @@ import {Flex, HStack, Separator, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import type {PageTotals} from "@/features/transactions/transactionsFormat";
 import {messages} from "@/lib/i18n";
-import {centsToDollars, signedAmountTone} from "@/lib/money";
+import {centsToDollars, signedAmountColor} from "@/lib/money";
 
 type TransactionsSummaryBarProps = {
     total: number;
@@ -27,18 +27,18 @@ export const TransactionsSummaryBar = ({total, totals}: TransactionsSummaryBarPr
                     <Text color="fg.muted">{intl.formatMessage(messages.transactions.toolbar.pageTotal)}</Text>
                     <HStack gap="1.5">
                         <Text color="fg.muted">{intl.formatMessage(messages.transactions.income)}</Text>
-                        <Text color="income" fontWeight="medium">
+                        <Text color={signedAmountColor(totals.incomeCents)} fontWeight="medium">
                             {`+${centsToDollars(totals.incomeCents)}`}
                         </Text>
                     </HStack>
                     <HStack gap="1.5">
                         <Text color="fg.muted">{intl.formatMessage(messages.transactions.expense)}</Text>
-                        <Text color="expense" fontWeight="medium">
+                        <Text color={signedAmountColor(-totals.expenseCents)} fontWeight="medium">
                             {`-${centsToDollars(totals.expenseCents)}`}
                         </Text>
                     </HStack>
                 </HStack>
-                <Text fontWeight="semibold" color={signedAmountTone(totals.netCents)}>
+                <Text fontWeight="semibold" color={signedAmountColor(totals.netCents)}>
                     {`${totals.netCents < 0 ? "" : "+"}${centsToDollars(totals.netCents)}`}
                 </Text>
             </HStack>

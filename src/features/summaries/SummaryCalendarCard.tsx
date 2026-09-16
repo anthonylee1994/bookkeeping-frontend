@@ -6,7 +6,7 @@ import type {DailyBreakdown} from "@/data/types";
 import {daysInMonth, parseCalendarDate} from "@/lib/calendar";
 import {todayDate, toDisplayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
-import {formatCompactSignedCents, formatSignedAmount, signedAmountTone} from "@/lib/money";
+import {formatCompactSignedCents, formatSignedAmount, signedAmountColor, signedAmountTone} from "@/lib/money";
 
 type SummaryCalendarCardProps = {
     daily: DailyBreakdown[];
@@ -47,15 +47,16 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
     while (cells.length % 7 !== 0) cells.push(null);
 
     const netTone = signedAmountTone(netCents);
+    const netColor = signedAmountColor(netCents);
 
     return (
-        <SectionCard title={intl.formatMessage(messages.summaries.calendarTitle)} description={intl.formatMessage(messages.summaries.calendarDescription)}>
+        <SectionCard title={intl.formatMessage(messages.summaries.calendarTitle)}>
             <Stack gap="4">
                 <Flex direction="column" gap="1">
                     <Text fontSize="sm" color="fg.muted">
                         {intl.formatMessage(messages.summaries.calendarNetLabel)}
                     </Text>
-                    <Text fontSize={{base: "2xl", md: "3xl"}} fontWeight="bold" color={netTone} fontVariantNumeric="tabular-nums">
+                    <Text fontSize={{base: "2xl", md: "3xl"}} fontWeight="bold" color={netColor} fontVariantNumeric="tabular-nums">
                         {formatSignedAmount({cents: netCents, kind: netTone})}
                     </Text>
                 </Flex>
@@ -73,9 +74,8 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
 
                             const iso = dayKey(year, month, day);
                             const net = byDate.get(iso)?.net_cents ?? 0;
-                            const isZero = net === 0;
                             const amountTone = signedAmountTone(net);
-                            const textColor = isZero ? "fg.muted" : amountTone;
+                            const textColor = signedAmountColor(net);
                             const isFuture = iso > today;
                             const background = iso === today ? "gray.100" : undefined;
 

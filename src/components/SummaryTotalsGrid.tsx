@@ -1,5 +1,5 @@
 import {Box, SimpleGrid, Text} from "@chakra-ui/react";
-import {centsToDollars, formatSignedAmount} from "@/lib/money";
+import {centsToDollars, formatSignedAmount, signedAmountColor} from "@/lib/money";
 
 type SummaryTotalsGridProps = {
     netCents: number;
@@ -14,7 +14,7 @@ type SummaryTile = {
     key: string;
     label: string;
     value: string;
-    tone: "income" | "expense";
+    color: string;
     wide?: boolean;
 };
 
@@ -28,11 +28,11 @@ export const SummaryTotalsGrid = ({netCents, incomeCents, expenseCents, netLabel
             key: "net",
             label: netLabel,
             value: formatSignedAmount({cents: Math.abs(netCents), kind: netCents >= 0 ? "income" : "expense"}),
-            tone: netCents >= 0 ? "income" : "expense",
+            color: signedAmountColor(netCents),
             wide: true,
         },
-        {key: "income", label: incomeLabel, value: `+${centsToDollars(incomeCents)}`, tone: "income"},
-        {key: "expense", label: expenseLabel, value: `-${centsToDollars(expenseCents)}`, tone: "expense"},
+        {key: "income", label: incomeLabel, value: `+${centsToDollars(incomeCents)}`, color: signedAmountColor(incomeCents)},
+        {key: "expense", label: expenseLabel, value: `-${centsToDollars(expenseCents)}`, color: signedAmountColor(-expenseCents)},
     ];
 
     return (
@@ -52,7 +52,7 @@ export const SummaryTotalsGrid = ({netCents, incomeCents, expenseCents, netLabel
                     <Text fontSize="sm" color="fg.muted">
                         {tile.label}
                     </Text>
-                    <Text mt="1" fontSize={{base: "xl", md: "2xl"}} lineHeight="1.2" fontWeight="bold" color={tile.tone} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
+                    <Text mt="1" fontSize={{base: "xl", md: "2xl"}} lineHeight="1.2" fontWeight="bold" color={tile.color} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
                         {tile.value}
                     </Text>
                 </Box>

@@ -446,7 +446,7 @@ export const messages = {
         noTransactions: {id: "summaries.noTransactions", defaultMessage: "期間內沒有交易"},
         calendarTitle: {id: "summaries.calendarTitle", defaultMessage: "收支日曆"},
         calendarDescription: {id: "summaries.calendarDescription", defaultMessage: "每日淨收支"},
-        calendarNetLabel: {id: "summaries.calendarNetLabel", defaultMessage: "本月淨收支 · HKD"},
+        calendarNetLabel: {id: "summaries.calendarNetLabel", defaultMessage: "本月淨收支"},
         calendarWeekdaySun: {id: "summaries.calendarWeekdaySun", defaultMessage: "日"},
         calendarWeekdayMon: {id: "summaries.calendarWeekdayMon", defaultMessage: "一"},
         calendarWeekdayTue: {id: "summaries.calendarWeekdayTue", defaultMessage: "二"},

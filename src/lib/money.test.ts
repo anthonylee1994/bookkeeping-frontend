@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {centsToDollars, dollarsToCents, formatCompactSignedCents, formatSignedAmount, signedAmountTone} from "./money";
+import {centsToDollars, dollarsToCents, formatCompactSignedCents, formatSignedAmount, signedAmountColor, signedAmountTone} from "./money";
 
 describe("dollarsToCents", () => {
     it.each([
@@ -38,6 +38,12 @@ describe("money formatting", () => {
         expect(signedAmountTone(-1)).toBe("expense");
         expect(signedAmountTone(0)).toBe("income");
         expect(signedAmountTone(1)).toBe("income");
+    });
+
+    it("maps signed cents to a colour token, grey for zero", () => {
+        expect(signedAmountColor(-1)).toBe("expense");
+        expect(signedAmountColor(0)).toBe("fg.muted");
+        expect(signedAmountColor(1)).toBe("income");
     });
 
     it("formats compact signed cents for narrow spaces", () => {

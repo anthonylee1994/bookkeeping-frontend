@@ -70,6 +70,12 @@ export function signedAmountTone(cents: number): "income" | "expense" {
     return cents < 0 ? "expense" : "income";
 }
 
+/** 正負金額的顏色 token：$0 用灰色，正數 income，負數 expense。 */
+export function signedAmountColor(cents: number): string {
+    if (cents === 0) return "fg.muted";
+    return cents > 0 ? "income" : "expense";
+}
+
 export function formatSignedAmount({cents, kind}: SignedAmountOptions): string {
     assertValidCents(cents);
 
