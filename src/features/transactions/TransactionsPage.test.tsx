@@ -146,6 +146,23 @@ describe("TransactionsPage", () => {
         expect(screen.getByTestId("location")).toHaveTextContent("q=");
     });
 
+    it("applies a quick date range from the segmented control", async () => {
+        const user = userEvent.setup();
+        renderTransactions();
+
+        await screen.findByText(/早餐/);
+
+        await user.click(screen.getByRole("button", {name: "本月"}));
+
+        await waitFor(() => {
+            const lastCall = listMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+            expect(typeof lastCall.from).toBe("string");
+            expect(typeof lastCall.to).toBe("string");
+            expect(lastCall.page).toBe(1);
+        });
+        expect(screen.getByTestId("location")).toHaveTextContent("from=");
+    });
+
     it("applies an advanced filter from the drawer and writes it back to the URL", async () => {
         const user = userEvent.setup();
         renderTransactions();

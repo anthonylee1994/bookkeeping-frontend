@@ -1,6 +1,6 @@
 import React from "react";
 import type {ReactNode} from "react";
-import {Button, ButtonGroup, CloseButton, Flex, Input, InputGroup} from "@chakra-ui/react";
+import {Box, Button, ButtonGroup, CloseButton, Flex, Input, InputGroup} from "@chakra-ui/react";
 import {SearchIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import type {QuickRange} from "@/features/transactions/transactionQuickRanges";
@@ -22,7 +22,10 @@ const RANGE_OPTIONS: readonly {value: QuickRange; label: keyof typeof messages.t
     {value: "last_30", label: "rangeLast30"},
 ];
 
-/** 搜尋 + 快捷日期範圍 + 進階篩選入口。搜尋在按 Enter 或失焦時才送出，避免每個字都打 API。 */
+/**
+ * 搜尋 + 快捷日期範圍 + 進階篩選入口。搜尋在按 Enter 或失焦時才送出，避免每個字都打 API。
+ * Mobile：搜尋同篩選按鈕一行，segmented 日期範圍自己一行撐滿；desktop 三個並排。
+ */
 export const TransactionsToolbar = ({keyword, range, onSearch, onRangeChange, filterControl}: TransactionsToolbarProps) => {
     const intl = useIntl();
     const [draft, setDraft] = React.useState(keyword);
@@ -41,7 +44,8 @@ export const TransactionsToolbar = ({keyword, range, onSearch, onRangeChange, fi
         <Flex wrap="wrap" align="center" gap="2">
             <InputGroup
                 flex="1"
-                minW="3xs"
+                minW={{base: "0", md: "3xs"}}
+                order="1"
                 startElement={<SearchIcon size={16} />}
                 endElement={
                     draft === "" ? undefined : (
@@ -73,10 +77,14 @@ export const TransactionsToolbar = ({keyword, range, onSearch, onRangeChange, fi
                 />
             </InputGroup>
 
-            <ButtonGroup size="sm" variant="outline" attached display={{base: "none", md: "inline-flex"}}>
+            <Box order={{base: "2", md: "3"}}>{filterControl}</Box>
+
+            <ButtonGroup size="sm" variant="outline" attached order={{base: "3", md: "2"}} w={{base: "full", md: "auto"}} flexShrink="0">
                 {RANGE_OPTIONS.map(option => (
                     <Button
                         key={option.value}
+                        flex={{base: "1", md: "0 0 auto"}}
+                        px={{base: "2", md: "3"}}
                         onClick={() => onRangeChange(option.value)}
                         aria-pressed={range === option.value}
                         bg={range === option.value ? "brand.active" : undefined}
@@ -87,8 +95,6 @@ export const TransactionsToolbar = ({keyword, range, onSearch, onRangeChange, fi
                     </Button>
                 ))}
             </ButtonGroup>
-
-            {filterControl}
         </Flex>
     );
 };
