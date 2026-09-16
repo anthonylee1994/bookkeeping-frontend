@@ -64,7 +64,7 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
                 <Box overflowX="auto">
                     <SimpleGrid columns={7} gap={{base: "1", md: "2"}} minW={{base: "21rem", md: "100%"}}>
                         {WEEKDAY_MESSAGES.map((message, index) => (
-                            <Text key={index} textAlign="center" fontSize="xs" color="fg.muted">
+                            <Text key={index} textAlign="center" fontSize={{base: "xs", md: "md"}} color="fg.muted">
                                 {intl.formatMessage(message)}
                             </Text>
                         ))}
@@ -83,9 +83,9 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
                                 <Stack
                                     key={iso}
                                     role="group"
-                                    gap="0.5"
+                                    gap={{base: "0.5", md: "1.5"}}
                                     align="center"
-                                    py="1"
+                                    py={{base: "1", md: "3.5"}}
                                     rounded="md"
                                     bg={background}
                                     aria-label={intl.formatMessage(messages.summaries.calendarDayLabel, {
@@ -94,10 +94,10 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
                                     })}
                                 >
                                     <React.Fragment>
-                                        <Text fontSize="sm" fontWeight="medium" fontVariantNumeric="tabular-nums">
+                                        <Text fontSize={{base: "sm", md: "lg"}} fontWeight="medium" fontVariantNumeric="tabular-nums">
                                             {day}
                                         </Text>
-                                        <Text fontSize={{base: "2xs", md: "xs"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
+                                        <Text fontSize={{base: "2xs", md: "md"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
                                             {isFuture ? "\u00A0" : formatCompactSignedCents(net)}
                                         </Text>
                                     </React.Fragment>
