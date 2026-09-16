@@ -82,3 +82,21 @@ export function formatSignedAmount({cents, kind}: SignedAmountOptions): string {
     }
     return amount;
 }
+
+const TEN_THOUSAND = 10_000;
+const HUNDRED_MILLION = 100_000_000;
+
+function scaledUnit(value: number): string {
+    return value.toFixed(2);
+}
+
+/** 日曆等窄位用：省略貨幣符號，四位數以上轉「萬／億」，永遠帶正負號。 */
+export function formatCompactSignedCents(cents: number): string {
+    assertValidCents(cents);
+
+    const sign = cents < 0 ? "-" : "+";
+    const dollars = Math.abs(cents) / 100;
+    if (dollars >= HUNDRED_MILLION) return `${sign}${scaledUnit(dollars / HUNDRED_MILLION)}億`;
+    if (dollars >= TEN_THOUSAND) return `${sign}${scaledUnit(dollars / TEN_THOUSAND)}萬`;
+    return `${sign}${dollars.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+}

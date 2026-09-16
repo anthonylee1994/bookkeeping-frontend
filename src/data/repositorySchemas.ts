@@ -72,6 +72,12 @@ export const paginatedTransactionRowsResponseSchema = z.union([
 /* ---------- Dashboard／summary ---------- */
 
 const rangeSchema = z.object({from: z.string(), to: z.string()});
+const dailyBreakdownSchema = z.object({
+    date: z.iso.date(),
+    income_cents: z.number().int(),
+    expense_cents: z.number().int(),
+    net_cents: z.number().int(),
+});
 const categoryBreakdownSchema = z.object({
     category_id: uuidSchema.nullable(),
     name: z.string().nullable(),
@@ -99,6 +105,7 @@ export const summaryResponseSchema = z.object({
     income_cents: z.number().int(),
     expense_cents: z.number().int(),
     net_cents: z.number().int(),
+    daily: z.array(dailyBreakdownSchema).default([]),
     by_category: z.array(categoryBreakdownSchema),
     by_account: z.array(accountBreakdownSchema),
     transfers: transferSummarySchema,

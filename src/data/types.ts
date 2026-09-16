@@ -248,11 +248,19 @@ export type TransferSummary = {
     total_cents: number;
 };
 
+export type DailyBreakdown = {
+    date: string;
+    income_cents: number;
+    expense_cents: number;
+    net_cents: number;
+};
+
 export type Summary = {
     range: Range;
     income_cents: number;
     expense_cents: number;
     net_cents: number;
+    daily: DailyBreakdown[];
     by_category: CategoryBreakdown[];
     by_account: AccountBreakdown[];
     transfers: TransferSummary;

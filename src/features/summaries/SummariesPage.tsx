@@ -7,6 +7,7 @@ import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {PageHeader} from "@/components/layout/PageHeader";
 import type {SummaryPeriod} from "@/data/types";
 import {SummaryAccountBreakdown} from "@/features/summaries/SummaryAccountBreakdown";
+import {SummaryCalendarCard} from "@/features/summaries/SummaryCalendarCard";
 import {SummaryPeriodControl} from "@/features/summaries/SummaryPeriodControl";
 import {SummaryPeriodNavigator} from "@/features/summaries/SummaryPeriodNavigator";
 import {SummaryTotals} from "@/features/summaries/SummaryTotals";
@@ -79,6 +80,7 @@ export const SummariesPage = () => {
                         categories={reference.categories}
                     />
                 </SimpleGrid>
+                {period === "monthly" ? <SummaryCalendarCard daily={summary.daily} date={date} incomeCents={summary.income_cents} netCents={summary.net_cents} /> : null}
                 <SummaryAccountBreakdown accounts={summary.by_account} />
                 <SummaryTransactions transactions={summary.transactions} onPageChange={changePage} />
             </Stack>

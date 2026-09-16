@@ -1,5 +1,5 @@
 import {describe, expect, it} from "vitest";
-import {centsToDollars, dollarsToCents, formatSignedAmount, signedAmountTone} from "./money";
+import {centsToDollars, dollarsToCents, formatCompactSignedCents, formatSignedAmount, signedAmountTone} from "./money";
 
 describe("dollarsToCents", () => {
     it.each([
@@ -38,6 +38,14 @@ describe("money formatting", () => {
         expect(signedAmountTone(-1)).toBe("expense");
         expect(signedAmountTone(0)).toBe("income");
         expect(signedAmountTone(1)).toBe("income");
+    });
+
+    it("formats compact signed cents for narrow spaces", () => {
+        expect(formatCompactSignedCents(422124)).toBe("+4,221.24");
+        expect(formatCompactSignedCents(-880)).toBe("-8.80");
+        expect(formatCompactSignedCents(0)).toBe("+0.00");
+        expect(formatCompactSignedCents(2060000)).toBe("+2.06萬");
+        expect(formatCompactSignedCents(-12345000000)).toBe("-1.23億");
     });
 
     it("rejects non-integer cents", () => {

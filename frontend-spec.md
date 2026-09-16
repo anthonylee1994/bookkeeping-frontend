@@ -321,6 +321,7 @@ Actions：修改、複製、刪除。
 - Period segmented control：日、週、月
 - 日期 picker 配合上一期／下一期
 - 顯示收入、支出、淨額、分類分佈（收入／支出各一張）、帳戶分佈、轉帳摘要、期內交易
+- 月報額外顯示「收支日曆」：逐日淨收支（紅負綠正、0 為灰）及佔當月收入百分比；未到嘅日子留白，今日淺灰格；窄螢幕用精簡金額（萬／億）並可橫向滾動
 - Weekly 清楚顯示星期一至星期日範圍
 - 轉帳獨立顯示，不計入收入／支出／淨額
 - 期內交易 row 顯示收入／支出 icon（跟 dashboard 一致）
@@ -366,9 +367,10 @@ Actions：pause、resume、run now、skip next、edit、delete。Card footer 動
 
 #### 商戶
 
-- 可搜尋／建立／刪除，顯示 default category 同使用次數
-- MVP 暫不提供商戶修改
+- 載入全部商戶（`GET /merchants` 不帶 `q`）；搜尋為前端即時過濾已載入清單
+- Create／edit：name、default category；列表顯示 default category
 - 刪除前提示歷史交易會保留，但商戶會被清空
+- 未儲存離開抽屜前需確認
 
 ---
 

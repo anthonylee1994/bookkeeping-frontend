@@ -50,6 +50,10 @@ const summaryFixture: Summary = {
     income_cents: 100000,
     expense_cents: 50000,
     net_cents: 50000,
+    daily: [
+        {date: "2026-09-13", income_cents: 0, expense_cents: 0, net_cents: 0},
+        {date: "2026-09-14", income_cents: 100000, expense_cents: 50000, net_cents: 50000},
+    ],
     by_category: [
         {category_id: CATEGORY_ID, name: "飲食", income_cents: 0, expense_cents: 50000},
         {category_id: INCOME_CATEGORY_ID, name: "薪金", income_cents: 100000, expense_cents: 0},
@@ -88,7 +92,7 @@ describe("SummariesPage", () => {
         expect(await screen.findByText("淨額")).toBeInTheDocument();
         expect(screen.getByText("+$1,000.00")).toBeInTheDocument();
         expect(screen.getAllByText("-$500.00").length).toBeGreaterThan(0);
-        expect(screen.getByText("+$500.00")).toBeInTheDocument();
+        expect(screen.getAllByText("+$500.00").length).toBeGreaterThan(0);
 
         expect(screen.getByText("1 筆轉帳")).toBeInTheDocument();
         expect(screen.getByText("$200.00")).toBeInTheDocument();
@@ -157,6 +161,23 @@ describe("SummariesPage", () => {
         await user.click(screen.getByRole("button", {name: "下一頁"}));
 
         await waitFor(() => expect(getMock).toHaveBeenCalledWith("monthly", "2026-09-16", 2, 25));
+    });
+
+    it("shows the daily calendar for monthly periods only", async () => {
+        getMock.mockResolvedValue({ok: true, value: summaryFixture});
+        renderSummaries();
+
+        expect(await screen.findByText("收支日曆")).toBeInTheDocument();
+        expect(screen.getByLabelText(/2026年9月14日：淨收支/)).toBeInTheDocument();
+    });
+
+    it("hides the daily calendar for weekly periods", async () => {
+        getMock.mockResolvedValue({ok: true, value: summaryFixture});
+        renderSummaries("/summaries?period=weekly&date=2026-09-16");
+
+        await waitFor(() => expect(getMock).toHaveBeenCalledWith("weekly", "2026-09-16", 1, 25));
+
+        expect(screen.queryByText("收支日曆")).not.toBeInTheDocument();
     });
 
     it("shows an error and retries on demand", async () => {
