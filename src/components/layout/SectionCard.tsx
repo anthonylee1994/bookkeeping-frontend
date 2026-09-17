@@ -11,7 +11,7 @@ type SectionCardProps = {
 /** 各 feature 頁面共用的卡片外殼：標題 + 可選動作 + 內容。 */
 export const SectionCard = ({title, description, action, children}: SectionCardProps) => {
     return (
-        <Card.Root as="section" rounded="xl" borderColor="border" shadow="xs">
+        <Card.Root as="section" h="full" display="flex" flexDirection="column" rounded="xl" borderColor="border" shadow="xs">
             {/* Card.Header 只有 padding-top，body 又 pt=0，所以要自己補 padding-bottom，
                 否則標題／描述／action 會癡住下面內容。 */}
             <Card.Header gap="1" px={{base: "4", md: "6"}} pt={{base: "4", md: "6"}} pb={{base: "3", md: "4"}}>
@@ -24,7 +24,7 @@ export const SectionCard = ({title, description, action, children}: SectionCardP
                     {action === undefined ? null : <Box flexShrink="0">{action}</Box>}
                 </Flex>
             </Card.Header>
-            <Card.Body pt="0" px={{base: "4", md: "6"}} pb={{base: "4", md: "6"}} gap="3">
+            <Card.Body flex="1" pt="0" px={{base: "4", md: "6"}} pb={{base: "4", md: "6"}} gap="3">
                 {children}
             </Card.Body>
         </Card.Root>

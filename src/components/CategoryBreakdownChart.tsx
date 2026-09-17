@@ -49,7 +49,7 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
             {slices.length === 0 ? (
                 <CardEmptyState icon={<PieChartIcon />} message={emptyMessage} />
             ) : (
-                <Flex direction={{base: "column", md: "row"}} gap="4" align="center">
+                <Flex direction={{base: "column", md: "row"}} gap="4" align={{base: "center", md: "flex-start"}} h="full">
                     <Box w={{base: "full", md: "12rem"}} h={{base: "10rem", md: "12rem"}} flexShrink="0">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
