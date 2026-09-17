@@ -19,7 +19,7 @@ export const SummaryPeriodNavigator = ({date, label, onDateChange, onPrevious, o
 
     return (
         <Flex direction={{base: "column", md: "row"}} align={{base: "stretch", md: "center"}} justify="space-between" gap="3">
-            <HStack w={{base: "full", md: "22rem"}} minW="0" gap="1" bg="bg.panel" borderWidth="1px" borderColor="border" rounded="lg" p="1" shadow="xs">
+            <HStack w="full" minW="0" gap="1" bg="bg.panel" borderWidth="1px" borderColor="border" rounded="lg" p="1" shadow="xs">
                 <IconButton aria-label={previousLabel} title={previousLabel} onClick={onPrevious} variant="ghost" size="sm">
                     <ChevronLeftIcon />
                 </IconButton>
