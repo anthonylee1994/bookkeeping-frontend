@@ -79,6 +79,15 @@ export default defineConfig(() => {
             }),
         ],
         build: {
+            /**
+             * Chrome 喺 Service Worker 控制嘅頁面會丟棄 `<link rel="modulepreload">`，
+             * 並報 "cross-world service worker resource mismatch"：preload 行 network 攞，
+             * 真正 import 由 SW 從 Cache Storage 回，來源唔一致。結果係嗰啲 bytes 白 download。
+             * 我哋已用 Workbox precache 所有靜態 asset，重複到訪本身 cache 直出，
+             * preload 只對首次（未有 SW 控制）有用，所以直接關閉最乾淨。
+             * 參考：https://github.com/vite-pwa/vite-plugin-pwa/issues/945
+             */
+            modulePreload: false,
             rolldownOptions: {
                 output: {
                     /**
