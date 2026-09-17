@@ -58,7 +58,7 @@ export const SummariesPage = () => {
         return (
             <Stack gap="5">
                 <SummaryTotals summary={summary} />
-                {period === "monthly" ? <SummaryCalendarCard daily={summary.daily} date={date} netCents={summary.net_cents} /> : null}
+                {period === "monthly" ? <SummaryCalendarCard daily={summary.daily} date={date} netCents={summary.net_cents} onSelectDate={iso => commit({period: "daily", date: iso})} /> : null}
                 <SimpleGrid columns={{base: 1, lg: 2}} gap="4" alignItems="start">
                     <CategoryBreakdownChart
                         breakdown={summary.by_category}

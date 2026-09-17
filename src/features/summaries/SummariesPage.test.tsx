@@ -171,6 +171,16 @@ describe("SummariesPage", () => {
         expect(screen.getByLabelText(/2026年9月14日：淨收支/)).toBeInTheDocument();
     });
 
+    it("opens the daily summary when a calendar day is selected", async () => {
+        const user = userEvent.setup();
+        getMock.mockResolvedValue({ok: true, value: summaryFixture});
+        renderSummaries();
+
+        await user.click(await screen.findByRole("button", {name: /2026年9月14日：淨收支/}));
+
+        await waitFor(() => expect(getMock).toHaveBeenCalledWith("daily", "2026-09-14", 1, 25));
+    });
+
     it("hides the daily calendar for weekly periods", async () => {
         getMock.mockResolvedValue({ok: true, value: summaryFixture});
         renderSummaries("/summaries?period=weekly&date=2026-09-16");

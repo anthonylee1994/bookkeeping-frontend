@@ -1,4 +1,4 @@
-import {Box, SimpleGrid, Stack, Text} from "@chakra-ui/react";
+import {Box, Button, SimpleGrid, Stack, Text} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {SectionCard} from "@/components/layout/SectionCard";
 import type {DailyBreakdown} from "@/data/types";
@@ -11,6 +11,7 @@ type SummaryCalendarCardProps = {
     daily: DailyBreakdown[];
     date: string;
     netCents: number;
+    onSelectDate: (iso: string) => void;
 };
 
 const WEEKDAY_MESSAGES = [
@@ -32,7 +33,7 @@ function dayKey(year: number, month: number, day: number): string {
 }
 
 /** 月報專用：逐日淨收支日曆。 */
-export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCardProps) => {
+export const SummaryCalendarCard = ({daily, date, netCents, onSelectDate}: SummaryCalendarCardProps) => {
     const intl = useIntl();
     const {year, month} = parseCalendarDate(date);
     const totalDays = daysInMonth(year, month);
@@ -81,27 +82,32 @@ export const SummaryCalendarCard = ({daily, date, netCents}: SummaryCalendarCard
                         const background = iso === today ? "gray.100" : undefined;
 
                         return (
-                            <Stack
+                            <Button
                                 key={iso}
-                                role="group"
-                                gap={{base: "0.5", md: "1"}}
-                                align="center"
-                                justify="center"
+                                type="button"
+                                variant="ghost"
+                                h="auto"
                                 minH={{base: "3rem", md: "4.5rem"}}
+                                px="0"
+                                py="1"
                                 rounded="md"
                                 bg={background}
+                                disabled={isFuture}
                                 aria-label={intl.formatMessage(messages.summaries.calendarDayLabel, {
                                     date: toDisplayDate(iso),
                                     amount: formatSignedAmount({cents: net, kind: amountTone}),
                                 })}
+                                onClick={() => onSelectDate(iso)}
                             >
-                                <Text fontSize={{base: "sm", md: "xl"}} fontWeight="medium" fontVariantNumeric="tabular-nums" lineHeight="1.1">
-                                    {day}
-                                </Text>
-                                <Text fontSize={{base: "2xs", md: "md"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap" lineHeight="1.1">
-                                    {isFuture ? "\u00A0" : formatCompactSignedCents(net)}
-                                </Text>
-                            </Stack>
+                                <Stack gap={{base: "0.5", md: "1"}} align="center" justify="center">
+                                    <Text fontSize={{base: "sm", md: "xl"}} fontWeight="medium" fontVariantNumeric="tabular-nums" lineHeight="1.1">
+                                        {day}
+                                    </Text>
+                                    <Text fontSize={{base: "2xs", md: "md"}} color={textColor} fontVariantNumeric="tabular-nums" whiteSpace="nowrap" lineHeight="1.1">
+                                        {isFuture ? "\u00A0" : formatCompactSignedCents(net)}
+                                    </Text>
+                                </Stack>
+                            </Button>
                         );
                     })}
                 </SimpleGrid>
