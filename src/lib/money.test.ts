@@ -47,10 +47,12 @@ describe("money formatting", () => {
     });
 
     it("formats compact signed cents for narrow spaces", () => {
-        expect(formatCompactSignedCents(422124)).toBe("+4,221.24");
+        expect(formatCompactSignedCents(422124)).toBe("+4.22千");
         expect(formatCompactSignedCents(-880)).toBe("-8.80");
-        expect(formatCompactSignedCents(0)).toBe("+0.00");
+        expect(formatCompactSignedCents(0)).toBe("+0");
+        expect(formatCompactSignedCents(100000)).toBe("+1千");
         expect(formatCompactSignedCents(2060000)).toBe("+2.06萬");
+        expect(formatCompactSignedCents(1000000)).toBe("+1萬");
         expect(formatCompactSignedCents(-12345000000)).toBe("-1.23億");
     });
 
