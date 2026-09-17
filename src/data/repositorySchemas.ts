@@ -7,6 +7,7 @@ import {
     paginationMetaSchema,
     recurringRuleInputSchema,
     recurringRuleSchema,
+    responseCentsSchema,
     transactionRowSchema,
     transactionSchema,
     userSchema,
@@ -74,35 +75,35 @@ export const paginatedTransactionRowsResponseSchema = z.union([
 const rangeSchema = z.object({from: z.string(), to: z.string()});
 const dailyBreakdownSchema = z.object({
     date: z.iso.date(),
-    net_cents: z.number().int(),
+    net_cents: responseCentsSchema,
 });
 const categoryBreakdownSchema = z.object({
     category_id: uuidSchema.nullable(),
     name: z.string().nullable(),
-    income_cents: z.number().int().default(0),
-    expense_cents: z.number().int(),
+    income_cents: responseCentsSchema.default(0),
+    expense_cents: responseCentsSchema,
 });
 const accountBreakdownSchema = z.object({
     account_id: uuidSchema.nullable(),
     name: z.string().nullable(),
-    income_cents: z.number().int(),
-    expense_cents: z.number().int(),
+    income_cents: responseCentsSchema,
+    expense_cents: responseCentsSchema,
 });
 const accountBalanceSchema = z.object({
     id: uuidSchema,
     name: z.string(),
     currency: z.literal("HKD"),
-    initial_balance_cents: z.number().int(),
-    balance_cents: z.number().int(),
+    initial_balance_cents: responseCentsSchema,
+    balance_cents: responseCentsSchema,
 });
-const transferSummarySchema = z.object({count: z.number().int().min(0), total_cents: z.number().int()});
-const recurringRuleSummarySchema = recurringRuleInputSchema.extend({id: uuidSchema});
+const transferSummarySchema = z.object({count: z.number().int().min(0), total_cents: responseCentsSchema});
+const recurringRuleSummarySchema = recurringRuleInputSchema.extend({id: uuidSchema, amount_cents: responseCentsSchema});
 
 export const summaryResponseSchema = z.object({
     range: rangeSchema,
-    income_cents: z.number().int(),
-    expense_cents: z.number().int(),
-    net_cents: z.number().int(),
+    income_cents: responseCentsSchema,
+    expense_cents: responseCentsSchema,
+    net_cents: responseCentsSchema,
     daily: z.array(dailyBreakdownSchema).default([]),
     by_category: z.array(categoryBreakdownSchema),
     by_account: z.array(accountBreakdownSchema),
@@ -112,9 +113,9 @@ export const summaryResponseSchema = z.object({
 
 export const dashboardResponseSchema = z.object({
     range: rangeSchema,
-    income_cents: z.number().int(),
-    expense_cents: z.number().int(),
-    net_cents: z.number().int(),
+    income_cents: responseCentsSchema,
+    expense_cents: responseCentsSchema,
+    net_cents: responseCentsSchema,
     recent_transactions: z.array(transactionRowSchema),
     by_category: z.array(categoryBreakdownSchema),
     accounts: z.array(accountBalanceSchema),

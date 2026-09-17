@@ -9,6 +9,13 @@ export const dateSchema = z.iso.date();
 export const nullableUuidSchema = uuidSchema.nullable();
 export const imageUrlSchema = z.union([z.string().url(), z.string().regex(/^\/(?!\/)/)]);
 
+/**
+ * Response 專用嘅 cents schema。後端回傳嘅金額有機會超出 JS safe integer，
+ * 而 zod v4 嘅 `.int()` 會封頂喺 `Number.MAX_SAFE_INTEGER`，用咗會令成個 response
+ * parse 失敗，所以讀取 response 嘅金額欄位一律用呢個，唔加 `.int()`。
+ */
+export const responseCentsSchema = z.number();
+
 /* ---------- Input schema（對 swagger *Input payload） ---------- */
 
 export const authInputSchema = z.object({
@@ -90,7 +97,8 @@ export const accountSchema = accountInputSchema.extend({
     id: uuidSchema,
     created_at: dateTimeSchema,
     updated_at: dateTimeSchema,
-    balance_cents: z.number().int().optional(),
+    initial_balance_cents: responseCentsSchema,
+    balance_cents: responseCentsSchema.optional(),
 });
 
 export const categorySchema = categoryInputSchema.extend({id: uuidSchema, created_at: dateTimeSchema, updated_at: dateTimeSchema});
@@ -104,6 +112,7 @@ export const merchantSchema = merchantInputSchema.extend({
 
 export const transactionRowSchema = transactionInputSchema.extend({
     id: uuidSchema,
+    amount_cents: responseCentsSchema,
 });
 
 export const transactionSchema = transactionRowSchema.extend({
@@ -113,6 +122,7 @@ export const transactionSchema = transactionRowSchema.extend({
 
 export const recurringRuleSchema = recurringRuleInputSchema.extend({
     id: uuidSchema,
+    amount_cents: responseCentsSchema,
     status: z.enum(["active", "paused", "ended"]),
     note: z.string().nullable(),
     created_at: dateTimeSchema,
@@ -129,7 +139,7 @@ export const paginationMetaSchema = z.object({
 /* ---------- AI preview ---------- */
 
 export const aiParsedFieldsSchema = z.object({
-    amount_cents: z.number().int().positive().nullish(),
+    amount_cents: responseCentsSchema.positive().nullish(),
     kind: z.enum(["income", "expense"]).nullish(),
     occurred_at: z.string().nullish(),
     merchant_name: z.string().nullish(),
