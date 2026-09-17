@@ -2,6 +2,7 @@ import React from "react";
 import {Alert, Box, Button, Card, HStack, Heading, Input, Stack, Text} from "@chakra-ui/react";
 import {PlusIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {PageHeader} from "@/components/layout/PageHeader";
 import type {Merchant} from "@/data/types";
 import {MerchantFormDrawer} from "@/features/settings/MerchantFormDrawer";
 import {useDomainReference} from "@/hooks/useDomainReference";
@@ -30,26 +31,22 @@ export const MerchantsPage = () => {
 
     if (isLoading) {
         return (
-            <Box p={{base: 4, md: 6}}>
-                <Heading size="xl" mb="6">
-                    {intl.formatMessage(messages.merchants.title)}
-                </Heading>
+            <React.Fragment>
+                <PageHeader title={intl.formatMessage(messages.merchants.title)} />
                 <Text>{intl.formatMessage(messages.common.loading)}</Text>
-            </Box>
+            </React.Fragment>
         );
     }
 
     if (error !== null) {
         return (
-            <Box p={{base: 4, md: 6}}>
-                <Heading size="xl" mb="6">
-                    {intl.formatMessage(messages.merchants.title)}
-                </Heading>
+            <React.Fragment>
+                <PageHeader title={intl.formatMessage(messages.merchants.title)} />
                 <Alert.Root status="error" rounded="lg">
                     <Alert.Indicator />
                     <Alert.Title>{intl.formatMessage(messages.merchants.loadFailed)}</Alert.Title>
                 </Alert.Root>
-            </Box>
+            </React.Fragment>
         );
     }
 
@@ -57,15 +54,17 @@ export const MerchantsPage = () => {
 
     return (
         <React.Fragment>
-            <Box maxW="7xl" mx="auto">
-                <HStack justify="space-between" mb="6">
-                    <Heading size="xl">{intl.formatMessage(messages.merchants.title)}</Heading>
+            <PageHeader
+                title={intl.formatMessage(messages.merchants.title)}
+                actions={
                     <Button size="sm" onClick={() => setDrawerMerchant(null)}>
                         <PlusIcon />
                         {intl.formatMessage(messages.merchants.createAction)}
                     </Button>
-                </HStack>
+                }
+            />
 
+            <Box>
                 <Box mb="4">
                     <Input placeholder={intl.formatMessage(messages.merchants.search)} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                 </Box>

@@ -3,6 +3,7 @@ import {Alert, Box, Button, Card, Center, HStack, Heading, Stack, Tabs, Text} fr
 import {Icon as IconifyIcon} from "@iconify/react";
 import {PlusIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {PageHeader} from "@/components/layout/PageHeader";
 import type {Category, CategoryKind} from "@/data/types";
 import {CategoryFormDrawer} from "@/features/settings/CategoryFormDrawer";
 import {useDomainReference} from "@/hooks/useDomainReference";
@@ -32,26 +33,22 @@ export const CategoriesPage = () => {
 
     if (isLoading) {
         return (
-            <Box p={{base: 4, md: 6}}>
-                <Heading size="xl" mb="6">
-                    {intl.formatMessage(messages.categories.title)}
-                </Heading>
+            <React.Fragment>
+                <PageHeader title={intl.formatMessage(messages.categories.title)} />
                 <Text>{intl.formatMessage(messages.common.loading)}</Text>
-            </Box>
+            </React.Fragment>
         );
     }
 
     if (error !== null) {
         return (
-            <Box p={{base: 4, md: 6}}>
-                <Heading size="xl" mb="6">
-                    {intl.formatMessage(messages.categories.title)}
-                </Heading>
+            <React.Fragment>
+                <PageHeader title={intl.formatMessage(messages.categories.title)} />
                 <Alert.Root status="error" rounded="lg">
                     <Alert.Indicator />
                     <Alert.Title>{intl.formatMessage(messages.categories.loadFailed)}</Alert.Title>
                 </Alert.Root>
-            </Box>
+            </React.Fragment>
         );
     }
 
@@ -59,15 +56,17 @@ export const CategoriesPage = () => {
 
     return (
         <React.Fragment>
-            <Box maxW="7xl" mx="auto">
-                <HStack justify="space-between" mb="6">
-                    <Heading size="xl">{intl.formatMessage(messages.categories.title)}</Heading>
+            <PageHeader
+                title={intl.formatMessage(messages.categories.title)}
+                actions={
                     <Button size="sm" onClick={() => setDrawerCategory(null)}>
                         <PlusIcon />
                         {intl.formatMessage(messages.categories.createAction)}
                     </Button>
-                </HStack>
+                }
+            />
 
+            <Box>
                 <Tabs.Root value={activeKind} onValueChange={e => setActiveKind(e.value as CategoryKind)}>
                     <Tabs.List>
                         <Tabs.Trigger value="expense">{intl.formatMessage(messages.transactions.expense)}</Tabs.Trigger>

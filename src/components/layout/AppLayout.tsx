@@ -1,6 +1,6 @@
 import React from "react";
-import {Box, Container, Flex} from "@chakra-ui/react";
-import {Outlet, useLocation} from "react-router";
+import {Box, Flex} from "@chakra-ui/react";
+import {Outlet} from "react-router";
 import {AppHeader} from "@/components/layout/AppHeader";
 import {MobileTabBar} from "@/components/layout/MobileTabBar";
 import {OfflineBanner} from "@/components/layout/OfflineBanner";
@@ -11,11 +11,10 @@ import {RouteErrorBoundary} from "@/routes/RouteErrorBoundary";
 
 /**
  * App shell 採用 mobile-app 模式：mobile 是 app bar + 底部 floating tab bar，
- * tablet／desktop 換成左側 sidebar rail，內容永遠置中於 container 之內。
+ * tablet／desktop 換成左側 sidebar rail；右欄背景拉滿，內容保持 max-width 置中。
  */
 export const AppLayout = () => {
     const isDesktop = useMediaQuery(DESKTOP_QUERY);
-    const location = useLocation();
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(!isDesktop);
     const [prevIsDesktop, setPrevIsDesktop] = React.useState(isDesktop);
 
@@ -30,26 +29,18 @@ export const AppLayout = () => {
 
     return (
         <ScanProvider>
-            <Box bg="bg" minH="100dvh">
+            <Box bg="bg" h="full" overflow="hidden">
                 <SidebarNav collapsed={sidebarCollapsed} />
-                <Flex direction="column" minH="100dvh" transition="padding 200ms ease" pl={{base: 0, md: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}}>
+                <Flex direction="column" h="full" minH="0" overflow="hidden" transition="padding 200ms ease" pl={{base: 0, md: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}}>
                     <AppHeader sidebarCollapsed={sidebarCollapsed} onToggleSidebar={toggleSidebar} />
                     <OfflineBanner />
-                    <Container
-                        as="main"
-                        id="main"
-                        key={location.pathname}
-                        maxW="7xl"
-                        flex="1"
-                        px={{base: 4, md: 6}}
-                        pt={{base: 4, md: 6}}
-                        pb={{base: 28, md: 10}}
-                        animation="page-enter 220ms cubic-bezier(0.32, 0.72, 0, 1) both"
-                    >
-                        <RouteErrorBoundary>
-                            <Outlet />
-                        </RouteErrorBoundary>
-                    </Container>
+                    <Box as="main" id="main" flex="1" minH="0" overflowY="auto" overscrollBehavior="contain" w="full">
+                        <Box maxW="7xl" mx="auto" w="full" px={{base: 4, md: 6}} pt={{base: 4, md: 6}} pb={{base: 28, md: 10}} animation="page-enter 220ms cubic-bezier(0.32, 0.72, 0, 1) both">
+                            <RouteErrorBoundary>
+                                <Outlet />
+                            </RouteErrorBoundary>
+                        </Box>
+                    </Box>
                     <MobileTabBar />
                 </Flex>
             </Box>

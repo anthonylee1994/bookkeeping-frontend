@@ -3,6 +3,7 @@ import {Alert, Box, Button, Card, Center, HStack, Heading, Stack, Text} from "@c
 import {Icon as IconifyIcon} from "@iconify/react";
 import {PlusIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {PageHeader} from "@/components/layout/PageHeader";
 import type {Account} from "@/data/types";
 import {AccountFormDrawer} from "@/features/settings/AccountFormDrawer";
 import {useDomainReference} from "@/hooks/useDomainReference";
@@ -32,26 +33,22 @@ export const AccountsPage = () => {
 
     if (isLoading) {
         return (
-            <Box p={{base: 4, md: 6}}>
-                <Heading size="xl" mb="6">
-                    {intl.formatMessage(messages.accounts.title)}
-                </Heading>
+            <React.Fragment>
+                <PageHeader title={intl.formatMessage(messages.accounts.title)} />
                 <Text>{intl.formatMessage(messages.common.loading)}</Text>
-            </Box>
+            </React.Fragment>
         );
     }
 
     if (error !== null) {
         return (
-            <Box p={{base: 4, md: 6}}>
-                <Heading size="xl" mb="6">
-                    {intl.formatMessage(messages.accounts.title)}
-                </Heading>
+            <React.Fragment>
+                <PageHeader title={intl.formatMessage(messages.accounts.title)} />
                 <Alert.Root status="error" rounded="lg">
                     <Alert.Indicator />
                     <Alert.Title>{intl.formatMessage(messages.accounts.loadFailed)}</Alert.Title>
                 </Alert.Root>
-            </Box>
+            </React.Fragment>
         );
     }
 
@@ -72,15 +69,17 @@ export const AccountsPage = () => {
 
     return (
         <React.Fragment>
-            <Box maxW="7xl" mx="auto">
-                <HStack justify="space-between" mb="6">
-                    <Heading size="xl">{intl.formatMessage(messages.accounts.title)}</Heading>
+            <PageHeader
+                title={intl.formatMessage(messages.accounts.title)}
+                actions={
                     <Button size="sm" onClick={() => setDrawerAccount(null)}>
                         <PlusIcon />
                         {intl.formatMessage(messages.accounts.createAction)}
                     </Button>
-                </HStack>
+                }
+            />
 
+            <Box>
                 {accounts.length === 0 ? (
                     <Card.Root>
                         <Card.Body>

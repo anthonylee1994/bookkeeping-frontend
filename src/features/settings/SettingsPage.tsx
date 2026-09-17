@@ -1,9 +1,11 @@
-import {Box, Card, Heading, HStack, Icon, Stack, Text} from "@chakra-ui/react";
+import React from "react";
+import {Box, Card, HStack, Icon, Stack, Text} from "@chakra-ui/react";
 import {ChevronRightIcon, FolderIcon, KeyRoundIcon, LogOutIcon, TagIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
-import {messages} from "@/lib/i18n";
+import {PageHeader} from "@/components/layout/PageHeader";
 import {useLogout} from "@/hooks/useLogout";
+import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 
 export const SettingsPage = () => {
@@ -11,10 +13,8 @@ export const SettingsPage = () => {
     const logout = useLogout();
 
     return (
-        <Box p={{base: 0, md: 6}} maxW="7xl" mx="auto">
-            <Heading size="xl" mb="6">
-                {intl.formatMessage(messages.settings.title)}
-            </Heading>
+        <React.Fragment>
+            <PageHeader title={intl.formatMessage(messages.settings.title)} />
 
             <Stack gap="6">
                 <Box>
@@ -136,6 +136,6 @@ export const SettingsPage = () => {
                     </Stack>
                 </Box>
             </Stack>
-        </Box>
+        </React.Fragment>
     );
 };

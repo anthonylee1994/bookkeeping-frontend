@@ -15,7 +15,7 @@ type AppHeaderProps = {
 
 /**
  * Mobile 作為 native app bar（返回按鈕／置中標題／右側動作），
- * desktop 作為 sidebar 上方的工具列。兩者共用同一個 sticky blur 樣式。
+ * desktop 作為 sidebar 上方的工具列。固定喺 shell 頂，唔再 sticky——滾動交俾 `#main`。
  */
 export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) => {
     const intl = useIntl();
@@ -38,8 +38,8 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
     const signOutLabel = intl.formatMessage(messages.auth.signOut);
 
     return (
-        <Box as="header" position="sticky" top="0" zIndex="30" bg="bg/80" backdropFilter="blur(16px)">
-            <Grid h={{base: 14, md: 16}} maxW="7xl" mx="auto" px={{base: 2, md: 4}} alignItems="center" gap="1" gridTemplateColumns="1fr auto 1fr" borderBottomWidth="1px" borderColor="border">
+        <Box as="header" flexShrink="0" zIndex="30" bg="bg" borderBottomWidth="1px" borderColor="border">
+            <Grid h={{base: 14, md: 16}} maxW="7xl" mx="auto" w="full" px={{base: 2, md: 4}} alignItems="center" gap="1" gridTemplateColumns="1fr auto 1fr">
                 <Flex flexShrink="0" justify="flex-start" align="center" gap="1">
                     <IconButton aria-label={sidebarLabel} onClick={onToggleSidebar} variant="ghost" size="md" display={{base: "none", md: "inline-flex"}}>
                         <PanelLeftIcon />
