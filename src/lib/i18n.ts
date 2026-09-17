@@ -48,7 +48,6 @@ export const messages = {
         columnCategory: {id: "common.columnCategory", defaultMessage: "分類"},
         columnAmount: {id: "common.columnAmount", defaultMessage: "金額"},
         columnShare: {id: "common.columnShare", defaultMessage: "佔比"},
-        chartCaption: {id: "common.chartCaption", defaultMessage: "圖表資料如下表；可用鍵盤方向鍵查看各分類。"},
         noIcon: {id: "common.noIcon", defaultMessage: "不使用圖示"},
     },
     errors: {

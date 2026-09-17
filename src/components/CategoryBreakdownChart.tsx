@@ -63,9 +63,6 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
                         </ResponsiveContainer>
                     </Box>
                     <Table.Root size="sm" w="full">
-                        <Table.Caption captionSide="bottom" color="fg.muted" mt={2} fontSize="xs">
-                            {intl.formatMessage(messages.common.chartCaption)}
-                        </Table.Caption>
                         <Table.Header>
                             <Table.Row>
                                 <Table.ColumnHeader>{intl.formatMessage(messages.common.columnCategory)}</Table.ColumnHeader>
