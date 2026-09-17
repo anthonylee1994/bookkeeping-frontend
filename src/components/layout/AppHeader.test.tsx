@@ -20,6 +20,6 @@ describe("AppHeader", () => {
 
         const recurringLink = screen.getByRole("link", {name: "定期交易"});
         expect(recurringLink).toHaveAttribute("href", "/recurring-rules");
-        expect(screen.getByRole("link", {name: "掃描"})).toHaveAttribute("href", "/scan");
+        expect(screen.getByRole("button", {name: "掃描"})).toBeInTheDocument();
     });
 });

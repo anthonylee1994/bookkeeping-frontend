@@ -34,7 +34,7 @@ function persistedDraft(): Record<string, unknown> {
 }
 
 beforeEach(() => {
-    useDraftStore.setState({transactionDraft: null, aiScan: null});
+    useDraftStore.setState({transactionDraft: null});
     sessionStorage.clear();
     useAuthStore.getState().clearSession();
 });
@@ -45,39 +45,33 @@ afterEach(() => {
 
 describe("draft store", () => {
     it("starts with no draft", () => {
-        expect(useDraftStore.getState()).toMatchObject({transactionDraft: null, aiScan: null});
+        expect(useDraftStore.getState()).toMatchObject({transactionDraft: null});
     });
 
-    it("keeps a transaction draft and an ai scan draft", () => {
+    it("keeps a transaction draft", () => {
         const draft = buildDraft();
         useDraftStore.getState().setTransactionDraft(draft);
-        useDraftStore.getState().setAiScan({step: "review", imageUrl: "https://cdn.example/receipt.jpg", preview: null});
 
         expect(useDraftStore.getState().transactionDraft).toEqual(draft);
-        expect(useDraftStore.getState().aiScan).toMatchObject({step: "review", imageUrl: "https://cdn.example/receipt.jpg"});
     });
 
     it("persists only the serializable draft fields", () => {
         const draft = buildDraft({image_urls: ["https://cdn.example/receipt.jpg"]});
         useDraftStore.getState().setTransactionDraft(draft);
-        useDraftStore.getState().setAiScan({step: "review", imageUrl: "https://cdn.example/receipt.jpg", preview: null});
 
-        const saved = persistedDraft().state as {transactionDraft: TransactionDraft; aiScan: {step: string; imageUrl: string}};
+        const saved = persistedDraft().state as {transactionDraft: TransactionDraft};
         expect(saved.transactionDraft).toEqual(draft);
-        expect(saved.aiScan).toEqual({step: "review", imageUrl: "https://cdn.example/receipt.jpg", preview: null});
     });
 
     it("never writes File, Blob or object URL into sessionStorage", () => {
         useDraftStore.getState().setTransactionDraft(buildDraft({image_urls: ["blob:http://localhost/preview-1"]}));
-        useDraftStore.getState().setAiScan({step: "selected", imageUrl: "blob:http://localhost/preview-2", preview: null});
 
         const raw = sessionStorage.getItem(DRAFT_STORAGE_KEY) ?? "";
         expect(raw).not.toContain("blob:");
         expect(raw).not.toContain("File");
 
-        const saved = persistedDraft().state as {transactionDraft: {image_urls: string[]}; aiScan: {imageUrl: string | null}};
+        const saved = persistedDraft().state as {transactionDraft: {image_urls: string[]}};
         expect(saved.transactionDraft.image_urls).toEqual([]);
-        expect(saved.aiScan.imageUrl).toBeNull();
 
         expect(useDraftStore.getState().transactionDraft?.image_urls).toEqual(["blob:http://localhost/preview-1"]);
     });
@@ -86,27 +80,25 @@ describe("draft store", () => {
         const revoke = vi.fn();
         Object.defineProperty(URL, "revokeObjectURL", {configurable: true, writable: true, value: revoke});
         useDraftStore.getState().setTransactionDraft(buildDraft({image_urls: ["blob:http://localhost/preview-1", "https://cdn.example/receipt.jpg"]}));
-        useDraftStore.getState().setAiScan({step: "selected", imageUrl: "blob:http://localhost/preview-2", preview: null});
 
         useDraftStore.getState().resetDrafts();
 
         expect(revoke).toHaveBeenCalledWith("blob:http://localhost/preview-1");
-        expect(revoke).toHaveBeenCalledWith("blob:http://localhost/preview-2");
         expect(revoke).not.toHaveBeenCalledWith("https://cdn.example/receipt.jpg");
-        expect(useDraftStore.getState()).toMatchObject({transactionDraft: null, aiScan: null});
+        expect(useDraftStore.getState()).toMatchObject({transactionDraft: null});
     });
 
     it("clears auth session, drafts and image previews on logout cleanup", () => {
         const revoke = vi.fn();
         Object.defineProperty(URL, "revokeObjectURL", {configurable: true, writable: true, value: revoke});
         useAuthStore.getState().setSession("opaque.api.token", user);
-        useDraftStore.getState().setAiScan({step: "selected", imageUrl: "blob:http://localhost/preview", preview: null});
+        useDraftStore.getState().setTransactionDraft(buildDraft({image_urls: ["blob:http://localhost/preview"]}));
 
         useAuthStore.getState().clearSession();
         useDraftStore.getState().resetDrafts();
 
         expect(useAuthStore.getState()).toMatchObject({token: null, user: null});
-        expect(useDraftStore.getState()).toMatchObject({transactionDraft: null, aiScan: null});
+        expect(useDraftStore.getState()).toMatchObject({transactionDraft: null});
         expect(revoke).toHaveBeenCalledWith("blob:http://localhost/preview");
     });
 });

@@ -3,6 +3,7 @@ import {PlusIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, NavLink} from "react-router";
 import {NAV_ITEMS} from "@/components/layout/navItems";
+import {useScan} from "@/features/receiptScan/ScanProvider";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 
@@ -16,6 +17,7 @@ type SidebarNavProps = {
 /** Tablet／desktop 左側 navigation rail；collapsed 時只餘下 icon。 */
 export const SidebarNav = ({collapsed}: SidebarNavProps) => {
     const intl = useIntl();
+    const {startScan} = useScan();
     const addLabel = intl.formatMessage(messages.layout.addTransaction);
 
     return (
@@ -76,31 +78,53 @@ export const SidebarNav = ({collapsed}: SidebarNavProps) => {
                 {NAV_ITEMS.map(item => {
                     const ItemIcon = item.icon;
                     const label = intl.formatMessage(item.label);
+                    const content = (isActive: boolean) => (
+                        <HStack
+                            h="11"
+                            px={collapsed ? "0" : "2.5"}
+                            justify={collapsed ? "center" : "flex-start"}
+                            gap="3"
+                            rounded="lg"
+                            fontSize="sm"
+                            bg={isActive ? "brand.active" : "transparent"}
+                            color={isActive ? "brand.activeFg" : "fg.muted"}
+                            fontWeight={isActive ? "semibold" : "medium"}
+                            transition="background 150ms ease, color 150ms ease"
+                            /* Hover 用半透明 brand.active，如此 selected（實色 + semibold）仍能分辨。 */
+                            _hover={isActive ? undefined : {bg: "brand.active/60", color: "brand.activeFg"}}
+                        >
+                            <Icon size="md" flexShrink="0">
+                                <ItemIcon />
+                            </Icon>
+                            <Text truncate srOnly={collapsed}>
+                                {label}
+                            </Text>
+                        </HStack>
+                    );
+
+                    if (item.kind === "scan") {
+                        return (
+                            <Box
+                                key={item.kind}
+                                asChild
+                                w="full"
+                                p="0"
+                                border="none"
+                                bg="transparent"
+                                textAlign="left"
+                                cursor="pointer"
+                                _focusVisible={{outline: "2px solid", outlineColor: "brand.solid", outlineOffset: "2px"}}
+                            >
+                                <button type="button" title={collapsed ? label : undefined} onClick={startScan}>
+                                    {content(false)}
+                                </button>
+                            </Box>
+                        );
+                    }
+
                     return (
                         <NavLink key={item.to} to={item.to} end={item.to === ROUTES.dashboard} title={collapsed ? label : undefined}>
-                            {({isActive}) => (
-                                <HStack
-                                    h="11"
-                                    px={collapsed ? "0" : "2.5"}
-                                    justify={collapsed ? "center" : "flex-start"}
-                                    gap="3"
-                                    rounded="lg"
-                                    fontSize="sm"
-                                    bg={isActive ? "brand.active" : "transparent"}
-                                    color={isActive ? "brand.activeFg" : "fg.muted"}
-                                    fontWeight={isActive ? "semibold" : "medium"}
-                                    transition="background 150ms ease, color 150ms ease"
-                                    /* Hover 用半透明 brand.active，如此 selected（實色 + semibold）仍能分辨。 */
-                                    _hover={isActive ? undefined : {bg: "brand.active/60", color: "brand.activeFg"}}
-                                >
-                                    <Icon size="md" flexShrink="0">
-                                        <ItemIcon />
-                                    </Icon>
-                                    <Text truncate srOnly={collapsed}>
-                                        {label}
-                                    </Text>
-                                </HStack>
-                            )}
+                            {({isActive}) => content(isActive)}
                         </NavLink>
                     );
                 })}

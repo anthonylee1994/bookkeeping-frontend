@@ -186,7 +186,7 @@ Date（`Asia/Hong_Kong`）：
 - `appStore`：accounts／categories／merchants／transactions／recurringRules、`referenceLoaded`、loading／error；**不 persist**（後端才是 source of truth）
 - Selectors 只訂閱需要 slice：`useAppStore(s => s.transactions)`
 - `uiStore`（不 persist）：`isMobileNavOpen`、`activeDialog`、`isOffline`、`installPrompt`
-- `draftStore` persist `sessionStorage`：`transactionDraft`、`aiScan`。**File／Blob／object URL 不 persist**
+- `draftStore` persist `sessionStorage`：`transactionDraft`。**File／Blob／object URL 不 persist**
 - Logout：原子 `clearSession` + `resetDrafts` + revoke object URLs + navigate `/login`
 
 **完成標準**：store tests：selector、reset、draft persist 不含 File、logout cleanup。
@@ -252,13 +252,13 @@ Date（`Asia/Hong_Kong`）：
 
 - `ROUTES` 集中 path
 - `RedirectIfAuthenticated`／`RequireAuth`（`returnTo` 經 `parseReturnTo`）
-- `LazyRoute`（`React.lazy` + `Suspense`）：transactions、scan、summaries、recurring、settings；dashboard／auth eager
+- `LazyRoute`（`React.lazy` + `Suspense`）：transactions、summaries、recurring、settings；dashboard／auth eager
 - `NotFoundPage`（404）、`RouteErrorBoundary`（full-screen fatal fallback：重試／返回首頁／清除本機資料）
 
 **Layout**
 
 - `AppLayout`：mobile = app bar + 底部 4 tab + 中間 FAB；`md+` 可收合 sidebar；`lg+`（≥1024）固定 sidebar
-- `AppHeader`：sidebar toggle（md+）、返回、定期交易（mobile）、掃描、登出
+- `AppHeader`：sidebar toggle（md+）、返回、定期交易（mobile）、掃描（一 click 開相機／上載）、登出
 - `MobileTabBar`：儀表板／交易／報表／設定 + FAB
 - `OfflineBanner`（`useOffline`）、`PwaBanners`（見 Step 19）
 
@@ -355,23 +355,24 @@ Actions：修改、複製、刪除。（**不進行退款**，見關鍵決策 9�
 
 ---
 
-## Step 15 — AI 單據 `/scan`
+## Step 15 — AI 單據（一 click 掃描）
 
-**狀態：已完成（2026-09-15，camera-first redesign 2026-09-16）**
+**狀態：已完成（2026-09-15，one-click drawer redesign 2026-09-17）**
 
-步驟：選圖／拍攝 → 上載 → 後端 parse（DeepSeek）→ 覆核 → confirm。
+步驟：一 click 掃描 → 相機／上載 → 上載 → 後端 parse（DeepSeek）→ 在同頁彈出覆核 drawer → confirm。
 
 實作備註：
 
-- `ScanStage`（camera-first）：未有圖時大面積拍攝／拖放區；有圖變預覽；解析期間蓋上可取消掃描遮罩（掃描光線動畫）
-- `ScanReviewPanel`：mobile 用底部 sheet（自動彈、可關、可重開），desktop 用頁內卡片；`ScanReviewForm` 加 `variant`（sheet 時動作 sticky 底部）
+- 已移除 `/scan` 頁面；`AppHeader`／`SidebarNav`／dashboard 快速動作／交易頁的 scan button 一律只作一 click 觸發
+- `ScanProvider`（掛在 `AppLayout`）持有隱藏 file input 及 session state；`useScan().startScan()` 直接開相機／上載，選圖後自動上載、解析並彈出 `ScanDrawer`
+- `ScanDrawer`：mobile 由底部升起、desktop 由右側滑入；上載／解析時顯示可取消進度，完成後切換成 `ScanReviewForm`
+- `ScanStage`：只負責相片預覽 + 掃描遮罩 + 換相片入口（不再有拖放／大片拍攝區）
 - `validateReceiptFile`／`RECEIPT_ACCEPT` 由 `receiptsRepository` 匯出，UI 與 repository 共用同一套類型／10 MiB 檢查
-- `ScanPage` 以 `runRef` generation counter 作取消；object URL 只留 component state，draft 只存遠端 URL
+- `ScanProvider` 以 `runRef` generation counter 作取消；object URL 只留 component state
 - `scanModel.ts`：`missingReviewFields`（逐欄「需覆核」badge）、`isLowConfidence`（< 0.6 警告）、`previewToReviewValues`（無法對應時留空）
 - Idempotency key 於 `ScanReviewForm` mount 生成；confirm 失敗重試沿用同一條 key
-- 非 desktop 時審核面板用 bottom sheet，desktop 左右並排（左邊 sticky 預覽 + 右邊表單）
 
-**完成標準（已達成）**：類型／大小本地擋下、upload → parse → 覆核預填、低信心度及缺欄位標示、parse 失敗保留圖片可重試（不重複上載）／轉手動、取消解析、confirm payload（`source: "ai"`／`ai_import_log_id`／idempotency key）及轉往新詳情、confirm 失敗重用同一條 key、reload 後失效 object URL 退回 idle，全部有測試。
+**完成標準（已達成）**：一 click 開 file picker、類型／大小本地擋下、upload → parse → 覆核預填、低信心度及缺欄位標示、parse 失敗保留圖片可重試（不重複上載）／轉手動、取消解析、confirm payload（`source: "ai"`／`ai_import_log_id`／idempotency key）及轉往新詳情、confirm 失敗重用同一條 key，全部有測試。
 
 ---
 
@@ -502,7 +503,7 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。
 - 交易列表／詳情／dashboard／定期交易加入帳戶、分類頭像（`EntityAvatar`，color + icon）
 - 交易 kind icon（`TransactionKindIcon`）統一 dashboard／summaries／定期交易
 - 全 app confirm dialog 統一置中（Chakra `Dialog` 預設 `placement="top"`，一律加 `placement="center"`）
-- `/scan` 改為 camera-first + mobile bottom sheet 覆核
+- `/scan` 移除，改為一 click 掃描 + 同頁覆核 drawer
 - Dashboard 數字層次、定期交易卡片、`SectionCard` header padding 等視覺調整
 - Transaction toolbar 快捷日期範圍 mobile 顯示
 

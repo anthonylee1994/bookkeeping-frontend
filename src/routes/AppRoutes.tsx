@@ -14,7 +14,6 @@ import {ROUTES} from "@/routes/paths";
 const TransactionsPage = React.lazy(() => import("@/features/transactions/TransactionsPage").then(module => ({default: module.TransactionsPage})));
 const TransactionDetailRoute = React.lazy(() => import("@/features/transactions/TransactionDetailRoute").then(module => ({default: module.TransactionDetailRoute})));
 const TransactionFormRoute = React.lazy(() => import("@/features/transactions/TransactionFormRoute").then(module => ({default: module.TransactionFormRoute})));
-const ScanPage = React.lazy(() => import("@/features/receiptScan/ScanPage").then(module => ({default: module.ScanPage})));
 const SummariesPage = React.lazy(() => import("@/features/summaries/SummariesPage").then(module => ({default: module.SummariesPage})));
 const RecurringRulesPage = React.lazy(() => import("@/features/recurringRules/RecurringRulesPage").then(module => ({default: module.RecurringRulesPage})));
 const SettingsPage = React.lazy(() => import("@/features/settings/SettingsPage").then(module => ({default: module.SettingsPage})));
@@ -65,14 +64,6 @@ export const AppRoutes = () => {
                         element={
                             <LazyRoute>
                                 <TransactionFormRoute />
-                            </LazyRoute>
-                        }
-                    />
-                    <Route
-                        path={ROUTES.scan}
-                        element={
-                            <LazyRoute>
-                                <ScanPage />
                             </LazyRoute>
                         }
                     />

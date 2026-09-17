@@ -2,6 +2,7 @@ import {Button, HStack} from "@chakra-ui/react";
 import {PlusIcon, ScanLineIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
+import {useScan} from "@/features/receiptScan/ScanProvider";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
 
@@ -11,6 +12,7 @@ import {ROUTES} from "@/routes/paths";
  */
 export const DashboardQuickActions = () => {
     const intl = useIntl();
+    const {startScan} = useScan();
 
     return (
         <HStack gap="3" flexWrap="wrap" display={{base: "flex", md: "none"}}>
@@ -20,11 +22,9 @@ export const DashboardQuickActions = () => {
                     {intl.formatMessage(messages.dashboard.addTransaction)}
                 </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" flex="1" minW={0}>
-                <Link to={ROUTES.scan}>
-                    <ScanLineIcon />
-                    {intl.formatMessage(messages.dashboard.scanReceipt)}
-                </Link>
+            <Button size="lg" variant="outline" flex="1" minW={0} onClick={startScan}>
+                <ScanLineIcon />
+                {intl.formatMessage(messages.dashboard.scanReceipt)}
             </Button>
         </HStack>
     );

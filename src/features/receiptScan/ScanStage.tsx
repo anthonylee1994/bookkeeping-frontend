@@ -1,6 +1,5 @@
-import React from "react";
-import {Box, Button, Center, Flex, Image, Input, Spinner, Stack, Text} from "@chakra-ui/react";
-import {CameraIcon, ImageOffIcon, ImagePlusIcon} from "lucide-react";
+import {Box, Button, Flex, Image, Spinner, Stack, Text} from "@chakra-ui/react";
+import {ImageOffIcon, ImagePlusIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {messages} from "@/lib/i18n";
 
@@ -8,116 +7,24 @@ export type ScanPhase = "uploading" | "parsing" | null;
 
 type ScanStageProps = {
     phase: ScanPhase;
-    imageSrc: string | null;
+    imageSrc: string;
     imageFailed: boolean;
-    accept: string;
-    onFile: (file: File | null) => void;
-    onImageError: () => void;
     onChangeImage: () => void;
     onCancel: () => void;
+    onImageError: () => void;
 };
 
-function dragHasFiles(event: React.DragEvent): boolean {
-    return event.dataTransfer.types.includes("Files");
-}
-
 /**
- * AI 單據的 camera-first 主體：未有圖時是一大片拍攝／拖放區，
- * 有圖之後變成預覽，解析期間蓋上可取消的掃描遮罩。Mobile 先，desktop 只是放大。
+ * 單據相片預覽：解析期間蓋上可取消的掃描遮罩，其餘時間提供換相片入口。
+ * 未有圖時不會出現，因為 scan 一 click 就已經彈出相機／上載。
  */
-export const ScanStage = ({phase, imageSrc, imageFailed, accept, onFile, onImageError, onChangeImage, onCancel}: ScanStageProps) => {
+export const ScanStage = ({phase, imageSrc, imageFailed, onChangeImage, onCancel, onImageError}: ScanStageProps) => {
     const intl = useIntl();
-    const inputRef = React.useRef<HTMLInputElement>(null);
-    const [dragging, setDragging] = React.useState(false);
-
-    const pickFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selected = event.target.files?.[0] ?? null;
-        event.target.value = "";
-        onFile(selected);
-    };
-
-    const onDragEnter = (event: React.DragEvent) => {
-        if (!dragHasFiles(event)) return;
-        event.preventDefault();
-        setDragging(true);
-    };
-
-    const onDragOver = (event: React.DragEvent) => {
-        if (!dragHasFiles(event)) return;
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "copy";
-        setDragging(true);
-    };
-
-    const onDragLeave = (event: React.DragEvent) => {
-        if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
-        setDragging(false);
-    };
-
-    const onDrop = (event: React.DragEvent) => {
-        event.preventDefault();
-        setDragging(false);
-        onFile(event.dataTransfer.files?.[0] ?? null);
-    };
-
-    if (imageSrc === null) {
-        return (
-            <Box position="relative">
-                <Input
-                    ref={inputRef}
-                    type="file"
-                    accept={accept}
-                    capture="environment"
-                    aria-label={intl.formatMessage(messages.scan.pickTitle)}
-                    position="absolute"
-                    boxSize="1px"
-                    opacity={0}
-                    overflow="hidden"
-                    tabIndex={-1}
-                    onChange={pickFile}
-                />
-                <Button
-                    type="button"
-                    variant="outline"
-                    w="full"
-                    h="auto"
-                    minH={{base: "15rem", sm: "17rem", md: "20rem"}}
-                    px="6"
-                    py="10"
-                    rounded="2xl"
-                    borderWidth="2px"
-                    borderStyle="dashed"
-                    borderColor={dragging ? "brand.solid" : "border.emphasized"}
-                    bg={dragging ? "brand.subtle" : "bg.panel"}
-                    _hover={{bg: "brand.subtle", borderColor: "brand.solid"}}
-                    onClick={() => inputRef.current?.click()}
-                    onDragEnter={onDragEnter}
-                    onDragOver={onDragOver}
-                    onDragLeave={onDragLeave}
-                    onDrop={onDrop}
-                >
-                    <Stack align="center" gap="4">
-                        <Center boxSize={{base: "16", md: "20"}} rounded="full" bg="brand.muted" color="brand.fg" transition="transform 150ms ease">
-                            <CameraIcon size={32} aria-hidden="true" />
-                        </Center>
-                        <Stack gap="1" align="center">
-                            <Text fontWeight="semibold" fontSize={{base: "lg", md: "xl"}}>
-                                {intl.formatMessage(dragging ? messages.scan.dropHere : messages.scan.pickAction)}
-                            </Text>
-                            <Text fontSize="sm" color="fg.muted" maxW="xs">
-                                {intl.formatMessage(messages.scan.pickHint)}
-                            </Text>
-                        </Stack>
-                    </Stack>
-                </Button>
-            </Box>
-        );
-    }
 
     return (
         <Box position="relative" rounded="2xl" overflow="hidden" borderWidth="1px" borderColor="border" bg="bg.subtle">
             {imageFailed ? (
-                <Flex direction="column" align="center" justify="center" gap="2" minH={{base: "15rem", md: "20rem"}} px="6" color="fg.muted" textAlign="center">
+                <Flex direction="column" align="center" justify="center" gap="2" minH={{base: "12rem", md: "16rem"}} px="6" color="fg.muted" textAlign="center">
                     <ImageOffIcon aria-hidden="true" />
                     <Text fontSize="sm">{intl.formatMessage(messages.scan.imageFailed)}</Text>
                 </Flex>
@@ -127,8 +34,8 @@ export const ScanStage = ({phase, imageSrc, imageFailed, accept, onFile, onImage
                     alt={intl.formatMessage(messages.scan.imageAlt)}
                     display="block"
                     w="full"
-                    minH={{base: "12rem", md: "18rem"}}
-                    maxH={{base: "58dvh", md: "26rem"}}
+                    minH={{base: "10rem", md: "14rem"}}
+                    maxH={{base: "38dvh", md: "20rem"}}
                     objectFit="contain"
                     bg="bg.subtle"
                     onError={onImageError}

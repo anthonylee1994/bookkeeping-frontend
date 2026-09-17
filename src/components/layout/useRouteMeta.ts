@@ -18,7 +18,6 @@ const ROUTE_META: readonly RouteMetaEntry[] = [
     {path: ROUTES.transactionNew, title: messages.transactions.newTitle, isRoot: false},
     {path: ROUTES.transactionEdit, title: messages.transactions.editTitle, isRoot: false},
     {path: ROUTES.transactionDetail, title: messages.transactions.detailTitle, isRoot: false},
-    {path: ROUTES.scan, title: messages.nav.scan, isRoot: false},
     {path: ROUTES.summaries, title: messages.nav.summaries, isRoot: true},
     {path: ROUTES.recurringRules, title: messages.nav.recurringRules, isRoot: false},
     {path: ROUTES.settings, title: messages.nav.settings, isRoot: true},

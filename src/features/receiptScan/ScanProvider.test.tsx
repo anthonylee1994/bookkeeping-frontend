@@ -1,15 +1,14 @@
 import React from "react";
-import {beforeEach, describe, expect, it, vi} from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {fireEvent, screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {createMemoryRouter, RouterProvider} from "react-router";
-import {ScanPage} from "@/features/receiptScan/ScanPage";
+import type {AiPreview} from "@/data/types";
+import {ScanProvider, useScan} from "@/features/receiptScan/ScanProvider";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
-import {useDraftStore} from "@/stores/draftStore";
 import {domainTestState} from "@/test/domainFixtures";
 import {renderWithIntl} from "@/test/renderWithIntl";
-import type {AiPreview} from "@/data/types";
 
 const uploadMock = vi.hoisted(() => vi.fn());
 const parseMock = vi.hoisted(() => vi.fn());
@@ -51,28 +50,30 @@ function receiptFile(name = "receipt.png", type = "image/png"): File {
     return new File(["receipt-bytes"], name, {type});
 }
 
-/** 模擬 viewport：setup 預設 matchMedia 永遠 false（mobile），desktop 測試逐個覆蓋。 */
-function setViewport(isDesktop: boolean): void {
-    window.matchMedia = ((query: string) => ({
-        matches: isDesktop ? query.includes("1024px") : false,
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-    })) as unknown as typeof window.matchMedia;
-}
+const ScanButton = () => {
+    const {startScan} = useScan();
+    return (
+        <button type="button" onClick={startScan}>
+            開始掃描
+        </button>
+    );
+};
 
-function renderScanPage(): void {
+function renderScan(): void {
     const router = createMemoryRouter(
         [
-            {path: "/scan", element: <ScanPage />},
+            {
+                path: "/",
+                element: (
+                    <ScanProvider>
+                        <ScanButton />
+                    </ScanProvider>
+                ),
+            },
             {path: "/transactions/new", element: <div>MANUAL FORM</div>},
             {path: "/transactions/:id", element: <div>TRANSACTION DETAIL</div>},
         ],
-        {initialEntries: ["/scan"]}
+        {initialEntries: ["/"]}
     );
     renderWithIntl(
         <React.Fragment>
@@ -81,11 +82,13 @@ function renderScanPage(): void {
     );
 }
 
+function picker(): HTMLElement {
+    return screen.getByLabelText("選擇單據相片");
+}
+
 beforeEach(() => {
-    setViewport(false);
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
     useAppStore.setState({...domainTestState, referenceLoaded: true});
-    useDraftStore.setState({transactionDraft: null, aiScan: null});
     uploadMock.mockReset().mockResolvedValue({ok: true, value: {url: RECEIPT_URL, sha256: "a".repeat(64)}});
     parseMock.mockReset().mockResolvedValue({ok: true, value: successPreview});
     confirmMock.mockReset();
@@ -93,12 +96,25 @@ beforeEach(() => {
     merchantCreateMock.mockReset();
 });
 
-describe("ScanPage", () => {
-    it("rejects an unsupported file type locally without uploading it", async () => {
-        renderScanPage();
+afterEach(() => {
+    vi.restoreAllMocks();
+});
 
-        // 瀏覽器的 accept filter 不是保證，所以直接派一個不合規的檔案落去試 guard。
-        fireEvent.change(screen.getByLabelText("選擇單據相片"), {target: {files: [receiptFile("note.txt", "text/plain")]}});
+describe("ScanProvider", () => {
+    it("opens the file picker with a single click", async () => {
+        const user = userEvent.setup();
+        const click = vi.spyOn(HTMLInputElement.prototype, "click");
+        renderScan();
+
+        await user.click(screen.getByRole("button", {name: "開始掃描"}));
+
+        expect(click).toHaveBeenCalledTimes(1);
+    });
+
+    it("rejects an unsupported file type locally without uploading it", async () => {
+        renderScan();
+
+        fireEvent.change(picker(), {target: {files: [receiptFile("note.txt", "text/plain")]}});
 
         expect(await screen.findByRole("alert")).toHaveTextContent("只支援 JPEG、PNG 或 WebP 圖片");
         expect(uploadMock).not.toHaveBeenCalled();
@@ -106,29 +122,19 @@ describe("ScanPage", () => {
 
     it("rejects a receipt over 10 MiB locally without uploading it", async () => {
         const user = userEvent.setup();
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), new File([new Uint8Array(10 * 1024 * 1024 + 1)], "large.png", {type: "image/png"}));
+        await user.upload(picker(), new File([new Uint8Array(10 * 1024 * 1024 + 1)], "large.png", {type: "image/png"}));
 
         expect(await screen.findByRole("alert")).toHaveTextContent("圖片不可大於 10 MiB");
         expect(uploadMock).not.toHaveBeenCalled();
     });
 
-    it("accepts a receipt dropped onto the picker", async () => {
-        renderScanPage();
-
-        fireEvent.drop(screen.getByRole("button", {name: /選擇或拍攝單據/}), {dataTransfer: {files: [receiptFile()]}});
-
-        expect(await screen.findByText("覆核解析結果")).toBeInTheDocument();
-        expect(uploadMock).toHaveBeenCalledTimes(1);
-        expect(parseMock).toHaveBeenCalledWith(RECEIPT_URL);
-    });
-
-    it("uploads, parses and prefills the review form", async () => {
+    it("uploads, parses and prefills the review drawer", async () => {
         const user = userEvent.setup();
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        await user.upload(picker(), receiptFile());
 
         expect(await screen.findByText("覆核解析結果")).toBeInTheDocument();
         expect(uploadMock).toHaveBeenCalledTimes(1);
@@ -144,9 +150,9 @@ describe("ScanPage", () => {
     it("marks low confidence and unreadable fields for review", async () => {
         const user = userEvent.setup();
         parseMock.mockResolvedValue({ok: true, value: {...successPreview, status: "partial", parsed: {amount_cents: 1250, confidence: 0.3}}});
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        await user.upload(picker(), receiptFile());
 
         expect(await screen.findByText("解析信心度只有 30%，請逐項核對。")).toBeInTheDocument();
         expect(screen.getByText("部分欄位未能辨識，已標示為需覆核。")).toBeInTheDocument();
@@ -156,11 +162,11 @@ describe("ScanPage", () => {
     it("keeps the image on a parse failure and can retry without re-uploading", async () => {
         const user = userEvent.setup();
         parseMock.mockResolvedValueOnce({ok: false, error: {code: "api_failed", message: "暫時無法連接服務"}});
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        await user.upload(picker(), receiptFile());
 
-        expect(await screen.findByText("單據解析失敗")).toBeInTheDocument();
+        expect(await screen.findByText("暫時無法連接服務")).toBeInTheDocument();
         expect(screen.getByAltText("單據預覽")).toBeInTheDocument();
 
         await user.click(screen.getByRole("button", {name: "重試解析"}));
@@ -173,10 +179,10 @@ describe("ScanPage", () => {
     it("offers manual entry when the parse keeps failing", async () => {
         const user = userEvent.setup();
         parseMock.mockResolvedValue({ok: true, value: {...successPreview, status: "failed", parsed: null, error: "看不清這張單"}});
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
-        expect(await screen.findByText("單據解析失敗")).toBeInTheDocument();
+        await user.upload(picker(), receiptFile());
+        expect(await screen.findByText("看不清這張單")).toBeInTheDocument();
 
         await user.click(screen.getByRole("button", {name: "改為手動入帳"}));
         expect(await screen.findByText("MANUAL FORM")).toBeInTheDocument();
@@ -185,9 +191,9 @@ describe("ScanPage", () => {
     it("cancels an in-flight parse and keeps the selected image", async () => {
         const user = userEvent.setup();
         parseMock.mockReturnValue(new Promise(() => undefined));
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        await user.upload(picker(), receiptFile());
 
         await user.click(await screen.findByRole("button", {name: "取消解析"}));
 
@@ -200,9 +206,9 @@ describe("ScanPage", () => {
     it("confirms the reviewed transaction with the import log id and an idempotency key", async () => {
         const user = userEvent.setup();
         confirmMock.mockResolvedValue({ok: true, value: {...domainTestState.transactions[0], id: "40000000-0000-4000-8000-0000000000a1"}});
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        await user.upload(picker(), receiptFile());
         await screen.findByText("覆核解析結果");
 
         await user.click(screen.getByRole("button", {name: "確認入帳"}));
@@ -219,16 +225,15 @@ describe("ScanPage", () => {
         expect(importLogId).toBe(IMPORT_LOG_ID);
         expect(idempotencyKey).toMatch(/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i);
         expect(await screen.findByText("TRANSACTION DETAIL")).toBeInTheDocument();
-        expect(useDraftStore.getState().aiScan).toBeNull();
     });
 
-    it("keeps the draft on a confirm failure so the same idempotency key is reused", async () => {
+    it("keeps the review on a confirm failure so the same idempotency key is reused", async () => {
         const user = userEvent.setup();
         confirmMock.mockResolvedValueOnce({ok: false, error: {code: "api_failed", message: "暫時無法連接服務"}});
         confirmMock.mockResolvedValueOnce({ok: true, value: {...domainTestState.transactions[0], id: "40000000-0000-4000-8000-0000000000a2"}});
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        await user.upload(picker(), receiptFile());
         await screen.findByText("覆核解析結果");
 
         await user.click(screen.getByRole("button", {name: "確認入帳"}));
@@ -239,38 +244,14 @@ describe("ScanPage", () => {
         expect(confirmMock.mock.calls[0][2]).toBe(confirmMock.mock.calls[1][2]);
     });
 
-    it("starts from the picker again when a reloaded draft lost its object URL", () => {
-        useDraftStore.setState({transactionDraft: null, aiScan: {step: "review", imageUrl: null, preview: successPreview}});
-        renderScanPage();
-
-        expect(screen.getByLabelText("選擇單據相片")).toBeInTheDocument();
-        expect(screen.queryByText("覆核解析結果")).not.toBeInTheDocument();
-        expect(screen.queryByAltText("單據預覽")).not.toBeInTheDocument();
-    });
-
-    it("opens the review as a bottom sheet and lets the user reopen it after closing", async () => {
+    it("opens the review as a bottom sheet and closes it again", async () => {
         const user = userEvent.setup();
-        renderScanPage();
+        renderScan();
 
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
+        await user.upload(picker(), receiptFile());
         expect(await screen.findByRole("dialog")).toHaveTextContent("覆核解析結果");
 
         await user.click(screen.getByRole("button", {name: "關閉"}));
         await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-
-        await user.click(screen.getByRole("button", {name: "繼續覆核"}));
-        expect(await screen.findByRole("dialog")).toHaveTextContent("覆核解析結果");
-    });
-
-    it("renders the review inline beside the preview on desktop without a sheet", async () => {
-        setViewport(true);
-        const user = userEvent.setup();
-        renderScanPage();
-
-        await user.upload(screen.getByLabelText("選擇單據相片"), receiptFile());
-
-        expect(await screen.findByText("覆核解析結果")).toBeInTheDocument();
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-        expect(screen.getByLabelText("金額")).toHaveValue("12.50");
     });
 });

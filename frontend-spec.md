@@ -160,14 +160,14 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 
 - Header 高 56px，尊重 `env(safe-area-inset-top)`
 - Bottom navigation 4 個 tab：首頁、交易、報表、設定；中間凸起 FAB 為「新增交易」
-- 「掃描」及「定期交易」放 app bar（因底部只夠 4 格）
+- 「掃描」（一 click 開相機／上載，選圖後彈覆核 drawer）及「定期交易」放 app bar（因底部只夠 4 格）
 - Page bottom padding 包括 navigation 高度同 `env(safe-area-inset-bottom)`
 - 長表格改用 list row；主要資料先顯示，次要資料可展開
 - 交易列表每行左邊顯示分類頭像（color + icon），meta 行顯示帳戶小頭像
 
 ### 3.2 Tablet / Desktop
 
-- 左側 navigation：儀表板、交易、掃描、報表、定期交易、設定 + 「新增交易」按鈕
+- 左側 navigation：儀表板、交易、掃描（一 click 動作）、報表、定期交易、設定 + 「新增交易」按鈕
 - Top bar 放頁面標題、日期範圍同 contextual actions
 - 交易列表使用 table（分類／帳戶欄顯示頭像）；點擊 row 開右側 detail panel，保留列表位置
 - 表單 create/edit 使用右側 drawer，不跳離當前工作脈絡
@@ -191,7 +191,6 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 /transactions/new              私有：新增交易
 /transactions/:id              私有：交易詳情
 /transactions/:id/edit         私有：修改交易
-/scan                          私有：AI 單據流程
 /summaries                     私有：報表
 /recurring-rules               私有：定期交易
 /settings                      私有：設定首頁
@@ -206,7 +205,7 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - Reload private route 先顯示全頁 loading，透過 `GET /me` 驗證 token，期間不可閃出 login page
 - 只接受站內 `returnTo` path，防止 open redirect
 - Browser back 必須可以關閉 modal／drawer 或返回上一步
-- Lazy load：transactions、scan、summaries、recurring、settings；dashboard／auth eager
+- Lazy load：transactions、summaries、recurring、settings；dashboard／auth eager
 
 ---
 
@@ -303,18 +302,18 @@ Actions：修改、複製、刪除。
 - 單據圖可放大查看，失效時顯示 fallback，不重試無限次
 - **不提供退款**（2026-09-15 移除）
 
-### 5.6 AI 單據 `/scan`
+### 5.6 AI 單據（一 click 掃描）
 
-流程：`選圖／拍攝 -> 上載 -> 後端解析（DeepSeek）-> 人工覆核 -> 確認入帳`。
+流程：`一 click 掃描 -> 相機／上載 -> 上載 -> 後端解析（DeepSeek）-> 同頁彈出覆核 drawer -> 確認入帳`。
 
-1. 使用 `<input type="file" accept="image/jpeg,image/png,image/webp" capture="environment">`
+1. 掃描 button（app bar／左側 navigation／dashboard／交易頁）一 click 即開 `<input type="file" accept="image/jpeg,image/png,image/webp">`，由系統提供相機或檔案選擇
 2. Frontend 驗證類型及 10 MiB 上限，顯示本地 preview（object URL）
 3. 上載期間顯示可取消的 progress UI（掃描光線動畫）
 4. 後端解析；低 confidence 或缺失欄位要明顯標示「需覆核」
-5. Review 用 bottom sheet（mobile）／頁內卡片（desktop）
+5. Review 一律用 drawer（mobile 底部升起、desktop 右側滑入）
 6. 用戶補回 account／category／merchant，再確認入帳
 
-確認時儲存修正後交易欄位及 `image_urls`，並使用 UUID 防止重複提交。解析失敗時保留圖片，提供重試解析或轉為手動入帳。
+確認時儲存修正後交易欄位及 `image_urls`，並使用 UUID 防止重複提交。解析失敗時保留圖片，提供重試解析或轉為手動入帳。已無獨立 `/scan` 頁面。
 
 ### 5.7 報表 `/summaries`
 
@@ -429,7 +428,7 @@ Zustand 管理 frontend app state；React Hook Form 管理表單暫態，URL 管
 | Form state                | React Hook Form            | transaction／account／category／recurring rule／AI confirm 欄位、dirty／validation state                     |
 | Session state             | `authStore`                | token、minimal user payload、hydrated、logout                                                                |
 | UI state                  | `uiStore`                  | mobile nav、drawer／dialog、offline flag、install prompt status                                              |
-| Temporary workflow／draft | `draftStore`               | transaction draft、AI scan step、uploaded image URL、AI preview                                              |
+| Temporary workflow／draft | `draftStore`               | transaction draft、uploaded image URL                                                                        |
 
 #### Store contract
 
@@ -455,9 +454,7 @@ type UiState = {
 
 type DraftState = {
     transactionDraft: TransactionDraft | null;
-    aiScan: AiScanDraft | null;
     setTransactionDraft: (draft: TransactionDraft | null) => void;
-    setAiScan: (draft: AiScanDraft | null) => void;
     resetDrafts: () => void;
 };
 ```
@@ -572,7 +569,7 @@ Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey
 
 ## 11. Performance
 
-- Route-level code splitting；Recharts、AI scan 等較重 feature lazy load
+- Route-level code splitting；Recharts 等較重 feature lazy load
 - `advancedChunks` 手動拆分 react／chakra／intl／vendor，令改動不會令整個 vendor bundle 失效
 - 大量 transaction 使用 server-side pagination，避免一次 render 全部資料
 - Merchant search debounce 300ms，避免每次 keypress 重算大型列表

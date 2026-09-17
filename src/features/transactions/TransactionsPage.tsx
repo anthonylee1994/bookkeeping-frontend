@@ -1,11 +1,12 @@
 import React from "react";
 import {Alert, Box, Button, EmptyState, Flex, HStack, NativeSelect, Stack, Text, VStack} from "@chakra-ui/react";
-import {FileQuestionIcon, PlusIcon, WalletIcon} from "lucide-react";
+import {FileQuestionIcon, PlusIcon, ScanLineIcon, WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, useNavigate, useSearchParams} from "react-router";
 import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {PageHeader} from "@/components/layout/PageHeader";
 import type {SortOrder, Transaction, TransactionFilters, TransactionSortField} from "@/data/types";
+import {useScan} from "@/features/receiptScan/ScanProvider";
 import {TransactionFilterChips} from "@/features/transactions/TransactionFilterChips";
 import {TransactionFiltersPanel} from "@/features/transactions/TransactionFiltersPanel";
 import {TransactionList} from "@/features/transactions/TransactionList";
@@ -30,6 +31,7 @@ const PER_PAGE_OPTIONS = [25, 50, 100];
 export const TransactionsPage = () => {
     const intl = useIntl();
     const navigate = useNavigate();
+    const {startScan} = useScan();
     const isDesktop = useMediaQuery(DESKTOP_QUERY);
     const [searchParams, setSearchParams] = useSearchParams();
     const reference = useDomainReference();
@@ -189,13 +191,19 @@ export const TransactionsPage = () => {
             <PageHeader
                 title={intl.formatMessage(messages.nav.transactions)}
                 actions={
-                    // Mobile 已經有 FAB，不要再放多一粒同樣動作的 button 佔位。
-                    <Button asChild display={{base: "none", md: "inline-flex"}}>
-                        <Link to={ROUTES.transactionNew}>
-                            <PlusIcon />
-                            {intl.formatMessage(messages.transactions.newTitle)}
-                        </Link>
-                    </Button>
+                    // Mobile 已經有 header 掃描 icon 及 FAB，不要再放多一粒同樣動作的 button 佔位。
+                    <HStack gap="2" display={{base: "none", md: "inline-flex"}}>
+                        <Button variant="outline" onClick={startScan}>
+                            <ScanLineIcon />
+                            {intl.formatMessage(messages.dashboard.scanReceipt)}
+                        </Button>
+                        <Button asChild>
+                            <Link to={ROUTES.transactionNew}>
+                                <PlusIcon />
+                                {intl.formatMessage(messages.transactions.newTitle)}
+                            </Link>
+                        </Button>
+                    </HStack>
                 }
             />
             <Stack gap="3">

@@ -5,6 +5,7 @@ import {AppHeader} from "@/components/layout/AppHeader";
 import {MobileTabBar} from "@/components/layout/MobileTabBar";
 import {OfflineBanner} from "@/components/layout/OfflineBanner";
 import {SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH, SidebarNav} from "@/components/layout/SidebarNav";
+import {ScanProvider} from "@/features/receiptScan/ScanProvider";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {RouteErrorBoundary} from "@/routes/RouteErrorBoundary";
 
@@ -28,28 +29,30 @@ export const AppLayout = () => {
     };
 
     return (
-        <Box bg="bg" minH="100dvh">
-            <SidebarNav collapsed={sidebarCollapsed} />
-            <Flex direction="column" minH="100dvh" transition="padding 200ms ease" pl={{base: 0, md: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}}>
-                <AppHeader sidebarCollapsed={sidebarCollapsed} onToggleSidebar={toggleSidebar} />
-                <OfflineBanner />
-                <Container
-                    as="main"
-                    id="main"
-                    key={location.pathname}
-                    maxW="7xl"
-                    flex="1"
-                    px={{base: 4, md: 6}}
-                    pt={{base: 4, md: 6}}
-                    pb={{base: 28, md: 10}}
-                    animation="page-enter 220ms cubic-bezier(0.32, 0.72, 0, 1) both"
-                >
-                    <RouteErrorBoundary>
-                        <Outlet />
-                    </RouteErrorBoundary>
-                </Container>
-                <MobileTabBar />
-            </Flex>
-        </Box>
+        <ScanProvider>
+            <Box bg="bg" minH="100dvh">
+                <SidebarNav collapsed={sidebarCollapsed} />
+                <Flex direction="column" minH="100dvh" transition="padding 200ms ease" pl={{base: 0, md: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH}}>
+                    <AppHeader sidebarCollapsed={sidebarCollapsed} onToggleSidebar={toggleSidebar} />
+                    <OfflineBanner />
+                    <Container
+                        as="main"
+                        id="main"
+                        key={location.pathname}
+                        maxW="7xl"
+                        flex="1"
+                        px={{base: 4, md: 6}}
+                        pt={{base: 4, md: 6}}
+                        pb={{base: 28, md: 10}}
+                        animation="page-enter 220ms cubic-bezier(0.32, 0.72, 0, 1) both"
+                    >
+                        <RouteErrorBoundary>
+                            <Outlet />
+                        </RouteErrorBoundary>
+                    </Container>
+                    <MobileTabBar />
+                </Flex>
+            </Box>
+        </ScanProvider>
     );
 };

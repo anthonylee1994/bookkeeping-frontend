@@ -298,11 +298,3 @@ export type TransactionDraft = {
     note: string;
     image_urls: string[];
 };
-
-export type AiScanStep = "idle" | "selected" | "parsing" | "review" | "failed";
-
-export type AiScanDraft = {
-    step: AiScanStep;
-    imageUrl: string | null;
-    preview: AiPreview | null;
-};

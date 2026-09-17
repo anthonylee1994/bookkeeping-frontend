@@ -3,6 +3,7 @@ import {ArrowLeftIcon, LogOutIcon, PanelLeftIcon, RepeatIcon, ScanLineIcon} from
 import {useIntl} from "react-intl";
 import {Link, useNavigate} from "react-router";
 import {useRouteMeta} from "@/components/layout/useRouteMeta";
+import {useScan} from "@/features/receiptScan/ScanProvider";
 import {useLogout} from "@/hooks/useLogout";
 import {messages} from "@/lib/i18n";
 import {ROUTES} from "@/routes/paths";
@@ -20,6 +21,7 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
     const intl = useIntl();
     const navigate = useNavigate();
     const logout = useLogout();
+    const {startScan} = useScan();
     const {title, isRoot} = useRouteMeta();
 
     const goBack = () => {
@@ -63,10 +65,8 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
                 </Box>
 
                 <Flex gap="1" align="center" justify="flex-end" flexShrink="0">
-                    <IconButton asChild aria-label={scanLabel} title={scanLabel} variant="ghost" size="md">
-                        <Link to={ROUTES.scan}>
-                            <ScanLineIcon />
-                        </Link>
+                    <IconButton aria-label={scanLabel} title={scanLabel} onClick={startScan} variant="ghost" size="md">
+                        <ScanLineIcon />
                     </IconButton>
                     <IconButton aria-label={signOutLabel} title={signOutLabel} onClick={logout} variant="ghost" size="md">
                         <LogOutIcon />

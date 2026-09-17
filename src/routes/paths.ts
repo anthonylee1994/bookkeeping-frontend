@@ -6,7 +6,6 @@ export const ROUTES = {
     transactionNew: "/transactions/new",
     transactionDetail: "/transactions/:id",
     transactionEdit: "/transactions/:id/edit",
-    scan: "/scan",
     summaries: "/summaries",
     recurringRules: "/recurring-rules",
     settings: "/settings",
