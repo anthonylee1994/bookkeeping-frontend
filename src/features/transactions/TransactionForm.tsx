@@ -4,6 +4,7 @@ import {Alert, Box, Button, Field, HStack, Image, Input, Link as ChakraLink, Nat
 import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {useBeforeUnload, useBlocker, useNavigate, Link as RouterLink} from "react-router";
+import {DrawerActions} from "@/components/layout/DrawerActions";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Account, Category, Merchant, Transaction, TransactionKind} from "@/data/types";
 import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
@@ -253,14 +254,14 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
                         </Alert.Root>
                     )}
 
-                    <HStack justify="flex-end" gap="3" py="2">
+                    <DrawerActions py="2">
                         <Button type="button" variant="outline" onClick={cancel}>
                             {intl.formatMessage(messages.common.cancel)}
                         </Button>
                         <Button type="submit" loading={formState.isSubmitting} disabled={accounts.length === 0}>
                             {intl.formatMessage(transaction === null ? messages.common.create : messages.common.save)}
                         </Button>
-                    </HStack>
+                    </DrawerActions>
                 </Stack>
             </form>
             <DirtyLeaveDialog blocker={blocker} />

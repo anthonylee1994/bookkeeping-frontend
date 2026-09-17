@@ -2,6 +2,8 @@ import React from "react";
 import {Badge, Box, Button, CloseButton, Drawer, Field, Input, NativeSelect, Popover, Portal, SimpleGrid, Stack, Text} from "@chakra-ui/react";
 import {SlidersHorizontalIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {DrawerActions} from "@/components/layout/DrawerActions";
+import {DrawerBody} from "@/components/layout/DrawerBody";
 import type {Account, Category, Merchant, TransactionFilters} from "@/data/types";
 import {EMPTY_FILTER_DRAFT, toFilterDraft, toTransactionFilters} from "@/features/transactions/transactionsFormat";
 import type {TransactionFilterDraft} from "@/features/transactions/transactionsFormat";
@@ -212,14 +214,12 @@ export const TransactionFiltersPanel = ({filters, activeCount, accounts, categor
                                 <CloseButton aria-label={intl.formatMessage(messages.common.close)} size="sm" />
                             </Drawer.CloseTrigger>
                         </Drawer.Header>
-                        <Drawer.Body>
+                        <DrawerBody>
                             <Stack gap="4">
                                 {fields}
-                                <Box display="flex" justifyContent="flex-end" gap="2" pb="2">
-                                    {actions}
-                                </Box>
+                                <DrawerActions pt="2">{actions}</DrawerActions>
                             </Stack>
-                        </Drawer.Body>
+                        </DrawerBody>
                     </Drawer.Content>
                 </Drawer.Positioner>
             </Portal>

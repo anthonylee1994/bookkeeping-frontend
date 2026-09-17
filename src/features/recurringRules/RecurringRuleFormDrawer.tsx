@@ -1,6 +1,7 @@
 import React from "react";
 import {Button, CloseButton, Dialog, Drawer, Portal, Stack} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
+import {DrawerBody} from "@/components/layout/DrawerBody";
 import type {Account, Category, Merchant, RecurringRule} from "@/data/types";
 import {RecurringRuleForm} from "@/features/recurringRules/RecurringRuleForm";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
@@ -49,9 +50,9 @@ export const RecurringRuleFormDrawer = ({rule, accounts, categories, merchants, 
                                     <CloseButton aria-label={intl.formatMessage(messages.common.close)} />
                                 </Drawer.CloseTrigger>
                             </Drawer.Header>
-                            <Drawer.Body pb={{base: "calc(1rem + env(safe-area-inset-bottom))", md: "8"}}>
+                            <DrawerBody>
                                 <RecurringRuleForm rule={rule} accounts={accounts} categories={categories} merchants={merchants} onSaved={onSaved} onCancel={requestClose} onDirtyChange={setDirty} />
-                            </Drawer.Body>
+                            </DrawerBody>
                         </Drawer.Content>
                     </Drawer.Positioner>
                 </Portal>

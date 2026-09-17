@@ -2,6 +2,7 @@ import React from "react";
 import {Alert, CloseButton, Drawer, Portal, Stack} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {useNavigate, useParams} from "react-router";
+import {DrawerBody} from "@/components/layout/DrawerBody";
 import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
@@ -87,7 +88,7 @@ export const TransactionFormPage = () => {
                                 <CloseButton aria-label={intl.formatMessage(messages.common.close)} />
                             </Drawer.CloseTrigger>
                         </Drawer.Header>
-                        <Drawer.Body pb={{base: "calc(1rem + env(safe-area-inset-bottom))", md: "8"}}>{body}</Drawer.Body>
+                        <DrawerBody>{body}</DrawerBody>
                     </Drawer.Content>
                 </Drawer.Positioner>
             </Portal>

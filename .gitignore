@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+# vite-plugin-pwa 於 dev 生成的暫存 service worker
+dev-dist
 *.local
 
 # Vercel

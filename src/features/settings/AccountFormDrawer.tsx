@@ -1,11 +1,13 @@
 import React from "react";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {Alert, Button, CloseButton, Dialog, Drawer, Field, HStack, Input, NativeSelect, Portal, Stack} from "@chakra-ui/react";
+import {Alert, Button, CloseButton, Dialog, Drawer, Field, Input, NativeSelect, Portal, Stack} from "@chakra-ui/react";
 import {useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {z} from "zod";
 import {ColorPicker} from "@/components/ColorPicker";
 import {IconPicker} from "@/components/IconPicker";
+import {DrawerActions} from "@/components/layout/DrawerActions";
+import {DrawerBody} from "@/components/layout/DrawerBody";
 import {AccountsRepository} from "@/data/accountsRepository";
 import type {Account, AccountKind} from "@/data/types";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
@@ -140,7 +142,7 @@ export const AccountFormDrawer = ({account, onSaved, onDeleted, onClose}: Accoun
                                     <CloseButton aria-label={intl.formatMessage(messages.common.close)} />
                                 </Drawer.CloseTrigger>
                             </Drawer.Header>
-                            <Drawer.Body pb={{base: "calc(1rem + env(safe-area-inset-bottom))", md: "8"}}>
+                            <DrawerBody>
                                 <form onSubmit={submit} noValidate>
                                     <Stack gap="5">
                                         <Field.Root required invalid={formState.errors.name !== undefined}>
@@ -198,24 +200,22 @@ export const AccountFormDrawer = ({account, onSaved, onDeleted, onClose}: Accoun
                                             </Alert.Root>
                                         )}
 
-                                        <HStack justify={account === null ? "flex-end" : "space-between"} gap="3" py="2">
+                                        <DrawerActions py="2">
                                             {account === null ? null : (
                                                 <Button type="button" variant="outline" colorPalette="red" onClick={() => setDeleteOpen(true)}>
                                                     {intl.formatMessage(messages.common.delete)}
                                                 </Button>
                                             )}
-                                            <HStack gap="3" ml="auto">
-                                                <Button type="button" variant="outline" onClick={requestClose}>
-                                                    {intl.formatMessage(messages.common.cancel)}
-                                                </Button>
-                                                <Button type="submit" loading={formState.isSubmitting}>
-                                                    {intl.formatMessage(account === null ? messages.common.create : messages.common.save)}
-                                                </Button>
-                                            </HStack>
-                                        </HStack>
+                                            <Button type="button" variant="outline" onClick={requestClose}>
+                                                {intl.formatMessage(messages.common.cancel)}
+                                            </Button>
+                                            <Button type="submit" loading={formState.isSubmitting}>
+                                                {intl.formatMessage(account === null ? messages.common.create : messages.common.save)}
+                                            </Button>
+                                        </DrawerActions>
                                     </Stack>
                                 </form>
-                            </Drawer.Body>
+                            </DrawerBody>
                         </Drawer.Content>
                     </Drawer.Positioner>
                 </Portal>

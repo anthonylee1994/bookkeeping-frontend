@@ -1,6 +1,7 @@
 import {Alert, Button, CloseButton, Drawer, Portal, Stack} from "@chakra-ui/react";
 import {PencilIcon, RotateCcwIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {DrawerBody} from "@/components/layout/DrawerBody";
 import type {AiPreview} from "@/data/types";
 import {ScanReviewForm} from "@/features/receiptScan/ScanReviewForm";
 import {ScanStage} from "@/features/receiptScan/ScanStage";
@@ -110,7 +111,7 @@ export const ScanDrawer = ({
                                 <CloseButton aria-label={intl.formatMessage(messages.common.close)} />
                             </Drawer.CloseTrigger>
                         </Drawer.Header>
-                        <Drawer.Body pb={{base: "calc(1rem + env(safe-area-inset-bottom))", md: "8"}}>{body}</Drawer.Body>
+                        <DrawerBody>{body}</DrawerBody>
                     </Drawer.Content>
                 </Drawer.Positioner>
             </Portal>

@@ -27,8 +27,10 @@ export default defineConfig(() => {
                 /** 由 app 內 `useAppUpdate` 自行註冊，方便控制「有新版本」提示。 */
                 injectRegister: null,
                 devOptions: {
-                    // SW 只在 production build 啟用，避免 dev 時 cache 住 stale asset。
-                    enabled: false,
+                    // Dev 都啟用 SW，方便測試 install prompt／離線；Vite 以 ES module 提供 dev SW，所以用 type: "module"。
+                    // 如遇 stale cache 可於 DevTools 清 Cache Storage。
+                    enabled: true,
+                    type: "module",
                 },
                 manifest: {
                     name: "簡單記帳",

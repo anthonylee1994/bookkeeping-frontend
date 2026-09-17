@@ -4,6 +4,7 @@ import {Alert, Button, Field, HStack, Input, NativeSelect, SimpleGrid, Stack, Te
 import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {useBeforeUnload, useBlocker} from "react-router";
+import {DrawerActions} from "@/components/layout/DrawerActions";
 import {RecurringRulesRepository} from "@/data/recurringRulesRepository";
 import type {Account, Category, Merchant, RecurringRule} from "@/data/types";
 import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
@@ -259,14 +260,14 @@ export const RecurringRuleForm = ({rule, accounts, categories, merchants, onSave
                         </Alert.Root>
                     )}
 
-                    <HStack justify="flex-end" gap="3" py="2">
+                    <DrawerActions py="2">
                         <Button type="button" variant="outline" onClick={onCancel}>
                             {intl.formatMessage(messages.common.cancel)}
                         </Button>
                         <Button type="submit" loading={formState.isSubmitting} disabled={accounts.length === 0}>
                             {intl.formatMessage(rule === null ? messages.common.create : messages.common.save)}
                         </Button>
-                    </HStack>
+                    </DrawerActions>
                 </Stack>
             </form>
             <DirtyLeaveDialog blocker={blocker} />

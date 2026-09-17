@@ -5,7 +5,7 @@ import {describe, expect, it} from "vitest";
 import {useAppUpdate} from "@/features/pwa/useAppUpdate";
 
 describe("useAppUpdate", () => {
-    it("does not register anything outside production builds", () => {
+    it("does nothing when the service worker API is unavailable", () => {
         const {result} = renderHook(() => useAppUpdate());
 
         expect(result.current.needRefresh).toBe(false);

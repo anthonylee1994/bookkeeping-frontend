@@ -2,7 +2,9 @@ import React from "react";
 
 /** 長時間開啟的 SPA 不會 reload，因此定時主動檢查新版本。 */
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
-const SW_URL = "/sw.js";
+/** Dev 由 Vite 以 ES module 提供 `dev-sw.js`，production 用 build 出嘅 classic `sw.js`。 */
+const SW_URL = import.meta.env.DEV ? "/dev-sw.js?dev-sw" : "/sw.js";
+const SW_TYPE: WorkerType = import.meta.env.DEV ? "module" : "classic";
 
 export type AppUpdateState = {
     /** Service worker 有新版本等待生效。 */
@@ -17,7 +19,7 @@ export type AppUpdateState = {
 /**
  * 自行註冊 service worker（不使用 `virtual:pwa-register`，以免引入 workbox-window 依賴）。
  * `registerType: "prompt"` 之下新版本不會自動 reload，一律由 UI 提示、用戶自行按下
- * 「重新載入」，因此不會打斷正在填寫的 form。開發／測試環境（非 PROD）完全 no-op。
+ * 「重新載入」，因此不會打斷正在填寫的 form。Dev 及 production 都會註冊。
  */
 export function useAppUpdate(): AppUpdateState {
     const [needRefresh, setNeedRefresh] = React.useState(false);
@@ -26,7 +28,7 @@ export function useAppUpdate(): AppUpdateState {
     const reloadingRef = React.useRef(false);
 
     React.useEffect(() => {
-        if (!import.meta.env.PROD || typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+        if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
 
         let disposed = false;
         let interval: ReturnType<typeof setInterval> | null = null;
@@ -61,7 +63,7 @@ export function useAppUpdate(): AppUpdateState {
         navigator.serviceWorker.addEventListener("controllerchange", onControllerChange);
 
         navigator.serviceWorker
-            .register(SW_URL, {scope: "/"})
+            .register(SW_URL, {scope: "/", type: SW_TYPE})
             .then(registration => {
                 if (disposed) return;
                 track(registration);

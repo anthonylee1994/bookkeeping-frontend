@@ -4,6 +4,7 @@ import {Alert, Badge, Button, Field, HStack, Input, Link as ChakraLink, NativeSe
 import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {useNavigate, Link as RouterLink} from "react-router";
+import {DrawerActions} from "@/components/layout/DrawerActions";
 import {ReceiptsRepository} from "@/data/receiptsRepository";
 import type {AiPreview, Merchant} from "@/data/types";
 import {confidencePercent, isLowConfidence, missingReviewFields, previewToReviewValues, reviewValuesToInput, scanReviewSchema, suggestedMerchantName} from "@/features/receiptScan/scanModel";
@@ -205,14 +206,14 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
                     </Alert.Root>
                 )}
 
-                <Stack direction={{base: "column", md: "row"}} justify={{md: "flex-end"}} gap="3" pt="2" pb={{base: "calc(0.5rem + env(safe-area-inset-bottom))", md: "2"}}>
-                    <Button type="button" variant="outline" w={{base: "full", md: "auto"}} onClick={onStartOver}>
+                <DrawerActions pt="2">
+                    <Button type="button" variant="outline" onClick={onStartOver}>
                         {intl.formatMessage(messages.scan.startOver)}
                     </Button>
-                    <Button type="submit" w={{base: "full", md: "auto"}} loading={formState.isSubmitting} disabled={reference.accounts.length === 0}>
+                    <Button type="submit" loading={formState.isSubmitting} disabled={reference.accounts.length === 0}>
                         {intl.formatMessage(messages.scan.confirm)}
                     </Button>
-                </Stack>
+                </DrawerActions>
             </Stack>
         </form>
     );

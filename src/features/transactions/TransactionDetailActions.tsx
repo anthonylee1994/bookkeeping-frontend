@@ -1,8 +1,9 @@
 import React from "react";
-import {Alert, Button, Dialog, HStack, Portal, Stack} from "@chakra-ui/react";
+import {Alert, Button, Dialog, Portal, Stack} from "@chakra-ui/react";
 import {CopyIcon, PencilIcon, Trash2Icon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link, useNavigate} from "react-router";
+import {DrawerActions} from "@/components/layout/DrawerActions";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
 import {messages} from "@/lib/i18n";
@@ -70,22 +71,22 @@ export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDe
                         <Alert.Title>{duplicateError}</Alert.Title>
                     </Alert.Root>
                 )}
-                <HStack justify={{base: "flex-start", md: "flex-end"}} gap="3" wrap="wrap" direction={{base: "column", md: "row"}}>
-                    <Button asChild variant="outline" w={{base: "full", md: "auto"}}>
+                <DrawerActions>
+                    <Button asChild variant="outline">
                         <Link to={transactionEditPath(transaction.id)}>
                             <PencilIcon />
                             {intl.formatMessage(messages.common.edit)}
                         </Link>
                     </Button>
-                    <Button type="button" variant="outline" loading={isDuplicating} w={{base: "full", md: "auto"}} onClick={duplicateTransaction}>
+                    <Button type="button" variant="outline" loading={isDuplicating} onClick={duplicateTransaction}>
                         <CopyIcon />
                         {intl.formatMessage(messages.transactions.detail.duplicate)}
                     </Button>
-                    <Button type="button" colorPalette="red" variant="outline" w={{base: "full", md: "auto"}} onClick={() => setConfirmOpen(true)}>
+                    <Button type="button" colorPalette="red" variant="outline" onClick={() => setConfirmOpen(true)}>
                         <Trash2Icon />
                         {intl.formatMessage(messages.common.delete)}
                     </Button>
-                </HStack>
+                </DrawerActions>
             </Stack>
 
             <Dialog.Root open={confirmOpen} placement="center" role="alertdialog" onOpenChange={event => setConfirmOpen(event.open)}>
