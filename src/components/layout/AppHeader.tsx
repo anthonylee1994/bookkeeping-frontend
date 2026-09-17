@@ -38,7 +38,7 @@ export const AppHeader = ({sidebarCollapsed, onToggleSidebar}: AppHeaderProps) =
     const signOutLabel = intl.formatMessage(messages.auth.signOut);
 
     return (
-        <Box as="header" flexShrink="0" zIndex="30" bg="bg" borderBottomWidth="1px" borderColor="border">
+        <Box position="sticky" top="0" left="0" right="0" as="header" flexShrink="0" zIndex="30" bg="bg" borderBottomWidth="1px" borderColor="border">
             <Grid h={{base: 14, md: 16}} maxW="7xl" mx="auto" w="full" px={{base: 2, md: 4}} alignItems="center" gap="1" gridTemplateColumns="1fr auto 1fr">
                 <Flex flexShrink="0" justify="flex-start" align="center" gap="1">
                     <IconButton aria-label={sidebarLabel} onClick={onToggleSidebar} variant="ghost" size="md" display={{base: "none", md: "inline-flex"}}>
