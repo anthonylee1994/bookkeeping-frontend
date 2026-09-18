@@ -196,28 +196,30 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
 
                     {kind === "transfer" ? null : (
                         <React.Fragment>
-                            <Controller
-                                name="merchantId"
-                                control={control}
-                                render={({field, fieldState}) => (
-                                    <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} onCreated={setCreatedMerchant} error={fieldState.error?.message} />
-                                )}
-                            />
+                            <SimpleGrid columns={{base: 1, md: 2}} gap="4">
+                                <Controller
+                                    name="merchantId"
+                                    control={control}
+                                    render={({field, fieldState}) => (
+                                        <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} onCreated={setCreatedMerchant} error={fieldState.error?.message} />
+                                    )}
+                                />
 
-                            <Field.Root invalid={formState.errors.categoryId !== undefined}>
-                                <Field.Label>{intl.formatMessage(messages.transactions.form.category)}</Field.Label>
-                                <NativeSelect.Root>
-                                    <NativeSelect.Field {...register("categoryId")}>
-                                        <option value="">{intl.formatMessage(messages.transactions.form.noCategory)}</option>
-                                        {filteredCategories.map(category => (
-                                            <option key={category.id} value={category.id}>
-                                                {category.name}
-                                            </option>
-                                        ))}
-                                    </NativeSelect.Field>
-                                    <NativeSelect.Indicator />
-                                </NativeSelect.Root>
-                            </Field.Root>
+                                <Field.Root invalid={formState.errors.categoryId !== undefined}>
+                                    <Field.Label>{intl.formatMessage(messages.transactions.form.category)}</Field.Label>
+                                    <NativeSelect.Root>
+                                        <NativeSelect.Field {...register("categoryId")}>
+                                            <option value="">{intl.formatMessage(messages.transactions.form.noCategory)}</option>
+                                            {filteredCategories.map(category => (
+                                                <option key={category.id} value={category.id}>
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                        </NativeSelect.Field>
+                                        <NativeSelect.Indicator />
+                                    </NativeSelect.Root>
+                                </Field.Root>
+                            </SimpleGrid>
                         </React.Fragment>
                     )}
 

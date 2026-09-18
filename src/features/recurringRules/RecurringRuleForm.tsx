@@ -5,6 +5,7 @@ import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {useBeforeUnload, useBlocker} from "react-router";
 import {DrawerActions} from "@/components/layout/DrawerActions";
+import {MerchantsRepository} from "@/data/merchantsRepository";
 import {RecurringRulesRepository} from "@/data/recurringRulesRepository";
 import type {Account, Category, Merchant, RecurringRule} from "@/data/types";
 import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
@@ -12,6 +13,7 @@ import {MerchantAutocomplete} from "@/features/transactions/MerchantAutocomplete
 import {emptyRecurringRuleFormValues, formValuesToInput, RECURRING_WEEKDAY_MESSAGES, recurringRuleFormSchema, recurringRuleToFormValues} from "@/features/recurringRules/recurringRuleModel";
 import type {RecurringRuleFormValues} from "@/features/recurringRules/recurringRuleModel";
 import {formatMessage, messages} from "@/lib/i18n";
+import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
 
 type RecurringRuleFormProps = {
@@ -32,6 +34,7 @@ export const RecurringRuleForm = ({rule, accounts, categories, merchants, onSave
     const intl = useIntl();
     const token = useAuthStore(state => state.token);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
+    const [createdMerchant, setCreatedMerchant] = React.useState<Merchant | null>(null);
     const {control, register, handleSubmit, formState, setValue} = useForm<RecurringRuleFormValues>({
         resolver: zodResolver(recurringRuleFormSchema),
         defaultValues: rule === null ? emptyRecurringRuleFormValues(accounts[0]?.id ?? "") : recurringRuleToFormValues(rule),
@@ -39,7 +42,19 @@ export const RecurringRuleForm = ({rule, accounts, categories, merchants, onSave
 
     const kind = useWatch({control, name: "kind"});
     const frequency = useWatch({control, name: "frequency"});
+    const categoryId = useWatch({control, name: "categoryId"});
+    const merchantId = useWatch({control, name: "merchantId"});
     const filteredCategories = categories.filter(category => category.kind === kind);
+
+    React.useEffect(() => {
+        if (token === null || createdMerchant === null || merchantId !== createdMerchant.id || categoryId === "") return;
+        if (createdMerchant.default_category_id === categoryId) return;
+        const updated: Merchant = {...createdMerchant, default_category_id: categoryId};
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCreatedMerchant(updated);
+        useAppStore.getState().setMerchants(useAppStore.getState().merchants.map(merchant => (merchant.id === updated.id ? updated : merchant)));
+        void new MerchantsRepository(token).update(updated.id, {name: updated.name, default_category_id: categoryId});
+    }, [categoryId, createdMerchant, merchantId, token]);
 
     const shouldBlockNavigation = formState.isDirty && !formState.isSubmitting;
     const blocker = useBlocker(shouldBlockNavigation);
@@ -58,7 +73,14 @@ export const RecurringRuleForm = ({rule, accounts, categories, merchants, onSave
         setValue("categoryId", "", {shouldDirty: true});
     };
 
-    const selectMerchant = (merchant: Merchant | null) => setValue("merchantId", merchant?.id ?? "", {shouldDirty: true, shouldValidate: true});
+    const selectMerchant = (merchant: Merchant | null) => {
+        setValue("merchantId", merchant?.id ?? "", {shouldDirty: true, shouldValidate: true});
+        const defaultCategoryId = merchant?.default_category_id ?? null;
+        if (defaultCategoryId === null) return;
+        const defaultCategory = categories.find(category => category.id === defaultCategoryId && category.kind === kind);
+        if (defaultCategory === undefined) return;
+        setValue("categoryId", defaultCategory.id, {shouldDirty: true, shouldValidate: true});
+    };
 
     const submit = handleSubmit(async values => {
         if (token === null) return;
@@ -108,22 +130,30 @@ export const RecurringRuleForm = ({rule, accounts, categories, merchants, onSave
                         {formState.errors.amount === undefined ? null : <Field.ErrorText>{formState.errors.amount.message}</Field.ErrorText>}
                     </Field.Root>
 
+                    <Field.Root required invalid={formState.errors.accountId !== undefined}>
+                        <Field.Label>{intl.formatMessage(messages.transactions.form.account)}</Field.Label>
+                        <NativeSelect.Root>
+                            <NativeSelect.Field {...register("accountId")}>
+                                <option value="">{intl.formatMessage(messages.transactions.form.selectAccount)}</option>
+                                {accounts.map(account => (
+                                    <option key={account.id} value={account.id}>
+                                        {account.name}
+                                    </option>
+                                ))}
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                        </NativeSelect.Root>
+                        {formState.errors.accountId === undefined ? null : <Field.ErrorText>{formState.errors.accountId.message}</Field.ErrorText>}
+                    </Field.Root>
+
                     <SimpleGrid columns={{base: 1, md: 2}} gap="4">
-                        <Field.Root required invalid={formState.errors.accountId !== undefined}>
-                            <Field.Label>{intl.formatMessage(messages.transactions.form.account)}</Field.Label>
-                            <NativeSelect.Root>
-                                <NativeSelect.Field {...register("accountId")}>
-                                    <option value="">{intl.formatMessage(messages.transactions.form.selectAccount)}</option>
-                                    {accounts.map(account => (
-                                        <option key={account.id} value={account.id}>
-                                            {account.name}
-                                        </option>
-                                    ))}
-                                </NativeSelect.Field>
-                                <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                            {formState.errors.accountId === undefined ? null : <Field.ErrorText>{formState.errors.accountId.message}</Field.ErrorText>}
-                        </Field.Root>
+                        <Controller
+                            name="merchantId"
+                            control={control}
+                            render={({field, fieldState}) => (
+                                <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} onCreated={setCreatedMerchant} error={fieldState.error?.message} />
+                            )}
+                        />
 
                         <Field.Root>
                             <Field.Label>{intl.formatMessage(messages.transactions.form.category)}</Field.Label>
@@ -140,12 +170,6 @@ export const RecurringRuleForm = ({rule, accounts, categories, merchants, onSave
                             </NativeSelect.Root>
                         </Field.Root>
                     </SimpleGrid>
-
-                    <Controller
-                        name="merchantId"
-                        control={control}
-                        render={({field, fieldState}) => <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} error={fieldState.error?.message} />}
-                    />
 
                     <SimpleGrid columns={{base: 1, md: 2}} gap="4">
                         <Field.Root required>
