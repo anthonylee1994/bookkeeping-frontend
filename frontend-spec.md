@@ -4,6 +4,8 @@
 
 本文件定義記帳 App frontend 的產品範圍、資訊架構、互動、PWA 行為、responsive 規則及驗收標準。Frontend 是 React SPA，經 typed API repository（axios）呼叫 Rails API（見 `backend-spec.md`／`swagger.yaml`）；瀏覽器只持久化 session token 及表單 draft，domain data 一律存於後端。
 
+> **文件維護**：日後任何 UI／行為改動，必須同步更新本文件及 `plan.md`；未更新 docs 嘅改動當未完成（見 §14）。
+
 ### 0.1 產品目標
 
 - 令用戶可以用手機快速記一筆收入、支出或轉帳
@@ -275,15 +277,17 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 | 金額     | 必填                       | 必填                 |
 | 帳戶     | 必填                       | 必填（轉出）         |
 | 轉入帳戶 | 不顯示                     | 必填且不可與轉出相同 |
-| 分類     | 可選，按 kind 過濾         | 不顯示               |
 | 商戶     | 可選 autocomplete          | 不顯示               |
+| 分類     | 可選，按 kind 過濾         | 不顯示               |
 | 日期時間 | 必填，預設現在             | 必填，預設現在       |
 | 付款方式 | 可選                       | 可選                 |
 | 備註     | 可選                       | 可選                 |
 | 圖片     | 可選，顯示已有 URL preview | 可選                 |
 
+- 商戶與分類在 md 以上並排（商戶在左、分類在右），mobile 疊住；商戶排在分類之前
 - Merchant autocomplete debounce 300ms；輸入新名稱時可建立 merchant，再選回表單
-- 選擇有 default category 的 merchant，可自動建議分類，但不可無提示覆蓋用戶已選值
+- 選擇有 default category 的 merchant，會即時套用該分類（只在分類 kind 與目前 kind 相符時）；用戶仍可自行改分類
+- 新增 merchant 時，如已選分類，會將該分類存為新 merchant 的 default category（下次再揀同一商戶會自動帶出）
 - Create 每次開表單產生 UUID 作 idempotency key；成功後同步更新相關 view
 - Edit 不可改變 `source`
 - 離線時照常本地操作（見 §8.3）；banner 提示資料可能未更新，不進行假網絡 retry
@@ -334,7 +338,8 @@ Actions：修改、複製、刪除。
 
 Create／edit 欄位：
 
-- 類型（收入／支出）、金額、帳戶、分類、商戶、備註
+- 類型（收入／支出）、金額、帳戶、商戶、分類（md 以上商戶／分類並排）、備註
+- 商戶／分類互動跟 §5.4：揀有 default category 的商戶會自動套用分類；新增商戶時如已選分類，會存為該商戶的 default category
 - 頻率：每日、每週、每月、每年
 - 間隔 `interval`，預設 1
 - 每週：`day_of_week`（0–6，UI 顯示日–六）
@@ -369,6 +374,7 @@ Actions：pause、resume、run now、skip next、edit、delete。Card footer 動
 
 - 載入全部商戶（`GET /merchants` 不帶 `q`）；搜尋為前端即時過濾已載入清單
 - Create／edit：name、default category；列表顯示 default category
+- 於交易／定期交易表單 inline 新增商戶時，如已揀分類，會自動設為該商戶的 default category
 - 刪除前提示歷史交易會保留，但商戶會被清空
 - 未儲存離開抽屜前需確認
 
@@ -655,6 +661,7 @@ VITE_API_URL=https://book-api.on99.app
 - `pnpm run build`、`tsc`、Prettier、Vitest 全部通過
 - 無 console error、React warning、水平 overflow 或 UI overlap
 - PWA 可安裝、更新提示正常，offline 可還原 local session／draft
+- 任何 UI／行為改動已同步更新 `frontend-spec.md` 及 `plan.md`（plan 補對應 Step 或新增 Post-MVP step）
 
 ---
 

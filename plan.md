@@ -60,6 +60,7 @@ Local domain type 必須補齊：
 - 其他 function 使用 `function name()`
 - 不使用 `any`
 - 修改完成後執行 `tsc -b` 及 Prettier；本專案不執行 ESLint 作為 agent 驗證步驟（build 前仍須 type-safe）
+- **任何 UI／行為改動都要同步更新 `plan.md` 及 `frontend-spec.md`**：plan 於對應 Step 補註或新增 Post-MVP step；spec 更新相關章節。改完 code 唔更新 docs 當未完成
 
 ---
 
@@ -322,7 +323,9 @@ Segmented control 切換 kind，欄位表依 spec 5.4。
 
 - RHF + Zod
 - Merchant autocomplete debounce 300ms；可即時建立
-- Merchant 有 default category 時建議分類，**不 silently 覆蓋用戶已選**
+- 商戶與分類並排（md 2 欄、mobile 疊）；商戶排在分類之前
+- Merchant 有 default category 時**自動套用**該分類（只在 kind 相符時）；2026-09-18 由「建議、不覆蓋」改成直接套用，見 Step 23
+- 新增 merchant 時如已選分類，會將該分類寫入新 merchant 的 default category，見 Step 23
 - Create 開啟表單即產生 UUID 作為 idempotency
 - Edit 不更改 source
 - Dirty leave：`useBlocker` 確認
@@ -410,6 +413,7 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。
 - Card：分類頭像 + 標題／金額 + 狀態 badge + 排程 + 下次執行 + 帳戶／分類／商戶 chips；footer 動作 toolbar（主要動作用實色品牌綠，其餘每行兩個）
 - run now 成功顯示新交易入口；`conflict_already_materialized` 顯示「今日已產生過交易」；skip next 列出日期；刪除說明保留已產生交易
 - 新增／修改用右側（desktop）／底部（mobile）drawer；dirty leave 用 `useBlocker` + confirm dialog
+- 2026-09-18：create／edit form 的商戶／分類並排、揀商戶自動套用 default category、新增商戶存 default category，跟交易表單一致（見 Step 23）
 
 **完成標準（已達成）**：pause／resume／run now／skip next／delete 文案、tab 切換、empty state、schedule 描述及 `next_run_at` 計算均有測試；tsc、完整 Vitest 及 production build 通過。
 
@@ -462,7 +466,7 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。
 
 **狀態：部分完成**
 
-- Vitest：money、date、URL、repository、stores、關鍵 forms、PWA hooks —— 已覆蓋（44 個 test file）
+- Vitest：money、date、URL、repository、stores、關鍵 forms、PWA hooks —— 已覆蓋（45 個 test file）
 - Playwright critical paths（spec 12.3）—— **未實作**（尚未有 `playwright.config.ts`／e2e 目錄）
 - Viewport：320×568、390×844、768×1024、1280×800、1440×900。無水平 overflow、dialog 可用、bottom nav safe-area
 - 每步：Prettier、`tsc -b`、`pnpm run build`、必要時手動瀏覽器行一次主路徑
@@ -506,6 +510,26 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。
 - `/scan` 移除，改為一 click 掃描 + 同頁覆核 drawer
 - Dashboard 數字層次、定期交易卡片、`SectionCard` header padding 等視覺調整
 - Transaction toolbar 快捷日期範圍 mobile 顯示
+
+---
+
+## Step 23 — Post-MVP 調整（2026-09-18）
+
+**狀態：已完成**
+
+交易／定期交易表單的商戶與分類互動（`TransactionForm` 同 `RecurringRuleForm`）：
+
+- 商戶欄移到分類之前，md 以上並排（`SimpleGrid columns={{base: 1, md: 2}}`）、mobile 自動疊住
+- 揀選有 `default_category_id` 的商戶，會即時將該分類套用到表單（只在分類 kind 與目前 kind 相符時）；同時移除舊有「建議分類／套用建議」提示，`transactions.form.categorySuggestion`／`applySuggestion` message 已刪
+- 新增商戶 inline 後，如表單已揀分類，會將該分類寫入新商戶的 `default_category_id`（`MerchantsRepository.update`）並同步 appStore；先揀分類或先新增商戶都覆蓋（用 `createdMerchant` state + effect 實作）
+
+Mobile 導航：
+
+- 底部 tab bar 中間 FAB 的 press feedback 由 `transform: scale(0.95)` 改成背景色變化（`_active={{bg: "brand.emphasized"}}`）。iOS standalone 會將 `:active` 的 transform 當成 hover 內容變化，令第一次 tap 被食掉、要撳兩下；改用顏色變化保留 feedback 而唔影響 hit area
+
+Docs：
+
+- 本步同時更新 `frontend-spec.md` §5.4、§5.8、§5.9 及 §14；日後任何 UI／行為改動都要同步更新 `plan.md` 及 `frontend-spec.md`
 
 ---
 
