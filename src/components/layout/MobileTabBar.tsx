@@ -63,8 +63,8 @@ export const MobileTabBar = () => {
                         outlineWidth="4px"
                         outlineStyle="solid"
                         outlineColor="bg"
-                        transition="transform 150ms ease"
-                        _active={{transform: "scale(0.95)"}}
+                        transition="background 150ms ease"
+                        _active={{bg: "brand.emphasized"}}
                     >
                         <NavLink to={ROUTES.transactionNew} aria-label={addLabel} title={addLabel}>
                             <Icon size="lg">
