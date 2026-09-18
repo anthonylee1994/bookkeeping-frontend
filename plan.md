@@ -517,11 +517,12 @@ Tabs：active／paused／ended。Create／edit 欄位依 spec 5.8。
 
 **狀態：已完成**
 
-交易／定期交易表單的商戶與分類互動（`TransactionForm` 同 `RecurringRuleForm`）：
+交易／定期交易／單據覆核表單的商戶與分類互動（`TransactionForm`、`RecurringRuleForm` 同 `ScanReviewForm`）：
 
 - 商戶欄移到分類之前，md 以上並排（`SimpleGrid columns={{base: 1, md: 2}}`）、mobile 自動疊住
 - 揀選有 `default_category_id` 的商戶，會即時將該分類套用到表單（只在分類 kind 與目前 kind 相符時）；同時移除舊有「建議分類／套用建議」提示，`transactions.form.categorySuggestion`／`applySuggestion` message 已刪
 - 新增商戶 inline 後，如表單已揀分類，會將該分類寫入新商戶的 `default_category_id`（`MerchantsRepository.update`）並同步 appStore；先揀分類或先新增商戶都覆蓋（用 `createdMerchant` state + effect 實作）
+- `ScanReviewForm` 另外：帳戶改全寬、商戶／分類 md 並排；`MerchantAutocomplete` 新增 optional `badge` prop，用嚟將「需覆核」badge 放喺 label 旁邊（保持同其他欄位一致）
 
 Mobile 導航：
 
@@ -529,7 +530,7 @@ Mobile 導航：
 
 Docs：
 
-- 本步同時更新 `frontend-spec.md` §5.4、§5.8、§5.9 及 §14；日後任何 UI／行為改動都要同步更新 `plan.md` 及 `frontend-spec.md`
+- 本步同時更新 `frontend-spec.md` §5.4、§5.6、§5.8、§5.9 及 §14；日後任何 UI／行為改動都要同步更新 `plan.md` 及 `frontend-spec.md`
 
 ---
 

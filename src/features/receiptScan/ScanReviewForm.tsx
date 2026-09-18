@@ -5,6 +5,7 @@ import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {useNavigate, Link as RouterLink} from "react-router";
 import {DrawerActions} from "@/components/layout/DrawerActions";
+import {MerchantsRepository} from "@/data/merchantsRepository";
 import {ReceiptsRepository} from "@/data/receiptsRepository";
 import type {AiPreview, Merchant} from "@/data/types";
 import {confidencePercent, isLowConfidence, missingReviewFields, previewToReviewValues, reviewValuesToInput, scanReviewSchema, suggestedMerchantName} from "@/features/receiptScan/scanModel";
@@ -13,6 +14,7 @@ import {MerchantAutocomplete} from "@/features/transactions/MerchantAutocomplete
 import {messages} from "@/lib/i18n";
 import {createId} from "@/lib/id";
 import {ROUTES, transactionDetailPath} from "@/routes/paths";
+import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
 
 type ScanReviewFormProps = {
@@ -31,12 +33,15 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
     // 同一次覆核重用同一條 key：submit 失敗再試也不會重複入帳。
     const [idempotencyKey] = React.useState(createId);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
+    const [createdMerchant, setCreatedMerchant] = React.useState<Merchant | null>(null);
     const {control, register, handleSubmit, setValue, formState} = useForm<ScanReviewValues>({
         resolver: zodResolver(scanReviewSchema),
         defaultValues: previewToReviewValues(preview, reference),
     });
 
     const kind = useWatch({control, name: "kind"});
+    const categoryId = useWatch({control, name: "categoryId"});
+    const merchantId = useWatch({control, name: "merchantId"});
     const missing = missingReviewFields(preview);
     const filteredCategories = reference.categories.filter(category => category.kind === kind);
     const reviewBadge = (field: ScanReviewField) =>
@@ -46,7 +51,24 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
             </Badge>
         ) : null;
 
-    const selectMerchant = (merchant: Merchant | null) => setValue("merchantId", merchant?.id ?? "", {shouldValidate: true});
+    React.useEffect(() => {
+        if (token === null || createdMerchant === null || merchantId !== createdMerchant.id || categoryId === "") return;
+        if (createdMerchant.default_category_id === categoryId) return;
+        const updated: Merchant = {...createdMerchant, default_category_id: categoryId};
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCreatedMerchant(updated);
+        useAppStore.getState().setMerchants(useAppStore.getState().merchants.map(merchant => (merchant.id === updated.id ? updated : merchant)));
+        void new MerchantsRepository(token).update(updated.id, {name: updated.name, default_category_id: categoryId});
+    }, [categoryId, createdMerchant, merchantId, token]);
+
+    const selectMerchant = (merchant: Merchant | null) => {
+        setValue("merchantId", merchant?.id ?? "", {shouldValidate: true});
+        const defaultCategoryId = merchant?.default_category_id ?? null;
+        if (defaultCategoryId === null) return;
+        const defaultCategory = reference.categories.find(category => category.id === defaultCategoryId && category.kind === kind);
+        if (defaultCategory === undefined) return;
+        setValue("categoryId", defaultCategory.id, {shouldValidate: true});
+    };
 
     const submit = handleSubmit(async values => {
         if (token === null) return;
@@ -124,29 +146,45 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
                     {formState.errors.amount === undefined ? null : <Field.ErrorText>{formState.errors.amount.message}</Field.ErrorText>}
                 </Field.Root>
 
+                <Field.Root required invalid={formState.errors.accountId !== undefined}>
+                    <Field.Label>{intl.formatMessage(messages.transactions.form.account)}</Field.Label>
+                    <NativeSelect.Root>
+                        <NativeSelect.Field disabled={reference.accounts.length === 0} {...register("accountId")}>
+                            <option value="">{intl.formatMessage(reference.accounts.length === 0 ? messages.scan.noAccounts : messages.transactions.form.selectAccount)}</option>
+                            {reference.accounts.map(account => (
+                                <option key={account.id} value={account.id}>
+                                    {account.name}
+                                </option>
+                            ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                    </NativeSelect.Root>
+                    {formState.errors.accountId === undefined ? null : <Field.ErrorText>{formState.errors.accountId.message}</Field.ErrorText>}
+                    {reference.accounts.length === 0 ? (
+                        <Text fontSize="sm" mt="1">
+                            <ChakraLink asChild color="brand.fg">
+                                <RouterLink to={ROUTES.settingsAccounts}>{intl.formatMessage(messages.scan.goToAccounts)}</RouterLink>
+                            </ChakraLink>
+                        </Text>
+                    ) : null}
+                </Field.Root>
+
                 <SimpleGrid columns={{base: 1, md: 2}} gap="4">
-                    <Field.Root required invalid={formState.errors.accountId !== undefined}>
-                        <Field.Label>{intl.formatMessage(messages.transactions.form.account)}</Field.Label>
-                        <NativeSelect.Root>
-                            <NativeSelect.Field disabled={reference.accounts.length === 0} {...register("accountId")}>
-                                <option value="">{intl.formatMessage(reference.accounts.length === 0 ? messages.scan.noAccounts : messages.transactions.form.selectAccount)}</option>
-                                {reference.accounts.map(account => (
-                                    <option key={account.id} value={account.id}>
-                                        {account.name}
-                                    </option>
-                                ))}
-                            </NativeSelect.Field>
-                            <NativeSelect.Indicator />
-                        </NativeSelect.Root>
-                        {formState.errors.accountId === undefined ? null : <Field.ErrorText>{formState.errors.accountId.message}</Field.ErrorText>}
-                        {reference.accounts.length === 0 ? (
-                            <Text fontSize="sm" mt="1">
-                                <ChakraLink asChild color="brand.fg">
-                                    <RouterLink to={ROUTES.settingsAccounts}>{intl.formatMessage(messages.scan.goToAccounts)}</RouterLink>
-                                </ChakraLink>
-                            </Text>
-                        ) : null}
-                    </Field.Root>
+                    <Controller
+                        name="merchantId"
+                        control={control}
+                        render={({field, fieldState}) => (
+                            <MerchantAutocomplete
+                                merchants={reference.merchants}
+                                value={field.value}
+                                defaultQuery={suggestedMerchantName(preview)}
+                                onChange={selectMerchant}
+                                onCreated={setCreatedMerchant}
+                                badge={reviewBadge("merchant")}
+                                error={fieldState.error?.message}
+                            />
+                        )}
+                    />
 
                     <Field.Root>
                         <Field.Label>{intl.formatMessage(messages.transactions.form.category)}</Field.Label>
@@ -163,27 +201,6 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
                         </NativeSelect.Root>
                     </Field.Root>
                 </SimpleGrid>
-
-                <Stack gap="1">
-                    {missing.includes("merchant") ? (
-                        <Badge colorPalette="orange" size="sm" alignSelf="flex-start">
-                            {intl.formatMessage(messages.scan.needsReview)}
-                        </Badge>
-                    ) : null}
-                    <Controller
-                        name="merchantId"
-                        control={control}
-                        render={({field, fieldState}) => (
-                            <MerchantAutocomplete
-                                merchants={reference.merchants}
-                                value={field.value}
-                                defaultQuery={suggestedMerchantName(preview)}
-                                onChange={selectMerchant}
-                                error={fieldState.error?.message}
-                            />
-                        )}
-                    />
-                </Stack>
 
                 <Field.Root required invalid={formState.errors.occurredAt !== undefined}>
                     <Field.Label>

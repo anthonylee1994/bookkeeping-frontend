@@ -13,12 +13,13 @@ type MerchantAutocompleteProps = {
     value: string;
     onChange: (merchant: Merchant | null) => void;
     onCreated?: (merchant: Merchant) => void;
+    badge?: React.ReactNode;
     error?: string;
     /** 未對應到現有商戶時的初始搜尋字（例如 AI 由單據讀到的名稱）。 */
     defaultQuery?: string;
 };
 
-export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, error, defaultQuery = ""}: MerchantAutocompleteProps) => {
+export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, badge, error, defaultQuery = ""}: MerchantAutocompleteProps) => {
     const intl = useIntl();
     const token = useAuthStore(state => state.token);
     const selected = merchants.find(merchant => merchant.id === value) ?? null;
@@ -67,7 +68,10 @@ export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, err
 
     return (
         <Field.Root invalid={error !== undefined}>
-            <Field.Label>{intl.formatMessage(messages.transactions.form.merchant)}</Field.Label>
+            <Field.Label>
+                {intl.formatMessage(messages.transactions.form.merchant)}
+                {badge}
+            </Field.Label>
             <Stack gap="2" width="full">
                 <InputGroup>
                     <Input

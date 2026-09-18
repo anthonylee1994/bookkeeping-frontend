@@ -317,6 +317,8 @@ Actions：修改、複製、刪除。
 5. Review 一律用 drawer（mobile 底部升起、desktop 右側滑入）
 6. 用戶補回 account／category／merchant，再確認入帳
 
+覆核 drawer 內帳戶為全寬，商戶／分類在 md 以上並排（商戶在左、分類在右）；商戶／分類互動跟 §5.4：揀有 default category 的商戶會自動套用分類；新增商戶時如已選分類，會存為該商戶的 default category。
+
 確認時儲存修正後交易欄位及 `image_urls`，並使用 UUID 防止重複提交。解析失敗時保留圖片，提供重試解析或轉為手動入帳。已無獨立 `/scan` 頁面。
 
 ### 5.7 報表 `/summaries`
