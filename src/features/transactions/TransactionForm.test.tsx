@@ -14,6 +14,7 @@ const createMock = vi.hoisted(() => vi.fn());
 const updateMock = vi.hoisted(() => vi.fn());
 const merchantSearchMock = vi.hoisted(() => vi.fn());
 const merchantCreateMock = vi.hoisted(() => vi.fn());
+const merchantUpdateMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/data/transactionsRepository", () => ({
     TransactionsRepository: class {
@@ -26,6 +27,7 @@ vi.mock("@/data/merchantsRepository", () => ({
     MerchantsRepository: class {
         search = merchantSearchMock;
         create = merchantCreateMock;
+        update = merchantUpdateMock;
     },
 }));
 
@@ -60,6 +62,7 @@ beforeEach(() => {
     updateMock.mockReset();
     merchantSearchMock.mockReset();
     merchantCreateMock.mockReset();
+    merchantUpdateMock.mockReset();
     merchantSearchMock.mockResolvedValue({ok: true, value: domainTestState.merchants});
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
     useAppStore.getState().resetAppState();
@@ -154,6 +157,20 @@ describe("TransactionForm", () => {
         expect(merchantCreateMock).toHaveBeenCalledWith({name: merchant.name});
         expect(screen.getByLabelText("商戶")).toHaveValue(merchant.name);
         expect(useAppStore.getState().merchants).toContainEqual(merchant);
+    });
+
+    it("saves the picked category as the new merchant's default", async () => {
+        const user = userEvent.setup();
+        const merchant = {...domainTestState.merchants[0], id: "30000000-0000-4000-8000-000000000099", name: "新商戶", default_category_id: null};
+        merchantCreateMock.mockResolvedValue({ok: true, value: merchant});
+        merchantUpdateMock.mockResolvedValue({ok: true, value: {...merchant, default_category_id: domainTestState.categories[1].id}});
+        renderForm();
+
+        await user.type(screen.getByLabelText("商戶"), merchant.name);
+        await user.click(screen.getByRole("button", {name: `新增商戶「${merchant.name}」`}));
+        await user.selectOptions(screen.getByLabelText("分類"), domainTestState.categories[1].id);
+
+        await waitFor(() => expect(merchantUpdateMock).toHaveBeenCalledWith(merchant.id, {name: merchant.name, default_category_id: domainTestState.categories[1].id}));
     });
 
     it("warns before cancelling a dirty form", async () => {

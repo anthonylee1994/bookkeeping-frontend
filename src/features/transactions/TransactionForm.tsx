@@ -5,6 +5,7 @@ import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
 import {useBeforeUnload, useBlocker, useNavigate, Link as RouterLink} from "react-router";
 import {DrawerActions} from "@/components/layout/DrawerActions";
+import {MerchantsRepository} from "@/data/merchantsRepository";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Account, Category, Merchant, Transaction, TransactionKind} from "@/data/types";
 import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
@@ -32,6 +33,7 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
     const token = useAuthStore(state => state.token);
     const [idempotencyKey] = React.useState(createId);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
+    const [createdMerchant, setCreatedMerchant] = React.useState<Merchant | null>(null);
     const {control, register, handleSubmit, reset, setValue, formState} = useForm<TransactionFormValues>({
         resolver: zodResolver(transactionFormSchema),
         defaultValues:
@@ -45,7 +47,19 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
 
     const kind = useWatch({control, name: "kind"});
     const accountId = useWatch({control, name: "accountId"});
+    const categoryId = useWatch({control, name: "categoryId"});
+    const merchantId = useWatch({control, name: "merchantId"});
     const filteredCategories = categories.filter(category => category.kind === kind);
+
+    React.useEffect(() => {
+        if (token === null || createdMerchant === null || merchantId !== createdMerchant.id || categoryId === "") return;
+        if (createdMerchant.default_category_id === categoryId) return;
+        const updated: Merchant = {...createdMerchant, default_category_id: categoryId};
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCreatedMerchant(updated);
+        useAppStore.getState().setMerchants(useAppStore.getState().merchants.map(merchant => (merchant.id === updated.id ? updated : merchant)));
+        void new MerchantsRepository(token).update(updated.id, {name: updated.name, default_category_id: categoryId});
+    }, [categoryId, createdMerchant, merchantId, token]);
 
     const shouldBlockNavigation = formState.isDirty && !formState.isSubmitting;
     const blocker = useBlocker(shouldBlockNavigation);
@@ -185,7 +199,9 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
                             <Controller
                                 name="merchantId"
                                 control={control}
-                                render={({field, fieldState}) => <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} error={fieldState.error?.message} />}
+                                render={({field, fieldState}) => (
+                                    <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} onCreated={setCreatedMerchant} error={fieldState.error?.message} />
+                                )}
                             />
 
                             <Field.Root invalid={formState.errors.categoryId !== undefined}>

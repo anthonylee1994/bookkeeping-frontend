@@ -12,12 +12,13 @@ type MerchantAutocompleteProps = {
     merchants: Merchant[];
     value: string;
     onChange: (merchant: Merchant | null) => void;
+    onCreated?: (merchant: Merchant) => void;
     error?: string;
     /** 未對應到現有商戶時的初始搜尋字（例如 AI 由單據讀到的名稱）。 */
     defaultQuery?: string;
 };
 
-export const MerchantAutocomplete = ({merchants, value, onChange, error, defaultQuery = ""}: MerchantAutocompleteProps) => {
+export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, error, defaultQuery = ""}: MerchantAutocompleteProps) => {
     const intl = useIntl();
     const token = useAuthStore(state => state.token);
     const selected = merchants.find(merchant => merchant.id === value) ?? null;
@@ -58,6 +59,7 @@ export const MerchantAutocomplete = ({merchants, value, onChange, error, default
         setResults(previous => [...previous.filter(merchant => merchant.id !== result.value.id), result.value]);
         setQuery(result.value.name);
         onChange(result.value);
+        onCreated?.(result.value);
     };
 
     const hasExactMatch = merchants.some(merchant => merchant.name.localeCompare(query.trim(), "zh-HK", {sensitivity: "accent"}) === 0);
