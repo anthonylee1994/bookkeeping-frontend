@@ -131,16 +131,15 @@ describe("TransactionForm", () => {
         expect(useAppStore.getState().transactions[0]).toEqual(created);
     });
 
-    it("offers a merchant default category without silently replacing the selection", async () => {
+    it("applies a merchant default category when the merchant is selected", async () => {
         const user = userEvent.setup();
         renderForm();
 
+        expect(screen.getByLabelText("分類")).toHaveValue("");
+
         await user.type(screen.getByLabelText("商戶"), "街角咖啡");
 
-        expect(await screen.findByText("此商戶建議分類：飲食")).toBeInTheDocument();
-        expect(screen.getByLabelText("分類")).toHaveValue("");
-        await user.click(screen.getByRole("button", {name: "套用建議"}));
-        expect(screen.getByLabelText("分類")).toHaveValue(domainTestState.categories[1].id);
+        await waitFor(() => expect(screen.getByLabelText("分類")).toHaveValue(domainTestState.categories[1].id));
     });
 
     it("creates a new merchant inline and selects it", async () => {

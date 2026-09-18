@@ -270,8 +270,6 @@ export const messages = {
             merchantPlaceholder: {id: "transactions.form.merchantPlaceholder", defaultMessage: "搜尋或新增商戶"},
             createMerchant: {id: "transactions.form.createMerchant", defaultMessage: "新增商戶「{name}」"},
             merchantCreateFailed: {id: "transactions.form.merchantCreateFailed", defaultMessage: "無法新增商戶"},
-            categorySuggestion: {id: "transactions.form.categorySuggestion", defaultMessage: "此商戶建議分類：{name}"},
-            applySuggestion: {id: "transactions.form.applySuggestion", defaultMessage: "套用建議"},
             occurredAt: {id: "transactions.form.occurredAt", defaultMessage: "日期時間"},
             paymentMethod: {id: "transactions.form.paymentMethod", defaultMessage: "付款方式"},
             paymentMethodPlaceholder: {id: "transactions.form.paymentMethodPlaceholder", defaultMessage: "例如：八達通、信用卡"},

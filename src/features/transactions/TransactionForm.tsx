@@ -45,13 +45,6 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
 
     const kind = useWatch({control, name: "kind"});
     const accountId = useWatch({control, name: "accountId"});
-    const categoryId = useWatch({control, name: "categoryId"});
-    const merchantId = useWatch({control, name: "merchantId"});
-    const selectedMerchant = merchants.find(merchant => merchant.id === merchantId) ?? null;
-    const suggestedCategory =
-        selectedMerchant?.default_category_id === undefined || selectedMerchant.default_category_id === null
-            ? null
-            : (categories.find(category => category.id === selectedMerchant.default_category_id && category.kind === kind) ?? null);
     const filteredCategories = categories.filter(category => category.kind === kind);
 
     const shouldBlockNavigation = formState.isDirty && !formState.isSubmitting;
@@ -74,6 +67,11 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
 
     const selectMerchant = (merchant: Merchant | null) => {
         setValue("merchantId", merchant?.id ?? "", {shouldDirty: true, shouldValidate: true});
+        const defaultCategoryId = merchant?.default_category_id ?? null;
+        if (defaultCategoryId === null) return;
+        const defaultCategory = categories.find(category => category.id === defaultCategoryId && category.kind === kind);
+        if (defaultCategory === undefined) return;
+        setValue("categoryId", defaultCategory.id, {shouldDirty: true, shouldValidate: true});
     };
 
     const submit = handleSubmit(async values => {
@@ -184,6 +182,12 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
 
                     {kind === "transfer" ? null : (
                         <React.Fragment>
+                            <Controller
+                                name="merchantId"
+                                control={control}
+                                render={({field, fieldState}) => <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} error={fieldState.error?.message} />}
+                            />
+
                             <Field.Root invalid={formState.errors.categoryId !== undefined}>
                                 <Field.Label>{intl.formatMessage(messages.transactions.form.category)}</Field.Label>
                                 <NativeSelect.Root>
@@ -198,22 +202,6 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
                                     <NativeSelect.Indicator />
                                 </NativeSelect.Root>
                             </Field.Root>
-
-                            <Controller
-                                name="merchantId"
-                                control={control}
-                                render={({field, fieldState}) => <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} error={fieldState.error?.message} />}
-                            />
-
-                            {suggestedCategory === null || suggestedCategory.id === categoryId ? null : (
-                                <Alert.Root status="info" rounded="lg">
-                                    <Alert.Indicator />
-                                    <Alert.Title flex="1">{intl.formatMessage(messages.transactions.form.categorySuggestion, {name: suggestedCategory.name})}</Alert.Title>
-                                    <Button type="button" size="sm" variant="outline" onClick={() => setValue("categoryId", suggestedCategory.id, {shouldDirty: true})}>
-                                        {intl.formatMessage(messages.transactions.form.applySuggestion)}
-                                    </Button>
-                                </Alert.Root>
-                            )}
                         </React.Fragment>
                     )}
 
