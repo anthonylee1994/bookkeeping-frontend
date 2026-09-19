@@ -64,7 +64,6 @@ export const SummariesPage = () => {
                         breakdown={summary.by_category}
                         kind="expense"
                         title={intl.formatMessage(messages.summaries.expenseCategoryTitle)}
-                        description={intl.formatMessage(messages.summaries.expenseCategoryDescription)}
                         limit={summary.by_category.length}
                         emptyMessage={intl.formatMessage(messages.summaries.noCategoryData, {kind: kindName("expense")})}
                         categories={reference.categories}
@@ -73,7 +72,6 @@ export const SummariesPage = () => {
                         breakdown={summary.by_category}
                         kind="income"
                         title={intl.formatMessage(messages.summaries.incomeCategoryTitle)}
-                        description={intl.formatMessage(messages.summaries.incomeCategoryDescription)}
                         limit={summary.by_category.length}
                         emptyMessage={intl.formatMessage(messages.summaries.noCategoryData, {kind: kindName("income")})}
                         categories={reference.categories}

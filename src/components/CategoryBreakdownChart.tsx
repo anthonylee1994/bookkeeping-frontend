@@ -17,7 +17,6 @@ type CategoryBreakdownChartProps = {
     breakdown: CategoryBreakdown[];
     kind: CategoryBreakdownKind;
     title: string;
-    description: string;
     /** 每種分類最多顯示幾個；不填即 5 個。 */
     limit?: number;
     /** 沒有資料時的文案。 */
@@ -31,7 +30,7 @@ type CategoryBreakdownChartProps = {
  * 圖表可以用鍵盤 focus 再用方向鍵移動 tooltip；旁邊同時提供完整資料表。
  * 收入與支出各自一張卡，不用 tab 切換。
  */
-export const CategoryBreakdownChart = ({breakdown, kind, title, description, limit, emptyMessage, categories}: CategoryBreakdownChartProps) => {
+export const CategoryBreakdownChart = ({breakdown, kind, title, limit, emptyMessage, categories}: CategoryBreakdownChartProps) => {
     const intl = useIntl();
     const categoryById = React.useMemo(() => new Map((categories ?? []).map(category => [category.id, category])), [categories]);
 
@@ -45,7 +44,7 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, description, lim
     const slices = rankCategories(breakdown, kind, {limit, uncategorizedLabel: intl.formatMessage(messages.common.uncategorized), colorOf});
 
     return (
-        <SectionCard title={title} description={description}>
+        <SectionCard title={title}>
             {slices.length === 0 ? (
                 <CardEmptyState icon={<PieChartIcon />} message={emptyMessage} />
             ) : (

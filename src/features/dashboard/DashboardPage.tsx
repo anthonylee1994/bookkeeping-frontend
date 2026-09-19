@@ -83,7 +83,6 @@ export const DashboardPage = () => {
                             breakdown={dashboard.by_category}
                             kind="expense"
                             title={intl.formatMessage(messages.dashboard.expenseCategoryTitle)}
-                            description={intl.formatMessage(messages.dashboard.expenseCategoryDescription)}
                             limit={dashboard.by_category.length}
                             emptyMessage={intl.formatMessage(messages.dashboard.noCategoryData, {kind: kindName("expense")})}
                             categories={reference.categories}
@@ -94,7 +93,6 @@ export const DashboardPage = () => {
                             breakdown={dashboard.by_category}
                             kind="income"
                             title={intl.formatMessage(messages.dashboard.incomeCategoryTitle)}
-                            description={intl.formatMessage(messages.dashboard.incomeCategoryDescription)}
                             limit={dashboard.by_category.length}
                             emptyMessage={intl.formatMessage(messages.dashboard.noCategoryData, {kind: kindName("income")})}
                             categories={reference.categories}
