@@ -2,7 +2,7 @@
 
 ## 0. 文件目的
 
-本文件定義記帳 App frontend 的產品範圍、資訊架構、互動、PWA 行為、responsive 規則及驗收標準。Frontend 是 React SPA，經 typed API repository（axios）呼叫 Rails API（見 `backend-spec.md`／`swagger.yaml`）；瀏覽器只持久化 session token 及表單 draft，domain data 一律存於後端。
+本文件定義記帳 App frontend 的產品範圍、資訊架構、互動、PWA 行為、responsive 規則及驗收標準。Frontend 是 React SPA，經 typed API repository（axios）呼叫 Rails API（API 規格見 backend repo 的 `BACKEND.md` 及本 repo `swagger.yaml`）；瀏覽器只持久化 session token 及表單 draft，domain data 一律存於後端。
 
 > **文件維護**：日後任何 UI／行為改動，必須同步更新本文件及 `plan.md`；未更新 docs 嘅改動當未完成（見 §14）。
 
@@ -52,10 +52,11 @@
 | Icons                 | Lucide React + `@iconify/react`（icon picker） |
 | Charts                | Recharts                                       |
 | Date                  | 原生 `Intl`（集中於 `lib/date.ts`）            |
+| i18n                  | react-intl（`lib/i18n.ts` 集中 message descriptor） |
 | Unit / component test | Vitest + React Testing Library                 |
-| E2E                   | Playwright                                     |
+| E2E                   | Playwright（已在 devDependencies，但 E2E suite 未實作） |
 
-Zustand 使用 `create` + `persist`（只限已列明的 local slice，例如 auth session）。不使用 remote data cache library（React Query／SWR）。
+Zustand 使用 `create`；只有 `draftStore` 用 `persist` middleware。`authStore` 唔用 `persist`，token 由 `authRepository` 手動讀寫 `localStorage`。不使用 remote data cache library（React Query／SWR）。
 
 ### 1.2 Coding conventions
 
@@ -72,7 +73,7 @@ Zustand 使用 `create` + `persist`（只限已列明的 local slice，例如 au
 - `.less` 不在本專案使用；如將來需要引入，import 必須放於所有 import 最後
 - 不使用 `any`；fixture、form input、local query params 全部有明確型別
 - 金額轉換集中於 `lib/money.ts`，日期／時區轉換集中於 `lib/date.ts`
-- Domain data 由 API repository 提供，feature hook 收到結果後寫入 appStore；URL 是可分享 filter 的唯一 source of truth
+- Domain data 由 API repository 提供；只有 accounts／categories／merchants 經 `useDomainReference` 寫入 appStore 作 shared reference cache，其餘 list hook 用 component-local state。URL 是可分享 filter 的唯一 source of truth
 
 ### 1.3 目錄
 
@@ -199,6 +200,7 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 /settings/accounts             私有：帳戶
 /settings/categories           私有：分類
 /settings/merchants            私有：商戶
+/settings/password             私有：更改密碼
 *                              404
 ```
 
@@ -236,15 +238,15 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 2. 快速新增交易、掃描單據（只於 mobile 顯示；desktop 用 sidebar／header）
 3. 分類 chart：收入與支出各一張卡（各顯示 Top 5，donut + 資料表）
 4. 帳戶餘額（顯示帳戶頭像）
-5. 未來 7 日定期交易（row 顯示 kind icon；日期用「今日／聽日／N 日後」）
-6. 最近 10 筆交易（row 顯示收入／支出／轉帳 icon）
+5. 未來 7 日定期交易（row 顯示分類頭像；日期用「今日／聽日／N 日後」）
+6. 最近 10 筆交易（row 顯示分類頭像；轉帳用 ArrowLeftRight icon）
 
 規則：
 
 - Mobile 金額摘要用 2-column grid（淨額橫跨兩格）；desktop 3 columns
 - Pie／donut chart 同時提供 legend、實際金額及可讀 table，不可以只靠顏色；分類顏色用該分類自訂 color（太淺則退回預設色序）
 - Empty state 提供「新增第一筆交易」主動作
-- 點擊分類、帳戶或最近交易，進入已套用 filter 的交易頁或交易詳情
+- 點擊帳戶餘額或最近交易 row 會進入已套用 filter 的交易頁或交易詳情；分類圖表的資料表 row 目前不可點
 
 ### 5.3 交易列表 `/transactions`
 
@@ -255,7 +257,7 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - 帳戶、分類、商戶
 - 關鍵字搜尋 note、payment method、merchant name
 - 最低／最高金額
-- 排序：日期、金額、建立時間；升序／降序
+- 排序：日期、金額；升序／降序（`created_at` 仍係合法 query 值，但 UI 未有入口）
 - Pagination，每頁預設 25，desktop 可選 25／50／100
 
 互動：
@@ -265,7 +267,7 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - Mobile 顯示交易 row：分類頭像、商戶或 note、分類、日期、帳戶（小頭像）、金額
 - Desktop 顯示 table：日期、商戶／備註、分類（頭像）、帳戶（頭像）、金額
 - 頁碼改變時保留 filter，並 scroll 到列表頂
-- Loading 使用固定尺寸 skeleton，避免 layout jump
+- Loading 用 `LoadingIndicator`（progress circle）並支撐固定高度，避免 layout jump；交易詳情 drawer 例外地用 `Skeleton`
 - No result state 提供清除 filter
 
 ### 5.4 新增／修改交易
@@ -324,13 +326,13 @@ Actions：修改、複製、刪除。
 ### 5.7 報表 `/summaries`
 
 - Period segmented control：日、週、月
-- 日期 picker 配合上一期／下一期；desktop 上一期／下一期列收窄（約 22rem）
+- 日期 picker 配合上一期／下一期
 - 顯示收入、支出、淨額、分類分佈（收入／支出各一張）、帳戶分佈、期內交易
 - 轉帳併入淨額卡下面一行（筆數 + 金額），不計入收入／支出／淨額
 - 月報額外顯示「收支日曆」，放喺淨額卡之後：逐日淨收支（紅負綠正、0 為灰）；未到嘅日子留白，今日淺灰格；窄螢幕用精簡金額（萬／億）並可橫向滾動
 - Weekly 清楚顯示星期一至星期日範圍
 - Desktop 帳戶分佈同期內交易並排兩欄（分類分佈同樣兩欄）
-- 期內交易 row 顯示收入／支出 icon（跟 dashboard 一致）
+- 期內交易 row 顯示分類頭像（跟 dashboard 一致）
 - Chart tooltip 可用 keyboard 觸發；旁邊提供資料表
 - URL 保存 `period`、`date`、`page`
 
@@ -380,6 +382,19 @@ Actions：pause、resume、run now、skip next、edit、delete。Card footer 動
 - 刪除前提示歷史交易會保留，但商戶會被清空
 - 未儲存離開抽屜前需確認
 
+#### 更改密碼 `/settings/password`
+
+- 由 SettingsPage「系統」區塊入口進入
+- 欄位：目前密碼、新密碼、確認新密碼；新密碼最少 8 字元
+- 送出呼叫 `PATCH /me/password`（body：`password_challenge`、`password`、`password_confirmation`）
+- 成功顯示 inline 成功訊息；失敗顯示一般化錯誤並清空欄位
+- 不需要重新登入
+
+#### 登出
+
+- SettingsPage「系統」區塊有登出卡
+- 登出原子地清除 auth session、draft／AI preview 及圖片 object URL，再導向 `/login`
+
 ---
 
 ## 6. 資料與狀態
@@ -412,16 +427,18 @@ export interface PaginationMeta {
 
 完整 domain type 由 `data/types.ts` 定義；測試 fixture（`test/domainFixtures.ts`）必須符合同一套 Zod schema，確保 UI 測試資料同 production shape 一致。
 
-### 6.3 Local selectors
+### 6.3 appStore selectors
 
 ```text
-useAppStore((state) => state.transactions)
 useAppStore((state) => state.accounts)
 useAppStore((state) => state.categories)
-useAppStore((state) => state.recurringRules)
+useAppStore((state) => state.merchants)
+useAppStore((state) => state.referenceLoaded)
 ```
 
-Selector 只讀取需要的 slice；資料寫入後由 store action 更新單一 source of truth，不建立 duplicated cache。
+- `accounts`／`categories`／`merchants`／`referenceLoaded` 係實際共用嘅 slice，由 `useDomainReference` 寫入。
+- 交易、報表、定期交易清單由各自 feature hook 用 component-local state 管理，唔經 appStore；`transactions`／`transactionsMeta` 只作交易詳情／表單嘅局部 cache。
+- Selector 只讀取需要的 slice，避免 component 訂閱整個 store；不建立 duplicated cache。
 
 ### 6.4 Zustand state management
 
@@ -431,7 +448,7 @@ Zustand 管理 frontend app state；React Hook Form 管理表單暫態，URL 管
 
 | State 類型                | Owner                      | 例子                                                                                                         |
 | ------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Local domain mirror       | `appStore`                 | transactions、accounts、categories、merchants、recurringRules、loading／error／pagination data（不 persist） |
+| Reference data mirror     | `appStore`                 | accounts、categories、merchants、referenceLoaded（由 `useDomainReference` 寫入）；transactions 只作交易詳情／表單局部 cache（不 persist） |
 | URL state                 | React Router search params | transaction filters、sort、page、summary period/date、recurring status、returnTo                             |
 | Form state                | React Hook Form            | transaction／account／category／recurring rule／AI confirm 欄位、dirty／validation state                     |
 | Session state             | `authStore`                | token、minimal user payload、hydrated、logout                                                                |
@@ -473,7 +490,7 @@ type DraftState = {
 
 - 使用 Zustand selectors 讀取最小片段，例如 `useAuthStore((state) => state.token)`；避免 component 直接訂閱整個 store。
 - Store action 用同步、可測試的 state transition；所有 repository operation 由 feature hook 呼叫，不將 component-specific logic 寫入 generic store。
-- `authStore` 用 `persist` middleware 存 token 到 `localStorage`，並設定 version／migration。密碼及單據原圖絕不 persist。
+- `authStore` **不用** `persist`：token 由 `authRepository` 的 `storeAuthToken`／`getStoredAuthToken`／`clearStoredAuthToken` 直接讀寫 `localStorage`，啟動時經 `hydrateAuthStore()` 同步。全 app 只有 `draftStore` 用 `persist`（version 1 + `sessionStorage`）。密碼及單據原圖絕不 persist。
 - App 啟動時首先 hydrate auth，再由 route guard 決定是否顯示 login；hydration 完成前不可 redirect，避免 login page 閃現。
 - `uiStore` 不需要持久化；`isOffline` 由 `navigator.onLine` 及 `online`／`offline` events 更新。
 - `draftStore` 只 persist 可序列化 draft 欄位到 `sessionStorage`；`File`、Blob、object URL 不可 persist，離開頁面或 reload 要清理無效 preview。
@@ -492,7 +509,7 @@ type DraftState = {
 
 Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview、summaries 及 recurring rules。每個 function 只負責 HTTP（加上 url／params／idempotency key），回傳 `LocalResult<T>`。
 
-Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey`（token／filter／reload token）改變時重新抓取，並把結果寫入 appStore；不得在 component 直接呼叫 axios。
+Feature hook 在 `requestKey`（token／filter／reload token）改變時重新抓取：`useDomainReference` 會將 accounts／categories／merchants 寫入 appStore，`useTransactions`／`useDashboard`／`useSummary`／`useRecurringRules` 則用 component-local state。不得在 component 直接呼叫 axios。
 
 ---
 
@@ -501,7 +518,7 @@ Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey
 - Auth 由後端 JWT 簽發；frontend 只持有 bearer token 作為 route gate。
 - 所有可插入 UI 的文字經 React escaping；不使用 `dangerouslySetInnerHTML`
 - **CSP 已於 2026-09-15 按用戶決定停用**：單據圖由 API origin 發出，`img-src 'self'` 會擋住。若要還原，需重新加回 meta，並將 API origin 補入 `img-src` 及 `connect-src`
-- Production 只使用 HTTPS；service worker 只於 production build 啟用（dev 不 enable）
+- Production 只使用 HTTPS；service worker 於 production build 同 dev 都啟用（`devOptions.enabled: true`，方便測 install／離線）；dev 遇 stale cache 可於 DevTools 清 Cache Storage
 - 登出或切換 session 時清除 auth／draft state、AI preview、draft 同圖片 object URL
 - 不在 console、analytics、error tracking 記錄密碼、完整單據圖 URL 或完整 local data snapshot
 - `returnTo`、external image URL 及 local error message 不可直接變成 executable URL／HTML
@@ -515,7 +532,7 @@ Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey
 - `name`、`short_name`、description 使用繁體中文
 - `display: standalone`、`start_url: /`、`scope: /`
 - `theme_color` 及 app header 一致（`#047857`）；`background_color` 用 neutral background
-- 提供 192×192、512×512 maskable icon，及 Apple touch icon（正式 bitmap，不使用臨時 Vite logo）
+- 提供 192×192（any）、512×512（any）、512×512 maskable icon，及 Apple touch icon（正式 bitmap，不使用臨時 Vite logo）
 
 ### 8.2 Service worker / caching
 
@@ -523,7 +540,7 @@ Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey
 - Precache hashed JS、CSS、icons 及 app shell（`index.html`）
 - Navigation 採 **NetworkFirst + 3 秒 timeout**，失敗時用 `precacheFallback` 回退至 app shell
 - Domain data（API）**不寫入 Cache Storage**；只可經 browser storage persistence
-- Receipt fixture images 不 precache；browser 自然 cache 已足夠
+- `globPatterns` 會 precache `public/` 內嘅 js／css／html／svg／png／ico／woff（包括 receipt placeholder）；API 回應唔會被 precache
 - 新版本採 prompt update：顯示「有新版本／重新載入」banner，由用戶按「重新載入」套用
 - 不可在用戶填寫表單時自動 reload
 
@@ -546,7 +563,7 @@ Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey
 
 ## 9. Loading、Empty、Error 與 Feedback
 
-- 首次 page load：用與最終 layout 同尺寸 skeleton
+- 首次 page load：主要頁面用 `LoadingIndicator`（progress circle）並預留最小高度；交易詳情 drawer 用 `Skeleton`
 - 寫入操作：按鈕內 progress，disable 同一 action；頁面其餘安全操作可繼續
 - 成功 create/update/delete：結果直接反映於頁面（inline banner／列表），**全 app 不使用 toast**
 - Validation：欄位下方錯誤 + focus 第一個錯誤欄位
@@ -611,6 +628,8 @@ Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey
 
 ### 12.3 E2E critical paths
 
+> 注意：Playwright 已列入 devDependencies，但 E2E suite 尚未實作（見 `plan.md`）。以下為目標 critical paths。
+
 1. Register -> 自動登入 -> 看到預設現金帳戶及分類
 2. 新增支出 -> Dashboard／交易列表反映結果
 3. 新增轉帳 -> 報表不計入收入／支出
@@ -633,8 +652,10 @@ Feature hook（例如 `useTransactions`、`useDomainReference`）在 `requestKey
 
 ```dotenv
 VITE_APP_ENV=development
-VITE_API_URL=https://book-api.on99.app
+VITE_API_URL=http://localhost:3000
 ```
+
+`VITE_API_URL` 於 Vercel project 設定為 production API origin。
 
 - `.env.example` 只放公開設定；所有 `VITE_*` 都視為可公開，不可放 secret
 - `VITE_API_URL` 是唯一必要的 build-time 變數（`VITE_APP_ENV` 目前未使用）
@@ -645,7 +666,7 @@ VITE_API_URL=https://book-api.on99.app
     - 如用 `*.vercel.app` 網域，需將該 origin 加入後端 `CORS_ORIGINS`
 - **Backend（Dokku）**：Rails + SQLite，release 執行 `db:prepare`；`storage/` 為持久 volume。CORS origins 見 `bin/dokku-setup.sh`
 - Production build 必須有 SPA fallback，未知 route 回 `index.html`
-- CI 次序：typecheck -> prettier -> unit/integration -> build -> Playwright smoke
+- CI 次序：typecheck -> prettier -> unit/integration -> build（Playwright smoke 為目標，未實作）
 - Production source map 如上傳 error tracker，不應公開提供
 
 ---
