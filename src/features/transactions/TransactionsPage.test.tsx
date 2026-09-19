@@ -1,10 +1,11 @@
 import React from "react";
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
-import {screen, waitFor} from "@testing-library/react";
+import {act, screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {MemoryRouter, Route, Routes, useLocation} from "react-router";
 import type {Transaction} from "@/data/types";
 import {TransactionsPage} from "@/features/transactions/TransactionsPage";
+import {TransactionsLayout} from "@/features/transactions/TransactionsLayout";
 import {DESKTOP_QUERY} from "@/hooks/useMediaQuery";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
@@ -101,6 +102,27 @@ function renderTransactions(entry = "/transactions"): void {
                         </React.Fragment>
                     }
                 />
+            </Routes>
+        </MemoryRouter>
+    );
+}
+
+function renderTransactionsWithLayout(entry = "/transactions"): void {
+    renderWithIntl(
+        <MemoryRouter initialEntries={[entry]}>
+            <Routes>
+                <Route path="/transactions" element={<TransactionsLayout />}>
+                    <Route index element={<LocationProbe />} />
+                    <Route
+                        path=":id"
+                        element={
+                            <React.Fragment>
+                                <div>DETAIL</div>
+                                <LocationProbe />
+                            </React.Fragment>
+                        }
+                    />
+                </Route>
             </Routes>
         </MemoryRouter>
     );
@@ -239,5 +261,31 @@ describe("TransactionsPage", () => {
 
         await screen.findByText("DETAIL");
         expect(screen.getByTestId("location")).toHaveTextContent(`/transactions/${expenseTransaction.id}?kind=expense&q=`);
+    });
+
+    it("does not refetch the list when opening a transaction detail", async () => {
+        const user = userEvent.setup();
+        setDesktopViewport(true);
+        renderTransactionsWithLayout("/transactions?kind=expense");
+
+        const row = (await screen.findByText(/早餐/)).closest("tr");
+        if (row === null) throw new Error("找不到交易列");
+        const callsBefore = listMock.mock.calls.length;
+
+        await user.click(row);
+        await screen.findByText("DETAIL");
+
+        expect(listMock).toHaveBeenCalledTimes(callsBefore);
+    });
+
+    it("refetches the list after a transaction mutation bumps the revision", async () => {
+        renderTransactionsWithLayout("/transactions?kind=expense");
+
+        await screen.findByText(/早餐/);
+        const callsBefore = listMock.mock.calls.length;
+
+        act(() => useAppStore.getState().bumpTransactionsRevision());
+
+        await waitFor(() => expect(listMock.mock.calls.length).toBeGreaterThan(callsBefore));
     });
 });

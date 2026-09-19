@@ -103,6 +103,8 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         const current = useAppStore.getState().transactions;
         const next = transaction === null ? [result.value, ...current] : current.map(item => (item.id === result.value.id ? result.value : item));
         useAppStore.getState().setTransactions(next, useAppStore.getState().transactionsMeta);
+        // 列表仍在背景 mount，bump revision 令佢即刻重新抓取，唔使等 route remount。
+        useAppStore.getState().bumpTransactionsRevision();
         reset(transactionToFormValues(result.value));
         navigate(transactionDetailPath(result.value.id, location.search), {replace: true});
     });

@@ -11,9 +11,10 @@ import {RedirectIfAuthenticated} from "@/routes/RedirectIfAuthenticated";
 import {RequireAuth} from "@/routes/RequireAuth";
 import {ROUTES} from "@/routes/paths";
 
-const TransactionsPage = React.lazy(() => import("@/features/transactions/TransactionsPage").then(module => ({default: module.TransactionsPage})));
-const TransactionDetailRoute = React.lazy(() => import("@/features/transactions/TransactionDetailRoute").then(module => ({default: module.TransactionDetailRoute})));
-const TransactionFormRoute = React.lazy(() => import("@/features/transactions/TransactionFormRoute").then(module => ({default: module.TransactionFormRoute})));
+const loadTransactions = () => import("@/features/transactions/TransactionsLayout");
+const TransactionsLayout = React.lazy(() => loadTransactions().then(module => ({default: module.TransactionsLayout})));
+const TransactionDetailRoute = React.lazy(() => loadTransactions().then(module => ({default: module.TransactionDetailRoute})));
+const TransactionFormRoute = React.lazy(() => loadTransactions().then(module => ({default: module.TransactionFormRoute})));
 const SummariesPage = React.lazy(() => import("@/features/summaries/SummariesPage").then(module => ({default: module.SummariesPage})));
 const RecurringRulesPage = React.lazy(() => import("@/features/recurringRules/RecurringRulesPage").then(module => ({default: module.RecurringRulesPage})));
 const SettingsPage = React.lazy(() => import("@/features/settings/SettingsPage").then(module => ({default: module.SettingsPage})));
@@ -39,34 +40,36 @@ export const AppRoutes = () => {
                         path={ROUTES.transactions}
                         element={
                             <LazyRoute>
-                                <TransactionsPage />
+                                <TransactionsLayout />
                             </LazyRoute>
                         }
-                    />
-                    <Route
-                        path={ROUTES.transactionNew}
-                        element={
-                            <LazyRoute>
-                                <TransactionFormRoute />
-                            </LazyRoute>
-                        }
-                    />
-                    <Route
-                        path={ROUTES.transactionDetail}
-                        element={
-                            <LazyRoute>
-                                <TransactionDetailRoute />
-                            </LazyRoute>
-                        }
-                    />
-                    <Route
-                        path={ROUTES.transactionEdit}
-                        element={
-                            <LazyRoute>
-                                <TransactionFormRoute />
-                            </LazyRoute>
-                        }
-                    />
+                    >
+                        <Route index element={null} />
+                        <Route
+                            path="new"
+                            element={
+                                <LazyRoute>
+                                    <TransactionFormRoute />
+                                </LazyRoute>
+                            }
+                        />
+                        <Route
+                            path=":id"
+                            element={
+                                <LazyRoute>
+                                    <TransactionDetailRoute />
+                                </LazyRoute>
+                            }
+                        />
+                        <Route
+                            path=":id/edit"
+                            element={
+                                <LazyRoute>
+                                    <TransactionFormRoute />
+                                </LazyRoute>
+                            }
+                        />
+                    </Route>
                     <Route
                         path={ROUTES.summaries}
                         element={

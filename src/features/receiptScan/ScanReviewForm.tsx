@@ -81,6 +81,7 @@ export const ScanReviewForm = ({preview, reference, onConfirmed, onStartOver}: S
         }
 
         onConfirmed();
+        useAppStore.getState().bumpTransactionsRevision();
         navigate(transactionDetailPath(result.value.id));
     });
 

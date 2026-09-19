@@ -13,6 +13,7 @@ import {useDomainReference} from "@/hooks/useDomainReference";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {messages} from "@/lib/i18n";
 import {transactionsPath} from "@/routes/paths";
+import {useRouteDrawerDismiss} from "@/routes/useRouteDrawerDismiss";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
 
@@ -58,9 +59,10 @@ export const TransactionDetailDrawer = () => {
     const avatars: TransactionAvatarMaps = React.useMemo(() => buildTransactionAvatarMaps(reference.accounts, reference.categories), [reference.accounts, reference.categories]);
 
     const close = () => navigate(transactionsPath(location.search));
+    const onOpenChange = useRouteDrawerDismiss(location.pathname, close);
 
     return (
-        <Drawer.Root open placement={isDesktop ? "end" : "bottom"} size={isDesktop ? "md" : "full"} onOpenChange={event => (!event.open ? close() : undefined)}>
+        <Drawer.Root open placement={isDesktop ? "end" : "bottom"} size={isDesktop ? "md" : "full"} onOpenChange={onOpenChange}>
             <Portal>
                 <Drawer.Backdrop />
                 <Drawer.Positioner>

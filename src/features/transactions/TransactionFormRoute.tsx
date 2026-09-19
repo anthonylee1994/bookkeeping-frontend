@@ -1,12 +1,10 @@
 import React from "react";
 import {TransactionFormPage} from "@/features/transactions/TransactionFormPage";
-import {TransactionsPage} from "@/features/transactions/TransactionsPage";
 
-/** 所有 viewport 都保留交易列表做背景，再由 responsive drawer 顯示表單。 */
+/** 新增／修改交易：列表由 `TransactionsLayout` 保留做背景，這裡只負責 responsive drawer。 */
 export const TransactionFormRoute = () => {
     return (
         <React.Fragment>
-            <TransactionsPage />
             <TransactionFormPage />
         </React.Fragment>
     );

@@ -43,6 +43,7 @@ export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDe
             store.transactions.filter(item => item.id !== transaction.id),
             store.transactionsMeta
         );
+        store.bumpTransactionsRevision();
         setConfirmOpen(false);
         onDeleted();
     };
@@ -60,6 +61,7 @@ export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDe
 
         const store = useAppStore.getState();
         store.setTransactions([result.value, ...store.transactions], store.transactionsMeta);
+        store.bumpTransactionsRevision();
         navigate(transactionDetailPath(result.value.id, location.search));
     };
 

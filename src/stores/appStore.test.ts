@@ -66,6 +66,13 @@ describe("app store", () => {
         expect(result.current).toEqual(domainTestState.transactions);
     });
 
+    it("bumps the transactions revision on mutation", () => {
+        const before = useAppStore.getState().transactionsRevision;
+        useAppStore.getState().bumpTransactionsRevision();
+
+        expect(useAppStore.getState().transactionsRevision).toBe(before + 1);
+    });
+
     it("resets every slice and status back to empty", () => {
         const state = useAppStore.getState();
         state.setAccounts(domainTestState.accounts);

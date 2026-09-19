@@ -1,10 +1,14 @@
 # 記帳 App Frontend Spec
 
+本文件檔名為 `FRONTEND.md`，係 frontend 產品／UX／架構嘅 source of truth。
+
 ## 0. 文件目的
 
 本文件定義記帳 App frontend 的產品範圍、資訊架構、互動、PWA 行為、responsive 規則及驗收標準。Frontend 是 React SPA，經 typed API repository（axios）呼叫 Rails API（API 規格見 backend repo 的 `BACKEND.md` 及本 repo `swagger.yaml`）；瀏覽器只持久化 session token 及表單 draft，domain data 一律存於後端。
 
-> **文件維護**：日後任何 UI／行為改動，必須同步更新本文件及 `plan.md`；未更新 docs 嘅改動當未完成（見 §14）。
+### 文件維護（硬性）
+
+**每次改 code 都要同步更新本文件相關章節。** 路由、互動、狀態、loading／error、測試範圍有變，就改對應 §；實作順序／歷史決策寫喺 `plan.md`（補對應 Step 或新增 Post-MVP step）。未更新 `FRONTEND.md` 嘅改動當未完成，唔好當做完（見 §14、`AGENTS.md`）。
 
 ### 0.1 產品目標
 
@@ -81,14 +85,14 @@ Zustand 使用 `create`；只有 `draftStore` 用 `persist` middleware。`authSt
 src/
   app.tsx
   main.tsx
-  routes/
+  routes/              # AppRoutes、auth gate、useRouteDrawerDismiss
   components/
     layout/            # AppLayout、AppHeader、SidebarNav、MobileTabBar、SectionCard…
     # 跨 feature primitive（EntityAvatar、TransactionKindIcon、SummaryTotalsGrid…）
   features/
     auth/
     dashboard/
-    transactions/
+    transactions/      # TransactionsLayout 永遠 mount 列表；detail／form 係 child drawer
     receiptScan/
     summaries/
     recurringRules/
@@ -190,10 +194,10 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 /login                         公開：登入
 /register                      公開：註冊
 /                              私有：Dashboard
-/transactions                  私有：交易列表
-/transactions/new              私有：新增交易
-/transactions/:id              私有：交易詳情
-/transactions/:id/edit         私有：修改交易
+/transactions                  私有：交易列表（layout 永遠 mount）
+/transactions/new              私有：新增交易 drawer（列表做背景）
+/transactions/:id              私有：交易詳情 drawer（列表做背景）
+/transactions/:id/edit         私有：修改交易 drawer（列表做背景）
 /summaries                     私有：報表
 /recurring-rules               私有：定期交易
 /settings                      私有：設定首頁
@@ -209,7 +213,10 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - Reload private route 先顯示全頁 loading，透過 `GET /me` 驗證 token，期間不可閃出 login page
 - 只接受站內 `returnTo` path，防止 open redirect
 - Browser back 必須可以關閉 modal／drawer 或返回上一步
-- Lazy load：transactions、summaries、recurring、settings；dashboard／auth eager
+- `/transactions` 係 nested layout：`TransactionsLayout` 永遠 mount `TransactionsPage`；`new`／`:id`／`:id/edit` 經 `Outlet` 疊 drawer，開／關 drawer 唔會 unmount 列表
+- 詳情／修改 URL 必須帶住列表當時嘅 search（filter／sort／page），關閉 drawer 先唔會清 filter
+- 路由控制嘅交易 drawer 用 `useRouteDrawerDismiss`：router 已經離開呢條 URL（例如詳情 → 修改）就唔可以再 `navigate` 返列表，否則會 `/id` → `/id/edit` → 即刻彈返 `/transactions`
+- Lazy load：transactions 子樹（layout + detail + form）同一個 chunk；summaries、recurring、settings；dashboard／auth eager
 
 ---
 
@@ -269,6 +276,8 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - 頁碼改變時保留 filter，並 scroll 到列表頂
 - Loading 用 `LoadingIndicator`（progress circle）並支撐固定高度，避免 layout jump；交易詳情 drawer 例外地用 `Skeleton`
 - No result state 提供清除 filter
+- 點擊 row／連結去 `/transactions/:id`，並帶住目前 search；列表喺 drawer 後面保持 mount，開詳情唔重新抓取
+- 交易 mutation（create／update／delete／duplicate／掃描確認入帳）呼叫 `bumpTransactionsRevision()`，已 mount 嘅列表先會重新抓取
 
 ### 5.4 新增／修改交易
 
@@ -296,6 +305,8 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - 離開 dirty form 前顯示確認
 - 新增交易預設選取第一個帳戶；修改保留原有帳戶
 - Desktop：右側 drawer；Mobile：底部 drawer（最高 92dvh）；直接進入 `/transactions/new`／edit URL 亦相同
+- 表單 route 係 `TransactionsLayout` 嘅 child：列表留喺背景，唔會因為開／關表單而 remount
+- 關閉新增 drawer 返回 `/transactions`（保留 search）；關閉修改 drawer 返回 `/transactions/:id`（即使表單仍在 loading，都用 URL 嘅 `id`，唔好因為 `transaction === null` 當新單咁返列表）
 
 ### 5.5 交易詳情
 
@@ -303,6 +314,9 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 
 Actions：修改、複製、刪除。
 
+- 詳情係 overlay drawer；列表由 `TransactionsLayout` 留喺遮罩後做背景
+- 「修改」係 Link 去 `/transactions/:id/edit`（同一 search）。由詳情跳去修改時，詳情 drawer unmount **唔可以**當關閉而彈返列表
+- 關閉詳情 drawer 返回 `/transactions`，並保留 filter search
 - 複製成功後打開新交易詳情；複製記錄日期預設為現在
 - 刪除確認：此操作無法復原；成功返回列表
 - 單據圖可放大查看，失效時顯示 fallback，不重試無限次
@@ -434,10 +448,12 @@ useAppStore((state) => state.accounts)
 useAppStore((state) => state.categories)
 useAppStore((state) => state.merchants)
 useAppStore((state) => state.referenceLoaded)
+useAppStore((state) => state.transactionsRevision)
 ```
 
 - `accounts`／`categories`／`merchants`／`referenceLoaded` 係實際共用嘅 slice，由 `useDomainReference` 寫入。
 - 交易、報表、定期交易清單由各自 feature hook 用 component-local state 管理，唔經 appStore；`transactions`／`transactionsMeta` 只作交易詳情／表單嘅局部 cache。
+- `transactionsRevision` 唔存資料：交易 mutation 加一，令已 mount 嘅 `useTransactions` 重新抓取（列表喺 drawer 後面唔會因為 route 變而 remount）。
 - Selector 只讀取需要的 slice，避免 component 訂閱整個 store；不建立 duplicated cache。
 
 ### 6.4 Zustand state management
@@ -448,7 +464,7 @@ Zustand 管理 frontend app state；React Hook Form 管理表單暫態，URL 管
 
 | State 類型                | Owner                      | 例子                                                                                                         |
 | ------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Reference data mirror     | `appStore`                 | accounts、categories、merchants、referenceLoaded（由 `useDomainReference` 寫入）；transactions 只作交易詳情／表單局部 cache（不 persist） |
+| Reference data mirror     | `appStore`                 | accounts、categories、merchants、referenceLoaded（由 `useDomainReference` 寫入）；transactions 只作交易詳情／表單局部 cache；`transactionsRevision` 觸發已 mount 列表刷新（不 persist） |
 | URL state                 | React Router search params | transaction filters、sort、page、summary period/date、recurring status、returnTo                             |
 | Form state                | React Hook Form            | transaction／account／category／recurring rule／AI confirm 欄位、dirty／validation state                     |
 | Session state             | `authStore`                | token、minimal user payload、hydrated、logout                                                                |
@@ -509,7 +525,7 @@ type DraftState = {
 
 Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview、summaries 及 recurring rules。每個 function 只負責 HTTP（加上 url／params／idempotency key），回傳 `LocalResult<T>`。
 
-Feature hook 在 `requestKey`（token／filter／reload token）改變時重新抓取：`useDomainReference` 會將 accounts／categories／merchants 寫入 appStore，`useTransactions`／`useDashboard`／`useSummary`／`useRecurringRules` 則用 component-local state。不得在 component 直接呼叫 axios。
+Feature hook 在 `requestKey`（token／filter／reload token；交易列表另加 `transactionsRevision`）改變時重新抓取：`useDomainReference` 會將 accounts／categories／merchants 寫入 appStore，`useTransactions`／`useDashboard`／`useSummary`／`useRecurringRules` 則用 component-local state。不得在 component 直接呼叫 axios。
 
 ---
 
@@ -595,6 +611,7 @@ Feature hook 在 `requestKey`（token／filter／reload token）改變時重新�
 ## 11. Performance
 
 - Route-level code splitting；Recharts 等較重 feature lazy load
+- Transactions layout、detail、form 同一個 lazy chunk，第一次由詳情撳「修改」唔使再等第二個 download
 - `advancedChunks` 手動拆分 react／chakra／intl／vendor，令改動不會令整個 vendor bundle 失效
 - 大量 transaction 使用 server-side pagination，避免一次 render 全部資料
 - Merchant search debounce 300ms，避免每次 keypress 重算大型列表
@@ -621,6 +638,7 @@ Feature hook 在 `requestKey`（token／filter／reload token）改變時重新�
 - Transaction form 三種 kind 的欄位切換及 validation
 - UUID 唯一性同重複提交保護（create transaction／AI confirm）
 - Filter、sort、pagination 與 URL 同步
+- 交易 drawer 導航：由詳情撳「修改」停喺 `/edit`、唔彈返列表；關閉詳情返回列表並保留 filter；列表喺 drawer 後面保持 mount
 - 定期交易：status tab、pause／resume／run now／skip next／delete 文案
 - AI upload／parse／edit／confirm，以及每段失敗重試
 - PWA：update banner、install prompt（延遲、dismiss 記憶）、offline ready
@@ -684,7 +702,7 @@ VITE_API_URL=http://localhost:3000
 - `pnpm run build`、`tsc`、Prettier、Vitest 全部通過
 - 無 console error、React warning、水平 overflow 或 UI overlap
 - PWA 可安裝、更新提示正常，offline 可還原 local session／draft
-- 任何 UI／行為改動已同步更新 `frontend-spec.md` 及 `plan.md`（plan 補對應 Step 或新增 Post-MVP step）
+- **每次改 code 都已同步更新 `FRONTEND.md` 相關章節**；實作順序／歷史決策同步 `plan.md`（補對應 Step 或新增 Post-MVP step）。未更新 spec 當未完成
 
 ---
 

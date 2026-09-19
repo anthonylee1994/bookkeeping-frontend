@@ -11,6 +11,8 @@ const EMPTY_APP_STATE = {
     recurringRules: [] as RecurringRule[],
     /** Reference data（accounts／categories／merchants）是否已完整載入，避免每次 mount 重複抓取。 */
     referenceLoaded: false,
+    /** 交易一有 mutation（create／update／delete／duplicate）就加一，令已 mount 的交易列表重新抓取。 */
+    transactionsRevision: 0,
     isLoading: false,
     error: null as LocalError | null,
 };
@@ -28,6 +30,7 @@ export type AppState = AppDomainState & {
     setTransactions: (transactions: Transaction[], meta?: PaginationMeta | null) => void;
     setRecurringRules: (rules: RecurringRule[]) => void;
     setReferenceLoaded: (loaded: boolean) => void;
+    bumpTransactionsRevision: () => void;
     setLoading: (isLoading: boolean) => void;
     setError: (error: LocalError | null) => void;
     resetAppState: () => void;
@@ -41,6 +44,7 @@ export const useAppStore = create<AppState>()(set => ({
     setTransactions: (transactions, meta) => set({transactions, transactionsMeta: meta ?? null}),
     setRecurringRules: recurringRules => set({recurringRules}),
     setReferenceLoaded: referenceLoaded => set({referenceLoaded}),
+    bumpTransactionsRevision: () => set(state => ({transactionsRevision: state.transactionsRevision + 1})),
     setLoading: isLoading => set({isLoading}),
     setError: error => set({error}),
     resetAppState: () => set({...EMPTY_APP_STATE}),

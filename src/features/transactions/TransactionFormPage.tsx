@@ -11,6 +11,7 @@ import {useDomainReference} from "@/hooks/useDomainReference";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {messages} from "@/lib/i18n";
 import {transactionDetailPath, transactionsPath} from "@/routes/paths";
+import {useRouteDrawerDismiss} from "@/routes/useRouteDrawerDismiss";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
 
@@ -43,7 +44,8 @@ export const TransactionFormPage = () => {
         };
     }, [cached, id, token]);
 
-    const close = () => navigate(transaction === null ? transactionsPath(location.search) : transactionDetailPath(transaction.id, location.search));
+    const close = () => navigate(id === undefined ? transactionsPath(location.search) : transactionDetailPath(id, location.search));
+    const onOpenChange = useRouteDrawerDismiss(location.pathname, close);
 
     const body = (() => {
         if (isLoading || reference.isLoading) return <LoadingIndicator minH="32rem" />;
@@ -78,7 +80,7 @@ export const TransactionFormPage = () => {
     })();
 
     return (
-        <Drawer.Root open placement={isDesktop ? "end" : "bottom"} size={isDesktop ? "md" : "full"} onOpenChange={event => (!event.open ? close() : undefined)}>
+        <Drawer.Root open placement={isDesktop ? "end" : "bottom"} size={isDesktop ? "md" : "full"} onOpenChange={onOpenChange}>
             <Portal>
                 <Drawer.Backdrop />
                 <Drawer.Positioner>
