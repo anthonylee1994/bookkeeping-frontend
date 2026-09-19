@@ -3,7 +3,7 @@ import {zodResolver} from "@hookform/resolvers/zod";
 import {Alert, Box, Button, Field, HStack, Image, Input, Link as ChakraLink, NativeSelect, SimpleGrid, Stack, Text, Textarea} from "@chakra-ui/react";
 import {Controller, useForm, useWatch} from "react-hook-form";
 import {useIntl} from "react-intl";
-import {useBeforeUnload, useBlocker, useNavigate, Link as RouterLink} from "react-router";
+import {useBeforeUnload, useBlocker, useLocation, useNavigate, Link as RouterLink} from "react-router";
 import {DrawerActions} from "@/components/layout/DrawerActions";
 import {MerchantsRepository} from "@/data/merchantsRepository";
 import {TransactionsRepository} from "@/data/transactionsRepository";
@@ -14,7 +14,7 @@ import {emptyTransactionFormValues, formValuesToInput, transactionFormSchema, tr
 import type {TransactionFormValues} from "@/features/transactions/TransactionFormModel";
 import {messages} from "@/lib/i18n";
 import {createId} from "@/lib/id";
-import {ROUTES, transactionDetailPath} from "@/routes/paths";
+import {ROUTES, transactionDetailPath, transactionsPath} from "@/routes/paths";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
 
@@ -30,6 +30,7 @@ const KINDS: TransactionKind[] = ["income", "expense", "transfer"];
 export const TransactionForm = ({transaction, accounts, categories, merchants}: TransactionFormProps) => {
     const intl = useIntl();
     const navigate = useNavigate();
+    const location = useLocation();
     const token = useAuthStore(state => state.token);
     const [idempotencyKey] = React.useState(createId);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
@@ -103,10 +104,10 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         const next = transaction === null ? [result.value, ...current] : current.map(item => (item.id === result.value.id ? result.value : item));
         useAppStore.getState().setTransactions(next, useAppStore.getState().transactionsMeta);
         reset(transactionToFormValues(result.value));
-        navigate(transactionDetailPath(result.value.id), {replace: true});
+        navigate(transactionDetailPath(result.value.id, location.search), {replace: true});
     });
 
-    const cancel = () => navigate(transaction === null ? ROUTES.transactions : transactionDetailPath(transaction.id));
+    const cancel = () => navigate(transaction === null ? transactionsPath(location.search) : transactionDetailPath(transaction.id, location.search));
     const kindLabel = (value: TransactionKind) =>
         intl.formatMessage(value === "income" ? messages.transactions.income : value === "expense" ? messages.transactions.expense : messages.transactions.transfer);
 

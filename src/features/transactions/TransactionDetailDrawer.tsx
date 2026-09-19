@@ -1,7 +1,7 @@
 import React from "react";
 import {Alert, CloseButton, Drawer, Portal, Skeleton, Stack} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
-import {useNavigate, useParams} from "react-router";
+import {useLocation, useNavigate, useParams} from "react-router";
 import {DrawerBody} from "@/components/layout/DrawerBody";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
@@ -12,7 +12,7 @@ import type {TransactionAvatarMaps, TransactionNameMaps} from "@/features/transa
 import {useDomainReference} from "@/hooks/useDomainReference";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {messages} from "@/lib/i18n";
-import {ROUTES} from "@/routes/paths";
+import {transactionsPath} from "@/routes/paths";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
 
@@ -25,6 +25,7 @@ type FetchedTransaction = {
 export const TransactionDetailDrawer = () => {
     const intl = useIntl();
     const navigate = useNavigate();
+    const location = useLocation();
     const {id} = useParams<{id: string}>();
     const token = useAuthStore(state => state.token);
     const cached = useAppStore(state => (id === undefined ? null : (state.transactions.find(transaction => transaction.id === id) ?? null)));
@@ -56,7 +57,7 @@ export const TransactionDetailDrawer = () => {
 
     const avatars: TransactionAvatarMaps = React.useMemo(() => buildTransactionAvatarMaps(reference.accounts, reference.categories), [reference.accounts, reference.categories]);
 
-    const close = () => navigate(ROUTES.transactions);
+    const close = () => navigate(transactionsPath(location.search));
 
     return (
         <Drawer.Root open placement={isDesktop ? "end" : "bottom"} size={isDesktop ? "md" : "full"} onOpenChange={event => (!event.open ? close() : undefined)}>

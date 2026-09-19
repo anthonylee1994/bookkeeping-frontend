@@ -1,7 +1,7 @@
 import React from "react";
 import {Alert, CloseButton, Drawer, Portal, Stack} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
-import {useNavigate, useParams} from "react-router";
+import {useLocation, useNavigate, useParams} from "react-router";
 import {DrawerBody} from "@/components/layout/DrawerBody";
 import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {TransactionsRepository} from "@/data/transactionsRepository";
@@ -10,13 +10,14 @@ import {TransactionForm} from "@/features/transactions/TransactionForm";
 import {useDomainReference} from "@/hooks/useDomainReference";
 import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {messages} from "@/lib/i18n";
-import {ROUTES, transactionDetailPath} from "@/routes/paths";
+import {transactionDetailPath, transactionsPath} from "@/routes/paths";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
 
 export const TransactionFormPage = () => {
     const intl = useIntl();
     const navigate = useNavigate();
+    const location = useLocation();
     const {id} = useParams<{id: string}>();
     const token = useAuthStore(state => state.token);
     const cached = useAppStore(state => (id === undefined ? null : (state.transactions.find(transaction => transaction.id === id) ?? null)));
@@ -42,7 +43,7 @@ export const TransactionFormPage = () => {
         };
     }, [cached, id, token]);
 
-    const close = () => navigate(transaction === null ? ROUTES.transactions : transactionDetailPath(transaction.id));
+    const close = () => navigate(transaction === null ? transactionsPath(location.search) : transactionDetailPath(transaction.id, location.search));
 
     const body = (() => {
         if (isLoading || reference.isLoading) return <LoadingIndicator minH="32rem" />;

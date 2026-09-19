@@ -2,7 +2,7 @@ import React from "react";
 import {Alert, Button, Dialog, Portal, Stack} from "@chakra-ui/react";
 import {CopyIcon, PencilIcon, Trash2Icon} from "lucide-react";
 import {useIntl} from "react-intl";
-import {Link, useNavigate} from "react-router";
+import {Link, useLocation, useNavigate} from "react-router";
 import {DrawerActions} from "@/components/layout/DrawerActions";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Transaction} from "@/data/types";
@@ -19,6 +19,7 @@ type TransactionDetailActionsProps = {
 export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDetailActionsProps) => {
     const intl = useIntl();
     const navigate = useNavigate();
+    const location = useLocation();
     const token = useAuthStore(state => state.token);
     const [confirmOpen, setConfirmOpen] = React.useState(false);
     const [isDeleting, setDeleting] = React.useState(false);
@@ -59,7 +60,7 @@ export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDe
 
         const store = useAppStore.getState();
         store.setTransactions([result.value, ...store.transactions], store.transactionsMeta);
-        navigate(transactionDetailPath(result.value.id));
+        navigate(transactionDetailPath(result.value.id, location.search));
     };
 
     return (
@@ -73,7 +74,7 @@ export const TransactionDetailActions = ({transaction, onDeleted}: TransactionDe
                 )}
                 <DrawerActions>
                     <Button asChild variant="outline">
-                        <Link to={transactionEditPath(transaction.id)}>
+                        <Link to={transactionEditPath(transaction.id, location.search)}>
                             <PencilIcon />
                             {intl.formatMessage(messages.common.edit)}
                         </Link>

@@ -17,13 +17,15 @@ type TransactionListProps = {
     avatars: TransactionAvatarMaps;
     /** 只有按日期排序時分組才有意義。 */
     grouped: boolean;
+    /** 目前列表 filter 的 query string，帶落詳情 URL 令返回時保留 filter。 */
+    search: string;
 };
 
 /**
  * Mobile 交易列表：按日期分組，組內用分隔線而不是逐張卡，
  * 這樣同樣高度可以多看幾行，掃描亦更容易。左邊分類頭像令每行一眼分辨到。
  */
-export const TransactionList = ({transactions, names, avatars, grouped}: TransactionListProps) => {
+export const TransactionList = ({transactions, names, avatars, grouped, search}: TransactionListProps) => {
     const renderRow = (transaction: Transaction) => {
         const view = describeTransaction(transaction, names);
         const isTransfer = transaction.kind === "transfer";
@@ -32,7 +34,7 @@ export const TransactionList = ({transactions, names, avatars, grouped}: Transac
         return (
             <Box as="li" key={transaction.id} listStyleType="none" _notLast={{borderBottomWidth: "1px", borderColor: "border"}}>
                 <Flex asChild align="center" gap="3" px="4" py="3" transition="background 150ms ease" _hover={{bg: "brand.active/40"}} _active={{bg: "brand.active/60"}}>
-                    <Link to={transactionDetailPath(transaction.id)}>
+                    <Link to={transactionDetailPath(transaction.id, search)}>
                         <EntityAvatar
                             size="md"
                             icon={isTransfer ? null : (categoryMeta?.icon ?? null)}

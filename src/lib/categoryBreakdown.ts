@@ -8,6 +8,8 @@ export type CategoryBreakdownKind = "income" | "expense";
 
 export type CategorySlice = {
     id: string;
+    /** 真實分類 id；未分類為 null，即無法用 category_id filter。 */
+    categoryId: string | null;
     name: string;
     cents: number;
     share: number;
@@ -37,6 +39,7 @@ export function rankCategories(breakdown: CategoryBreakdown[], kind: CategoryBre
         .slice(0, limit)
         .map((item, index) => ({
             id: item.category_id ?? `uncategorized-${index}`,
+            categoryId: item.category_id,
             name: item.name ?? label,
             cents: amountOf(item, kind),
             share: total === 0 ? 0 : amountOf(item, kind) / total,

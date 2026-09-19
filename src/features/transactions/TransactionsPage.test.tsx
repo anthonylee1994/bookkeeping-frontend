@@ -227,4 +227,17 @@ describe("TransactionsPage", () => {
         expect(await screen.findByText("DETAIL")).toBeInTheDocument();
         expect(screen.getByTestId("location")).toHaveTextContent(`/transactions/${expenseTransaction.id}`);
     });
+
+    it("carries the list filters into the detail URL so closing the drawer does not reset them", async () => {
+        const user = userEvent.setup();
+        setDesktopViewport(true);
+        renderTransactions("/transactions?kind=expense&q=%E5%92%96%E5%95%A1");
+
+        const row = (await screen.findByText(/早餐/)).closest("tr");
+        if (row === null) throw new Error("找不到交易列");
+        await user.click(row);
+
+        await screen.findByText("DETAIL");
+        expect(screen.getByTestId("location")).toHaveTextContent(`/transactions/${expenseTransaction.id}?kind=expense&q=`);
+    });
 });

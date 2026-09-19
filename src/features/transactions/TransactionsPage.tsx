@@ -22,7 +22,7 @@ import {DESKTOP_QUERY, useMediaQuery} from "@/hooks/useMediaQuery";
 import {useDomainReference} from "@/hooks/useDomainReference";
 import {messages} from "@/lib/i18n";
 import {DEFAULT_PER_PAGE, parseTransactionFilters, serializeTransactionFilters} from "@/lib/searchParams";
-import {ROUTES, transactionDetailPath} from "@/routes/paths";
+import {transactionDetailPath, transactionNewPath} from "@/routes/paths";
 
 const DEFAULT_SORT: TransactionSortField = "occurred_at";
 const DEFAULT_ORDER: SortOrder = "desc";
@@ -90,7 +90,7 @@ export const TransactionsPage = () => {
     };
 
     const openTransaction = (transaction: Transaction) => {
-        navigate(transactionDetailPath(transaction.id));
+        navigate(transactionDetailPath(transaction.id, searchParams.toString()));
     };
     const activeFilterCount = countActiveFilters(filters);
     const chips = describeActiveFilters(filters, names);
@@ -131,7 +131,7 @@ export const TransactionsPage = () => {
                             </Button>
                         ) : (
                             <Button asChild>
-                                <Link to={ROUTES.transactionNew}>
+                                <Link to={transactionNewPath(searchParams.toString())}>
                                     <PlusIcon />
                                     {intl.formatMessage(messages.transactions.list.emptyAction)}
                                 </Link>
@@ -151,7 +151,7 @@ export const TransactionsPage = () => {
                 {isDesktop ? (
                     <TransactionsTable transactions={page.data} names={names} avatars={avatars} sort={sort} order={order} onSelect={openTransaction} onSortChange={changeSort} />
                 ) : (
-                    <TransactionList transactions={page.data} names={names} avatars={avatars} grouped={grouped} />
+                    <TransactionList transactions={page.data} names={names} avatars={avatars} grouped={grouped} search={searchParams.toString()} />
                 )}
 
                 <Flex wrap="wrap" align="center" justify="space-between" gap="3" pt="1">
@@ -198,7 +198,7 @@ export const TransactionsPage = () => {
                             {intl.formatMessage(messages.dashboard.scanReceipt)}
                         </Button>
                         <Button asChild>
-                            <Link to={ROUTES.transactionNew}>
+                            <Link to={transactionNewPath(searchParams.toString())}>
                                 <PlusIcon />
                                 {intl.formatMessage(messages.transactions.newTitle)}
                             </Link>

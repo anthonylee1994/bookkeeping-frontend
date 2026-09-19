@@ -2,16 +2,19 @@ import React from "react";
 import {Box, Flex, Table, Text} from "@chakra-ui/react";
 import {PieChartIcon, TagIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {useNavigate} from "react-router";
 import {Cell, Pie, PieChart, ResponsiveContainer, Tooltip} from "recharts";
 import {EntityAvatar} from "@/components/EntityAvatar";
 import {CardEmptyState} from "@/components/CardEmptyState";
 import {SectionCard} from "@/components/layout/SectionCard";
 import type {Category, CategoryBreakdown} from "@/data/types";
 import {formatShare, rankCategories} from "@/lib/categoryBreakdown";
-import type {CategoryBreakdownKind} from "@/lib/categoryBreakdown";
+import type {CategoryBreakdownKind, CategorySlice} from "@/lib/categoryBreakdown";
 import {isLightColor} from "@/lib/colors";
 import {messages} from "@/lib/i18n";
 import {centsToDollars} from "@/lib/money";
+import {serializeTransactionFilters} from "@/lib/searchParams";
+import {ROUTES} from "@/routes/paths";
 
 type CategoryBreakdownChartProps = {
     breakdown: CategoryBreakdown[];
@@ -32,6 +35,7 @@ type CategoryBreakdownChartProps = {
  */
 export const CategoryBreakdownChart = ({breakdown, kind, title, limit, emptyMessage, categories}: CategoryBreakdownChartProps) => {
     const intl = useIntl();
+    const navigate = useNavigate();
     const categoryById = React.useMemo(() => new Map((categories ?? []).map(category => [category.id, category])), [categories]);
 
     // 太淺的分類色在白色底上作 donut 幾乎不可見，因此退回預設色序，並令頭像使用同一顏色。
@@ -43,6 +47,13 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, limit, emptyMess
 
     const slices = rankCategories(breakdown, kind, {limit, uncategorizedLabel: intl.formatMessage(messages.common.uncategorized), colorOf});
 
+    // 未分類冇對應嘅 category_id，無法 filter，所以只有真實分類先可以點入交易頁。
+    const openCategory = (slice: CategorySlice) => {
+        if (slice.categoryId === null) return;
+        const search = serializeTransactionFilters({category_id: slice.categoryId, kind}).toString();
+        navigate(`${ROUTES.transactions}?${search}`);
+    };
+
     return (
         <SectionCard title={title}>
             {slices.length === 0 ? (
@@ -52,7 +63,17 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, limit, emptyMess
                     <Box w={{base: "full", md: "12rem"}} h={{base: "10rem", md: "12rem"}} flexShrink="0">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={slices} dataKey="cents" nameKey="name" innerRadius="58%" outerRadius="92%" paddingAngle={2} stroke="none">
+                                <Pie
+                                    data={slices}
+                                    dataKey="cents"
+                                    nameKey="name"
+                                    innerRadius="58%"
+                                    outerRadius="92%"
+                                    paddingAngle={2}
+                                    stroke="none"
+                                    cursor="pointer"
+                                    onClick={(_data, index) => openCategory(slices[index])}
+                                >
                                     {slices.map(slice => (
                                         <Cell key={slice.id} fill={slice.color} />
                                     ))}
@@ -70,22 +91,39 @@ export const CategoryBreakdownChart = ({breakdown, kind, title, limit, emptyMess
                             </Table.Row>
                         </Table.Header>
                         <Table.Body>
-                            {slices.map(slice => (
-                                <Table.Row key={slice.id}>
-                                    <Table.Cell>
-                                        <Flex align="center" gap="2">
-                                            <EntityAvatar size="xs" icon={categoryById.get(slice.id)?.icon ?? null} color={slice.color} fallbackIcon={TagIcon} />
-                                            <Text truncate>{slice.name}</Text>
-                                        </Flex>
-                                    </Table.Cell>
-                                    <Table.Cell textAlign="end" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
-                                        {centsToDollars(slice.cents)}
-                                    </Table.Cell>
-                                    <Table.Cell textAlign="end" color="fg.muted" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
-                                        {formatShare(slice.share)}
-                                    </Table.Cell>
-                                </Table.Row>
-                            ))}
+                            {slices.map(slice => {
+                                const isClickable = slice.categoryId !== null;
+                                return (
+                                    <Table.Row
+                                        key={slice.id}
+                                        cursor={isClickable ? "pointer" : "default"}
+                                        tabIndex={isClickable ? 0 : undefined}
+                                        _hover={isClickable ? {bg: "bg.subtle"} : undefined}
+                                        _focusVisible={{outlineWidth: "2px", outlineColor: "brand.focusRing", outlineOffset: "-2px"}}
+                                        onClick={() => openCategory(slice)}
+                                        onKeyDown={event => {
+                                            if (!isClickable) return;
+                                            if (event.key === "Enter" || event.key === " ") {
+                                                event.preventDefault();
+                                                openCategory(slice);
+                                            }
+                                        }}
+                                    >
+                                        <Table.Cell>
+                                            <Flex align="center" gap="2">
+                                                <EntityAvatar size="xs" icon={categoryById.get(slice.id)?.icon ?? null} color={slice.color} fallbackIcon={TagIcon} />
+                                                <Text truncate>{slice.name}</Text>
+                                            </Flex>
+                                        </Table.Cell>
+                                        <Table.Cell textAlign="end" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
+                                            {centsToDollars(slice.cents)}
+                                        </Table.Cell>
+                                        <Table.Cell textAlign="end" color="fg.muted" whiteSpace="nowrap" fontVariantNumeric="tabular-nums">
+                                            {formatShare(slice.share)}
+                                        </Table.Cell>
+                                    </Table.Row>
+                                );
+                            })}
                         </Table.Body>
                     </Table.Root>
                 </Flex>
