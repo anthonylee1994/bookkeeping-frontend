@@ -3,6 +3,7 @@ import {Box, Flex, HStack, Stack, Text} from "@chakra-ui/react";
 import {ArrowLeftRightIcon, TagIcon, WalletIcon} from "lucide-react";
 import type {LucideIcon} from "lucide-react";
 import {useIntl} from "react-intl";
+import {Link as RouterLink} from "react-router";
 import {EntityAvatar} from "@/components/EntityAvatar";
 import type {Transaction} from "@/data/types";
 import {TransactionReceiptImages} from "@/features/transactions/TransactionReceiptImages";
@@ -10,7 +11,9 @@ import {sourceLabel} from "@/features/transactions/transactionsFormat";
 import type {TransactionAvatarMaps, TransactionNameMaps} from "@/features/transactions/transactionsFormat";
 import {toDisplayDateTime} from "@/lib/date";
 import {messages} from "@/lib/i18n";
+import {serializeTransactionFilters} from "@/lib/searchParams";
 import {kindLabel, transactionAmountLabel, transactionTone} from "@/lib/transactionDisplay";
+import {ROUTES} from "@/routes/paths";
 
 type TransactionDetailContentProps = {
     transaction: Transaction;
@@ -24,21 +27,13 @@ type TransactionDetailRowProps = {
     /** 需要頭像等自訂內容時用；提供後會取代預設的文字包裝。 */
     value?: React.ReactNode;
     preserveLineBreaks?: boolean;
+    /** 有值即整行變成連去已套用 filter 交易頁嘅 link；未分類等冇 filter 目標就純文字。 */
+    to?: string;
 };
 
-export const TransactionDetailRow = ({label, children, value, preserveLineBreaks = false}: TransactionDetailRowProps) => {
-    return (
-        <Flex
-            direction={preserveLineBreaks ? "column" : "row"}
-            justify={preserveLineBreaks ? undefined : "space-between"}
-            align={preserveLineBreaks ? "stretch" : "flex-start"}
-            gap={preserveLineBreaks ? "1" : "4"}
-            px="4"
-            py="2.5"
-            borderBottomWidth="1px"
-            borderColor="border"
-            _last={{borderBottomWidth: "0"}}
-        >
+export const TransactionDetailRow = ({label, children, value, preserveLineBreaks = false, to}: TransactionDetailRowProps) => {
+    const content = (
+        <React.Fragment>
             <Text fontSize="sm" color="fg.muted" flexShrink="0">
                 {label}
             </Text>
@@ -56,6 +51,35 @@ export const TransactionDetailRow = ({label, children, value, preserveLineBreaks
                     {children}
                 </Text>
             )}
+        </React.Fragment>
+    );
+
+    const rowProps: React.ComponentProps<typeof Flex> = {
+        direction: preserveLineBreaks ? "column" : "row",
+        justify: preserveLineBreaks ? undefined : "space-between",
+        align: preserveLineBreaks ? "stretch" : "flex-start",
+        alignItems: preserveLineBreaks ? "flex-start" : "center",
+        gap: preserveLineBreaks ? "1" : "4",
+        px: "4",
+        py: "2.5",
+        borderBottomWidth: "1px",
+        borderColor: "border",
+        // 用 `:last-child` 而唔用 Chakra `_last`（`:last-of-type`），否則最後一行 link（a）會被誤判為 last-of-type 而冇咗底線。
+        css: {"&:last-child": {borderBottomWidth: "0"}},
+    };
+
+    if (to === undefined) return <Flex {...rowProps}>{content}</Flex>;
+
+    return (
+        <Flex
+            {...rowProps}
+            asChild
+            cursor="pointer"
+            transition="background 150ms ease"
+            _hover={{bg: "bg.subtle"}}
+            _focusVisible={{outlineWidth: "2px", outlineColor: "brand.focusRing", outlineOffset: "-2px"}}
+        >
+            <RouterLink to={to}>{content}</RouterLink>
         </Flex>
     );
 };
@@ -80,6 +104,8 @@ export const TransactionDetailContent = ({transaction, names, avatars}: Transact
     const accountMeta = avatars.accounts.get(transaction.account_id);
     const transferMeta = transaction.transfer_account_id != null ? avatars.accounts.get(transaction.transfer_account_id) : undefined;
     const categoryMeta = transaction.category_id != null ? avatars.categories.get(transaction.category_id) : undefined;
+    const accountTo = `${ROUTES.transactions}?${serializeTransactionFilters({account_id: transaction.account_id}).toString()}`;
+    const categoryTo = transaction.category_id != null ? `${ROUTES.transactions}?${serializeTransactionFilters({category_id: transaction.category_id, kind: transaction.kind}).toString()}` : undefined;
 
     return (
         <Stack gap="4">
@@ -97,6 +123,7 @@ export const TransactionDetailContent = ({transaction, names, avatars}: Transact
                 <TransactionDetailRow label={intl.formatMessage(messages.transactions.detail.occurredAt)}>{toDisplayDateTime(transaction.occurred_at)}</TransactionDetailRow>
                 <TransactionDetailRow
                     label={intl.formatMessage(messages.transactions.detail.account)}
+                    to={accountTo}
                     value={<EntityValue icon={accountMeta?.icon ?? null} color={accountMeta?.color ?? null} fallbackIcon={WalletIcon} name={accountName} />}
                 />
                 {transaction.kind === "transfer" ? (
@@ -114,6 +141,7 @@ export const TransactionDetailContent = ({transaction, names, avatars}: Transact
                 ) : (
                     <TransactionDetailRow
                         label={intl.formatMessage(messages.transactions.detail.category)}
+                        to={categoryTo}
                         value={
                             <EntityValue
                                 icon={categoryMeta?.icon ?? null}

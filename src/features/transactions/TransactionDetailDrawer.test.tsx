@@ -25,7 +25,7 @@ vi.mock("@/data/transactionsRepository", () => ({
 
 const LocationProbe = () => {
     const location = useLocation();
-    return <div data-testid="location">{location.pathname}</div>;
+    return <div data-testid="location">{`${location.pathname}${location.search}`}</div>;
 };
 
 function renderDrawer(current: Transaction = transaction) {
@@ -42,7 +42,15 @@ function renderDrawer(current: Transaction = transaction) {
                             </React.Fragment>
                         }
                     />
-                    <Route path="/transactions" element={<div>TRANSACTION LIST</div>} />
+                    <Route
+                        path="/transactions"
+                        element={
+                            <React.Fragment>
+                                <div>TRANSACTION LIST</div>
+                                <LocationProbe />
+                            </React.Fragment>
+                        }
+                    />
                 </Routes>
             </MemoryRouter>
         </React.Fragment>
@@ -66,6 +74,13 @@ describe("TransactionDetailDrawer", () => {
         expect(screen.getAllByText("工資")).toHaveLength(2);
         expect(screen.getByRole("link", {name: "修改"})).toHaveAttribute("href", `/transactions/${transaction.id}/edit`);
         expect(screen.getByRole("button", {name: "刪除"})).toBeInTheDocument();
+    });
+
+    it("links the account and category rows to the filtered transactions list", async () => {
+        renderDrawer();
+
+        expect(await screen.findByRole("link", {name: /現金/})).toHaveAttribute("href", `/transactions?account_id=${transaction.account_id}`);
+        expect(screen.getByRole("link", {name: /工資/})).toHaveAttribute("href", `/transactions?kind=income&category_id=${transaction.category_id}`);
     });
 
     it("confirms deletion, removes the transaction and closes the drawer", async () => {

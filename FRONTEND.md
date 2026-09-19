@@ -315,6 +315,7 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 Actions：修改、複製、刪除。
 
 - 詳情係 overlay drawer；列表由 `TransactionsLayout` 留喺遮罩後做背景
+- 帳戶、分類整行可點：帶 `account_id`／`category_id`（連 `kind`）filter 去交易頁；未分類唔可點
 - 「修改」係 Link 去 `/transactions/:id/edit`（同一 search）。由詳情跳去修改時，詳情 drawer unmount **唔可以**當關閉而彈返列表
 - 關閉詳情 drawer 返回 `/transactions`，並保留 filter search
 - 複製成功後打開新交易詳情；複製記錄日期預設為現在
