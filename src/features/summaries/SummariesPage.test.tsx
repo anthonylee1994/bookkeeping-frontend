@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import {screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {MemoryRouter, Route, Routes} from "react-router";
+import {MemoryRouter, Route, Routes, useLocation} from "react-router";
 import type {Summary, TransactionRow} from "@/data/types";
 import {SummariesPage} from "@/features/summaries/SummariesPage";
 import {useAppStore} from "@/stores/appStore";
@@ -68,11 +68,17 @@ const paginatedSummary: Summary = {
     transactions: {data: [expenseTransaction], meta: {page: 1, per_page: 25, total: 40, total_pages: 2}},
 };
 
+const TransactionsStub = () => {
+    const location = useLocation();
+    return <div>{`TRANSACTIONS:${location.search}`}</div>;
+};
+
 function renderSummaries(entry = "/summaries?period=monthly&date=2026-09-16"): void {
     renderWithIntl(
         <MemoryRouter initialEntries={[entry]}>
             <Routes>
                 <Route path="/summaries" element={<SummariesPage />} />
+                <Route path="/transactions" element={<TransactionsStub />} />
             </Routes>
         </MemoryRouter>
     );
@@ -101,6 +107,16 @@ describe("SummariesPage", () => {
         expect(screen.getAllByText("100%")).toHaveLength(2);
         expect(screen.getByText("現金")).toBeInTheDocument();
         expect(screen.getByText("午餐")).toBeInTheDocument();
+    });
+
+    it("opens the filtered transactions list when an account row is selected", async () => {
+        const user = userEvent.setup();
+        getMock.mockResolvedValue({ok: true, value: summaryFixture});
+        renderSummaries();
+
+        await user.click(await screen.findByText("現金"));
+
+        expect(screen.getByText(`TRANSACTIONS:?account_id=${ACCOUNT_ID}`)).toBeInTheDocument();
     });
 
     it("shows separate expense and income category cards", async () => {

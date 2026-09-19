@@ -106,7 +106,8 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         // 列表仍在背景 mount，bump revision 令佢即刻重新抓取，唔使等 route remount。
         useAppStore.getState().bumpTransactionsRevision();
         reset(transactionToFormValues(result.value));
-        navigate(transactionDetailPath(result.value.id, location.search), {replace: true});
+        // 新增成功後清空 search，令背後列表清走 filter 並返回第一頁；修改則保留原本 filter。
+        navigate(transactionDetailPath(result.value.id, transaction === null ? "" : location.search), {replace: true});
     });
 
     const cancel = () => navigate(transaction === null ? transactionsPath(location.search) : transactionDetailPath(transaction.id, location.search));

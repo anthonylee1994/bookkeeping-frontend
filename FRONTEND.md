@@ -299,7 +299,7 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - Merchant autocomplete debounce 300ms；輸入新名稱時可建立 merchant，再選回表單
 - 選擇有 default category 的 merchant，會即時套用該分類（只在分類 kind 與目前 kind 相符時）；用戶仍可自行改分類
 - 新增 merchant 時，如已選分類，會將該分類存為新 merchant 的 default category（下次再揀同一商戶會自動帶出）
-- Create 每次開表單產生 UUID 作 idempotency key；成功後同步更新相關 view
+- Create 每次開表單產生 UUID 作 idempotency key；成功後同步更新相關 view，並清空列表 search（清除 filter、返回第一頁）再打開新交易詳情；Edit 成功保留原 search
 - Edit 不可改變 `source`
 - 離線時照常本地操作（見 §8.3）；banner 提示資料可能未更新，不進行假網絡 retry
 - 離開 dirty form 前顯示確認
@@ -346,6 +346,7 @@ Actions：修改、複製、刪除。
 - 月報額外顯示「收支日曆」，放喺淨額卡之後：逐日淨收支（紅負綠正、0 為灰）；未到嘅日子留白，今日淺灰格；窄螢幕用精簡金額（萬／億）並可橫向滾動
 - Weekly 清楚顯示星期一至星期日範圍
 - Desktop 帳戶分佈同期內交易並排兩欄（分類分佈同樣兩欄）
+- 分類分佈圖表 slice／row 可點去已套用 `category_id`（連 `kind`）filter 嘅交易頁；帳戶分佈 row 亦然（`account_id`）；未分類／未知帳戶唔可點
 - 期內交易 row 顯示分類頭像（跟 dashboard 一致）
 - Chart tooltip 可用 keyboard 觸發；旁邊提供資料表
 - URL 保存 `period`、`date`、`page`

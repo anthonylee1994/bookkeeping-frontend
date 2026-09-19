@@ -2,7 +2,7 @@ import React from "react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import {screen, waitFor, within} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import {createMemoryRouter, RouterProvider} from "react-router";
+import {createMemoryRouter, RouterProvider, useLocation} from "react-router";
 import type {Transaction} from "@/data/types";
 import {TransactionForm} from "@/features/transactions/TransactionForm";
 import {useAppStore} from "@/stores/appStore";
@@ -38,17 +38,22 @@ const created: Transaction = {
     amount_cents: 1250,
 };
 
-function renderForm(transaction: Transaction | null = null): void {
+const DetailStub = () => {
+    const location = useLocation();
+    return <div>{`DETAIL:${location.search}`}</div>;
+};
+
+function renderForm(transaction: Transaction | null = null, initialEntry = "/transactions/new"): void {
     const router = createMemoryRouter(
         [
             {
                 path: "/transactions/new",
                 element: <TransactionForm transaction={transaction} accounts={domainTestState.accounts} categories={domainTestState.categories} merchants={domainTestState.merchants} />,
             },
-            {path: "/transactions/:id", element: <div>DETAIL</div>},
+            {path: "/transactions/:id", element: <DetailStub />},
             {path: "/transactions", element: <div>LIST</div>},
         ],
-        {initialEntries: ["/transactions/new"]}
+        {initialEntries: [initialEntry]}
     );
     renderWithIntl(
         <React.Fragment>
@@ -128,10 +133,21 @@ describe("TransactionForm", () => {
         await user.selectOptions(screen.getByLabelText("帳戶"), domainTestState.accounts[0].id);
         await user.click(screen.getByRole("button", {name: "新增"}));
 
-        await waitFor(() => expect(screen.getByText("DETAIL")).toBeInTheDocument());
+        await waitFor(() => expect(screen.getByText("DETAIL:")).toBeInTheDocument());
         expect(createMock).toHaveBeenCalledWith(expect.objectContaining({kind: "expense", amount_cents: 1250, account_id: domainTestState.accounts[0].id}), expect.stringMatching(/^[0-9a-f-]{36}$/));
         expect(createMock.mock.calls[0][0]).not.toHaveProperty("source");
         expect(useAppStore.getState().transactions[0]).toEqual(created);
+    });
+
+    it("clears the list filters and returns to the first page after creating", async () => {
+        const user = userEvent.setup();
+        createMock.mockResolvedValue({ok: true, value: created});
+        renderForm(null, "/transactions/new?keyword=%E5%92%96%E5%95%A1&page=3");
+
+        await user.type(screen.getByLabelText("金額"), "12.50");
+        await user.click(screen.getByRole("button", {name: "新增"}));
+
+        await waitFor(() => expect(screen.getByText("DETAIL:")).toBeInTheDocument());
     });
 
     it("applies a merchant default category when the merchant is selected", async () => {
@@ -189,13 +205,13 @@ describe("TransactionForm", () => {
         const user = userEvent.setup();
         const edited = {...domainTestState.transactions[0], note: "已修改"};
         updateMock.mockResolvedValue({ok: true, value: edited});
-        renderForm(domainTestState.transactions[0]);
+        renderForm(domainTestState.transactions[0], "/transactions/new?keyword=%E5%92%96%E5%95%A1");
 
         await user.clear(screen.getByLabelText("備註"));
         await user.type(screen.getByLabelText("備註"), "已修改");
         await user.click(screen.getByRole("button", {name: "儲存"}));
 
-        await waitFor(() => expect(screen.getByText("DETAIL")).toBeInTheDocument());
+        await waitFor(() => expect(screen.getByText("DETAIL:?keyword=%E5%92%96%E5%95%A1")).toBeInTheDocument());
         const input = updateMock.mock.calls[0][1] as Record<string, unknown>;
         expect(input).not.toHaveProperty("source");
         expect(input.note).toBe("已修改");
