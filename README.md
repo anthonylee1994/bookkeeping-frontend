@@ -6,7 +6,7 @@ Frontend 係 React SPA，經 typed axios repository 呼叫 Rails API。瀏覽器
 
 語言固定繁體中文（香港），時區 `Asia/Hong_Kong`，貨幣只支援 HKD。金額以 integer cents 儲存，frontend 唔用浮點數做金額運算。
 
-產品範圍、互動同驗收標準見 [`FRONTEND.md`](./FRONTEND.md)。API 語意見 [`swagger.yaml`](./swagger.yaml)。實作順序見 [`plan.md`](./plan.md)。每次改 code 都要同步更新 `FRONTEND.md`。
+產品範圍、互動同驗收標準見 [`AGENTS.md`](./AGENTS.md)。API 語意見 [`swagger.yaml`](./swagger.yaml)。每次改 code 都要同步更新 `AGENTS.md`。
 
 ## 功能
 
