@@ -21,8 +21,8 @@ export function transactionTone(transaction: TransactionRow): TransactionTone {
 
 export function transactionTitle(transaction: TransactionRow, categoryName?: string | null, merchantName?: string | null): string {
     if (transaction.note !== null && transaction.note !== undefined && transaction.note.trim() !== "") return transaction.note;
-    if (categoryName !== null && categoryName !== undefined && categoryName.trim() !== "") return categoryName;
     if (merchantName !== null && merchantName !== undefined && merchantName.trim() !== "") return merchantName;
+    if (categoryName !== null && categoryName !== undefined && categoryName.trim() !== "") return categoryName;
     if (transaction.payment_method !== null && transaction.payment_method !== undefined && transaction.payment_method.trim() !== "") return transaction.payment_method;
     return kindLabel(transaction.kind);
 }
