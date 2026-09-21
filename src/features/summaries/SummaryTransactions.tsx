@@ -6,7 +6,7 @@ import {Link} from "react-router";
 import {CardEmptyState} from "@/components/CardEmptyState";
 import {EntityAvatar} from "@/components/EntityAvatar";
 import {SectionCard} from "@/components/layout/SectionCard";
-import type {Category, Paginated, TransactionRow} from "@/data/types";
+import type {Category, Merchant, Paginated, TransactionRow} from "@/data/types";
 import {toDisplayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
 import {transactionDisplayAmount, transactionTitle, transactionTone} from "@/lib/transactionDisplay";
@@ -17,13 +17,16 @@ type SummaryTransactionsProps = {
     onPageChange: (page: number) => void;
     /** 分類參考資料（含 color／icon）；交易 payload 只有 category_id。 */
     categories: Category[];
+    /** 商戶參考資料；交易 payload 只有 merchant_id。 */
+    merchants: Merchant[];
 };
 
 /** 期內交易（只包括收入及支出；轉帳另有獨立卡片）。 */
-export const SummaryTransactions = ({transactions, onPageChange, categories}: SummaryTransactionsProps) => {
+export const SummaryTransactions = ({transactions, onPageChange, categories, merchants}: SummaryTransactionsProps) => {
     const intl = useIntl();
     const {page, total_pages: totalPages} = transactions.meta;
     const categoryById = React.useMemo(() => new Map(categories.map(category => [category.id, category])), [categories]);
+    const merchantById = React.useMemo(() => new Map(merchants.map(merchant => [merchant.id, merchant])), [merchants]);
 
     return (
         <SectionCard title={intl.formatMessage(messages.summaries.transactionsTitle)} description={intl.formatMessage(messages.summaries.transactionsDescription)}>
@@ -35,6 +38,7 @@ export const SummaryTransactions = ({transactions, onPageChange, categories}: Su
                         {transactions.data.map(transaction => {
                             const isTransfer = transaction.kind === "transfer";
                             const category = transaction.category_id != null ? categoryById.get(transaction.category_id) : undefined;
+                            const merchantName = transaction.merchant_id != null ? merchantById.get(transaction.merchant_id)?.name : undefined;
                             return (
                                 <Box key={transaction.id} asChild rounded="lg" px="3" py="2.5" transition="background 150ms ease" _hover={{bg: "bg.subtle"}}>
                                     <Link to={transactionDetailPath(transaction.id)}>
@@ -47,7 +51,7 @@ export const SummaryTransactions = ({transactions, onPageChange, categories}: Su
                                             />
                                             <Box minW="0" flex="1">
                                                 <Text fontSize="sm" fontWeight="medium" truncate>
-                                                    {transactionTitle(transaction)}
+                                                    {transactionTitle(transaction, isTransfer ? null : (category?.name ?? null), isTransfer ? null : (merchantName ?? null))}
                                                 </Text>
                                                 <Text fontSize="xs" color="fg.muted">
                                                     {toDisplayDate(transaction.occurred_at)}

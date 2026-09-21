@@ -273,6 +273,8 @@ Chakra breakpoint 採用預設值（md 768px、lg 992px），layout 以內容需
 - 快捷日期範圍（全部時間／本月／上月／近 30 日）為 segmented control，mobile 撐滿一行
 - Mobile 顯示交易 row：分類頭像、商戶或 note、分類、日期、帳戶（小頭像）、金額
 - Desktop 顯示 table：日期、商戶／備註、分類（頭像）、帳戶（頭像）、金額
+- 交易標題優先次序：商戶 > note > 付款方式 > 分類名稱 > 交易類型
+- Dashboard 最近交易／期內交易 tile 標題：note > 付款方式 > 分類名稱 > 商戶 > 交易類型（無 note、無付款方式、分類名未解析時退回商戶名）
 - 頁碼改變時保留 filter，並 scroll 到列表頂
 - Loading 用 `LoadingIndicator`（progress circle）並支撐固定高度，避免 layout jump；交易詳情 drawer 例外地用 `Skeleton`
 - No result state 提供清除 filter

@@ -5,7 +5,7 @@ import {useIntl} from "react-intl";
 import {Link} from "react-router";
 import {EntityAvatar} from "@/components/EntityAvatar";
 import {SectionCard} from "@/components/layout/SectionCard";
-import type {Category, TransactionRow} from "@/data/types";
+import type {Category, Merchant, TransactionRow} from "@/data/types";
 import {toDisplayDate} from "@/lib/date";
 import {messages} from "@/lib/i18n";
 import {transactionDisplayAmount, transactionTitle, transactionTone} from "@/lib/transactionDisplay";
@@ -15,12 +15,15 @@ type RecentTransactionsCardProps = {
     transactions: TransactionRow[];
     /** 分類參考資料（含 color／icon）；交易 payload 只有 category_id。 */
     categories: Category[];
+    /** 商戶參考資料；交易 payload 只有 merchant_id。 */
+    merchants: Merchant[];
 };
 
 /** 最近交易；每行連去交易詳情。 */
-export const RecentTransactionsCard = ({transactions, categories}: RecentTransactionsCardProps) => {
+export const RecentTransactionsCard = ({transactions, categories, merchants}: RecentTransactionsCardProps) => {
     const intl = useIntl();
     const categoryById = React.useMemo(() => new Map(categories.map(category => [category.id, category])), [categories]);
+    const merchantById = React.useMemo(() => new Map(merchants.map(merchant => [merchant.id, merchant])), [merchants]);
 
     return (
         <SectionCard
@@ -40,6 +43,7 @@ export const RecentTransactionsCard = ({transactions, categories}: RecentTransac
                     {transactions.map(transaction => {
                         const isTransfer = transaction.kind === "transfer";
                         const category = transaction.category_id != null ? categoryById.get(transaction.category_id) : undefined;
+                        const merchantName = transaction.merchant_id != null ? merchantById.get(transaction.merchant_id)?.name : undefined;
                         return (
                             <Box key={transaction.id} asChild rounded="lg" px="3" py="2.5" transition="background 150ms ease" _hover={{bg: "bg.subtle"}}>
                                 <Link to={transactionDetailPath(transaction.id)}>
@@ -52,7 +56,7 @@ export const RecentTransactionsCard = ({transactions, categories}: RecentTransac
                                         />
                                         <Box minW="0" flex="1">
                                             <Text fontSize="sm" fontWeight="medium" truncate>
-                                                {transactionTitle(transaction)}
+                                                {transactionTitle(transaction, isTransfer ? null : (category?.name ?? null), isTransfer ? null : (merchantName ?? null))}
                                             </Text>
                                             <Text fontSize="xs" color="fg.muted">
                                                 {toDisplayDate(transaction.occurred_at)}

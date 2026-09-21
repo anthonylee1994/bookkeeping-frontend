@@ -79,7 +79,7 @@ export const SummariesPage = () => {
                 </SimpleGrid>
                 <SimpleGrid columns={{base: 1, lg: 2}} gap="4">
                     <SummaryAccountBreakdown breakdown={summary.by_account} accounts={reference.accounts} />
-                    <SummaryTransactions transactions={summary.transactions} onPageChange={changePage} categories={reference.categories} />
+                    <SummaryTransactions transactions={summary.transactions} onPageChange={changePage} categories={reference.categories} merchants={reference.merchants} />
                 </SimpleGrid>
             </Stack>
         );

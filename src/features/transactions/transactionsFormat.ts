@@ -123,7 +123,7 @@ export function describeTransaction(transaction: TransactionRow, names: Transact
     }
 
     return {
-        primary: transactionPrimaryLabel(transaction, merchantName),
+        primary: transactionPrimaryLabel(transaction, merchantName, categoryName),
         secondary,
         category: transaction.kind === "transfer" ? formatMessage(messages.transactions.transfer) : (categoryName ?? formatMessage(messages.transactions.list.uncategorized)),
         account: accountName ?? formatMessage(messages.transactions.list.unknownAccount),
@@ -215,9 +215,9 @@ export function sourceLabel(source: TransactionSource): string {
     return formatMessage(messages.transactions.detail.sourceManual);
 }
 
-function transactionPrimaryLabel(transaction: TransactionRow, merchantName: string | undefined): string {
+function transactionPrimaryLabel(transaction: TransactionRow, merchantName: string | undefined, categoryName: string | undefined): string {
     if (merchantName !== undefined && merchantName !== "") return merchantName;
-    return transactionTitle(transaction);
+    return transactionTitle(transaction, categoryName);
 }
 
 function transactionSecondaryLabel(transaction: TransactionRow, merchantName: string | undefined): string | null {
