@@ -1,5 +1,5 @@
 import React from "react";
-import {Box, Flex, SimpleGrid, Text} from "@chakra-ui/react";
+import {Box, Flex, Separator, SimpleGrid, Text} from "@chakra-ui/react";
 import {WalletIcon} from "lucide-react";
 import {useIntl} from "react-intl";
 import {Link} from "react-router";
@@ -7,7 +7,7 @@ import {EntityAvatar} from "@/components/EntityAvatar";
 import {SectionCard} from "@/components/layout/SectionCard";
 import type {Account, AccountBalance} from "@/data/types";
 import {messages} from "@/lib/i18n";
-import {centsToDollars} from "@/lib/money";
+import {centsToDollars, signedAmountColor} from "@/lib/money";
 import {serializeTransactionFilters} from "@/lib/searchParams";
 import {ROUTES} from "@/routes/paths";
 
@@ -23,9 +23,19 @@ type AccountBalancesCardProps = {
 export const AccountBalancesCard = ({balances, accounts, from, to}: AccountBalancesCardProps) => {
     const intl = useIntl();
     const accountById = React.useMemo(() => new Map(accounts.map(account => [account.id, account])), [accounts]);
+    const totalCents = balances.reduce((sum, balance) => sum + balance.balance_cents, 0);
 
     return (
         <SectionCard title={intl.formatMessage(messages.dashboard.accountBalancesTitle)}>
+            <Flex justify="space-between" align="baseline" gap="3">
+                <Text fontSize="sm" color="fg.muted">
+                    {intl.formatMessage(messages.dashboard.totalBalance)}
+                </Text>
+                <Text fontSize="lg" fontWeight="bold" color={signedAmountColor(totalCents)} fontVariantNumeric="tabular-nums" whiteSpace="nowrap">
+                    {centsToDollars(totalCents)}
+                </Text>
+            </Flex>
+            <Separator />
             <SimpleGrid columns={{base: 1, sm: 2}} gap="2">
                 {balances.map(balance => {
                     const account = accountById.get(balance.id);

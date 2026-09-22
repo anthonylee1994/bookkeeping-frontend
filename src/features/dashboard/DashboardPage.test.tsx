@@ -153,6 +153,19 @@ describe("DashboardPage", () => {
         expect(screen.getByText("薪金")).toBeInTheDocument();
     });
 
+    it("shows the combined total of all account balances", async () => {
+        const savingsBalance = {id: SAVINGS_ID, name: "儲蓄", currency: "HKD" as const, initial_balance_cents: 0, balance_cents: 150000};
+        getMock.mockResolvedValue({
+            ok: true,
+            value: {...dashboardFixture, accounts: [accountBalance, savingsBalance], account_balances: [accountBalance, savingsBalance]},
+        });
+        renderDashboard();
+
+        expect(await screen.findByText("總餘額")).toBeInTheDocument();
+        expect(screen.getByText("$2,000.00")).toBeInTheDocument();
+        expect(screen.getByText("儲蓄")).toBeInTheDocument();
+    });
+
     it("shows the first-transaction empty state when there is no data", async () => {
         getMock.mockResolvedValue({ok: true, value: emptyDashboard});
         renderDashboard();

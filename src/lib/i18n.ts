@@ -387,6 +387,7 @@ export const messages = {
         expenseCategoryTitle: {id: "dashboard.expenseCategoryTitle", defaultMessage: "支出分類"},
         incomeCategoryTitle: {id: "dashboard.incomeCategoryTitle", defaultMessage: "收入分類"},
         accountBalancesTitle: {id: "dashboard.accountBalancesTitle", defaultMessage: "帳戶餘額"},
+        totalBalance: {id: "dashboard.totalBalance", defaultMessage: "總餘額"},
         upcomingTitle: {id: "dashboard.upcomingTitle", defaultMessage: "未來 7 日定期交易"},
         upcomingToday: {id: "dashboard.upcomingToday", defaultMessage: "今日"},
         upcomingTomorrow: {id: "dashboard.upcomingTomorrow", defaultMessage: "聽日"},
