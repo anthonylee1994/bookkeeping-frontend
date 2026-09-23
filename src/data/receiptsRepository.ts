@@ -7,6 +7,8 @@ import type {AiPreview, LocalError, LocalResult, ReceiptUpload, TransactionInput
 
 export const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 export const RECEIPT_ACCEPT = "image/jpeg,image/png,image/webp";
+/** 自然語言打字記帳嘅輸入上限（字元），同 backend `MAX_INTERPRET_TEXT` 一致。 */
+export const MAX_INTERPRET_TEXT = 500;
 
 const receiptTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -39,6 +41,14 @@ export class ReceiptsRepository {
     async parse(imageUrl: string): Promise<LocalResult<AiPreview>> {
         if (imageUrl.trim() === "") return localValidation(formatMessage(messages.validation.receiptImageUrlInvalid), {image_url: formatMessage(messages.fields.required)});
         return apiRequest(this.#token, {method: "POST", url: "/ai/parse", data: {image_url: imageUrl}}, aiResponseSchema);
+    }
+
+    /** 自然語言打字記帳：解讀一句文字，回同 `parse` 一樣嘅 preview（`source = text`）。 */
+    async interpret(text: string): Promise<LocalResult<AiPreview>> {
+        const trimmed = text.trim();
+        if (trimmed === "") return localValidation(formatMessage(messages.validation.interpretTextEmpty), {text: formatMessage(messages.fields.required)});
+        if (trimmed.length > MAX_INTERPRET_TEXT) return localValidation(formatMessage(messages.validation.interpretTextTooLong), {text: formatMessage(messages.fields.interpretTextTooLong)});
+        return apiRequest(this.#token, {method: "POST", url: "/ai/interpret", data: {text: trimmed}}, aiResponseSchema);
     }
 
     async confirm(input: TransactionInput, importLogId: UUID, idempotencyKey: UUID): Promise<LocalResult<TransactionRow>> {

@@ -28,7 +28,7 @@
 | [15-division-of-responsibilities](./agent-specs/15-division-of-responsibilities.md) | §15 前後端分工與限制                        |
 | [99-project-rules](./agent-specs/99-project-rules.md)                               | Project rules（spec source of truth、驗證） |
 
-`agent-specs/05-pages/`：5.1 登入註冊、5.2 Dashboard、5.3 交易列表、5.4 新增修改交易、5.5 交易詳情、5.6 AI 單據、5.7 報表、5.8 定期交易、5.9 設定。
+`agent-specs/05-pages/`：5.1 登入註冊、5.2 Dashboard、5.3 交易列表、5.4 新增修改交易、5.5 交易詳情、5.6 AI 單據、5.7 報表、5.8 定期交易、5.9 設定、5.10 AI 打字記帳。
 
 ## Project rules
 

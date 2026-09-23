@@ -6,10 +6,13 @@ import {useIntl} from "react-intl";
 import {useBeforeUnload, useBlocker, useLocation, useNavigate, Link as RouterLink} from "react-router";
 import {DrawerActions} from "@/components/layout/DrawerActions";
 import {MerchantsRepository} from "@/data/merchantsRepository";
+import {ReceiptsRepository} from "@/data/receiptsRepository";
 import {TransactionsRepository} from "@/data/transactionsRepository";
-import type {Account, Category, Merchant, Transaction, TransactionKind} from "@/data/types";
+import type {Account, AiPreview, Category, Merchant, Transaction, TransactionKind} from "@/data/types";
+import {previewToReviewValues, suggestedMerchantName} from "@/features/receiptScan/scanModel";
 import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
 import {MerchantAutocomplete} from "@/features/transactions/MerchantAutocomplete";
+import {NaturalLanguageEntry} from "@/features/transactions/NaturalLanguageEntry";
 import {emptyTransactionFormValues, formValuesToInput, transactionFormSchema, transactionToFormValues} from "@/features/transactions/TransactionFormModel";
 import type {TransactionFormValues} from "@/features/transactions/TransactionFormModel";
 import {messages} from "@/lib/i18n";
@@ -35,6 +38,12 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
     const [idempotencyKey] = React.useState(createId);
     const [submitError, setSubmitError] = React.useState<string | null>(null);
     const [createdMerchant, setCreatedMerchant] = React.useState<Merchant | null>(null);
+    // 經 AI 打字記帳預填時記住 import log id；入帳會改行 `/ai/confirm` 保留 ai 來源。
+    const [aiLogId, setAiLogId] = React.useState<string | null>(null);
+    // AI 讀到嘅商戶名：對唔上現有商戶時帶入 autocomplete，讓用戶一按建立。
+    // `interpretSeq` 每次解讀遞增，用作 key 迫 autocomplete remount 以食到新 query。
+    const [suggestedMerchant, setSuggestedMerchant] = React.useState("");
+    const [interpretSeq, setInterpretSeq] = React.useState(0);
     const {control, register, handleSubmit, reset, setValue, formState} = useForm<TransactionFormValues>({
         resolver: zodResolver(transactionFormSchema),
         defaultValues:
@@ -89,25 +98,69 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         setValue("categoryId", defaultCategory.id, {shouldDirty: true, shouldValidate: true});
     };
 
+    /** AI 打字記帳成功：將 preview 映射落現有表單欄位，並記住 log id 以便 `/ai/confirm`。 */
+    const applyInterpretation = (preview: AiPreview) => {
+        const review = previewToReviewValues(preview, {accounts, categories, merchants});
+        reset({
+            kind: review.kind,
+            amount: review.amount,
+            accountId: review.accountId,
+            transferAccountId: "",
+            categoryId: review.categoryId,
+            merchantId: review.merchantId,
+            occurredAt: review.occurredAt,
+            paymentMethod: "",
+            note: review.note,
+        });
+        setAiLogId(preview.id);
+        setSuggestedMerchant(suggestedMerchantName(preview));
+        setInterpretSeq(sequence => sequence + 1);
+    };
+
     const submit = handleSubmit(async values => {
         if (token === null) return;
         setSubmitError(null);
         const repository = new TransactionsRepository(token);
         const input = formValuesToInput(values, transaction?.image_urls ?? []);
-        const result = transaction === null ? await repository.create(input, idempotencyKey) : await repository.update(transaction.id, input);
+
+        if (transaction !== null) {
+            const result = await repository.update(transaction.id, input);
+            if (!result.ok) {
+                setSubmitError(result.error.message);
+                return;
+            }
+            const next = useAppStore.getState().transactions.map(item => (item.id === result.value.id ? result.value : item));
+            useAppStore.getState().setTransactions(next, useAppStore.getState().transactionsMeta);
+            useAppStore.getState().bumpTransactionsRevision();
+            reset(transactionToFormValues(result.value));
+            // 修改保留原本 filter。
+            navigate(transactionDetailPath(result.value.id, location.search), {replace: true});
+            return;
+        }
+
+        // 由 AI 打字記帳預填：入帳行 `/ai/confirm`，保留 ai_import_log 關聯同 `source = ai`。
+        if (aiLogId !== null) {
+            const result = await new ReceiptsRepository(token).confirm(input, aiLogId, idempotencyKey);
+            if (!result.ok) {
+                setSubmitError(result.error.message);
+                return;
+            }
+            useAppStore.getState().bumpTransactionsRevision();
+            navigate(transactionDetailPath(result.value.id, ""), {replace: true});
+            return;
+        }
+
+        const result = await repository.create(input, idempotencyKey);
         if (!result.ok) {
             setSubmitError(result.error.message);
             return;
         }
-
-        const current = useAppStore.getState().transactions;
-        const next = transaction === null ? [result.value, ...current] : current.map(item => (item.id === result.value.id ? result.value : item));
-        useAppStore.getState().setTransactions(next, useAppStore.getState().transactionsMeta);
+        useAppStore.getState().setTransactions([result.value, ...useAppStore.getState().transactions], useAppStore.getState().transactionsMeta);
         // 列表仍在背景 mount，bump revision 令佢即刻重新抓取，唔使等 route remount。
         useAppStore.getState().bumpTransactionsRevision();
         reset(transactionToFormValues(result.value));
-        // 新增成功後清空 search，令背後列表清走 filter 並返回第一頁；修改則保留原本 filter。
-        navigate(transactionDetailPath(result.value.id, transaction === null ? "" : location.search), {replace: true});
+        // 新增成功後清空 search，令背後列表清走 filter 並返回第一頁。
+        navigate(transactionDetailPath(result.value.id, ""), {replace: true});
     });
 
     const cancel = () => navigate(transaction === null ? transactionsPath(location.search) : transactionDetailPath(transaction.id, location.search));
@@ -127,6 +180,8 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
                             </Button>
                         </Alert.Root>
                     )}
+
+                    {transaction === null && accounts.length > 0 ? <NaturalLanguageEntry onInterpreted={applyInterpretation} /> : null}
 
                     <Field.Root>
                         <Field.Label>{intl.formatMessage(messages.transactions.form.kind)}</Field.Label>
@@ -205,7 +260,15 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
                                     name="merchantId"
                                     control={control}
                                     render={({field, fieldState}) => (
-                                        <MerchantAutocomplete merchants={merchants} value={field.value} onChange={selectMerchant} onCreated={setCreatedMerchant} error={fieldState.error?.message} />
+                                        <MerchantAutocomplete
+                                            key={interpretSeq}
+                                            merchants={merchants}
+                                            value={field.value}
+                                            defaultQuery={suggestedMerchant}
+                                            onChange={selectMerchant}
+                                            onCreated={setCreatedMerchant}
+                                            error={fieldState.error?.message}
+                                        />
                                     )}
                                 />
 

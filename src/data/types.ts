@@ -178,8 +178,11 @@ export type AiParsedFields = {
     confidence?: number | null;
 };
 
+export type AiPreviewSource = "receipt" | "text";
+
 export type AiPreview = {
     id: UUID;
+    source?: AiPreviewSource;
     image_urls: string[];
     sha256: string;
     status: "success" | "partial" | "failed";

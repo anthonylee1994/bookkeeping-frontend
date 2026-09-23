@@ -111,6 +111,6 @@ type DraftState = {
 
 ## 6.5 Repository contract
 
-Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview、summaries（含 AI 收支概況 `getInsight`）及 recurring rules。每個 function 只負責 HTTP（加上 url／params／idempotency key），回傳 `LocalResult<T>`。
+Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview、AI 文字解讀（`interpret`）、summaries（含 AI 收支概況 `getInsight`）及 recurring rules。每個 function 只負責 HTTP（加上 url／params／idempotency key），回傳 `LocalResult<T>`。
 
-Feature hook 在 `requestKey`（token／filter／reload token；交易列表另加 `transactionsRevision`）改變時重新抓取：`useDomainReference` 會將 accounts／categories／merchants 寫入 appStore，`useTransactions`／`useDashboard`／`useSummary`／`useRecurringRules` 則用 component-local state。不得在 component 直接呼叫 axios。`useSummaryInsight` 另加一個由 summary aggregate 派生嘅 `invalidationKey`（見 §5.7），避免純粹轉交易頁碼就重新生成 AI 概況。
+Feature hook 在 `requestKey`（token／filter／reload token；交易列表另加 `transactionsRevision`）改變時重新抓取：`useDomainReference` 會將 accounts／categories／merchants 寫入 appStore，`useTransactions`／`useDashboard`／`useSummary`／`useRecurringRules` 則用 component-local state。不得在 component 直接呼叫 axios。`useSummaryInsight` 另加一個由 summary aggregate 派生嘅 `invalidationKey`（見 §5.7），避免純粹轉交易頁碼就重新生成 AI 概況。`useInterpretText`（AI 打字記帳）只屬 on-demand 呼叫，解讀結果同錯誤用 component-local state，原文只存記憶體、唔入 appStore、唔 persist（見 §5.10、§8.3）。

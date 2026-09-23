@@ -9,3 +9,4 @@
 - 使用 Error Boundary 隔離 route-level render error
 - 阻塞錯誤使用 `role="alert"`
 - 非阻塞的次要內容（例如報表頁 AI 收支概況）用 `aria-live="polite"` + `Skeleton`；失敗時只在卡片內顯示重試，不影響頁面其餘 deterministic 內容
+- AI 打字記帳解讀期間用欄位下方 progress（可取消）；成功預填後以 `aria-live="polite"` 提示「AI 已預填，請核對」，失敗喺欄位下方 inline retry，不阻塞手動輸入

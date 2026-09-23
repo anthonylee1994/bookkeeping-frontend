@@ -12,6 +12,8 @@ import {renderWithIntl} from "@/test/renderWithIntl";
 
 const createMock = vi.hoisted(() => vi.fn());
 const updateMock = vi.hoisted(() => vi.fn());
+const interpretMock = vi.hoisted(() => vi.fn());
+const confirmMock = vi.hoisted(() => vi.fn());
 const merchantSearchMock = vi.hoisted(() => vi.fn());
 const merchantCreateMock = vi.hoisted(() => vi.fn());
 const merchantUpdateMock = vi.hoisted(() => vi.fn());
@@ -20,6 +22,14 @@ vi.mock("@/data/transactionsRepository", () => ({
     TransactionsRepository: class {
         create = createMock;
         update = updateMock;
+    },
+}));
+
+vi.mock("@/data/receiptsRepository", () => ({
+    MAX_INTERPRET_TEXT: 500,
+    ReceiptsRepository: class {
+        interpret = interpretMock;
+        confirm = confirmMock;
     },
 }));
 
@@ -65,6 +75,8 @@ function renderForm(transaction: Transaction | null = null, initialEntry = "/tra
 beforeEach(() => {
     createMock.mockReset();
     updateMock.mockReset();
+    interpretMock.mockReset();
+    confirmMock.mockReset();
     merchantSearchMock.mockReset();
     merchantCreateMock.mockReset();
     merchantUpdateMock.mockReset();
@@ -137,6 +149,51 @@ describe("TransactionForm", () => {
         expect(createMock).toHaveBeenCalledWith(expect.objectContaining({kind: "expense", amount_cents: 1250, account_id: domainTestState.accounts[0].id}), expect.stringMatching(/^[0-9a-f-]{36}$/));
         expect(createMock.mock.calls[0][0]).not.toHaveProperty("source");
         expect(useAppStore.getState().transactions[0]).toEqual(created);
+    });
+
+    it("prefills from AI text and confirms through /ai/confirm", async () => {
+        const user = userEvent.setup();
+        const preview = {
+            id: "80000000-0000-4000-8000-000000000001",
+            source: "text" as const,
+            image_urls: [],
+            sha256: "a".repeat(64),
+            status: "success" as const,
+            parsed: {amount_cents: 1250, kind: "expense" as const, occurred_at: "2026-09-14T12:00:00+08:00", merchant_name: "街角咖啡", confidence: 0.9},
+        };
+        interpretMock.mockResolvedValue({ok: true, value: preview});
+        confirmMock.mockResolvedValue({ok: true, value: created});
+        renderForm();
+
+        await user.type(screen.getByLabelText("AI 打字記帳"), "街角咖啡 12.5");
+        await user.click(screen.getByRole("button", {name: "解讀"}));
+
+        await waitFor(() => expect(screen.getByLabelText("金額")).toHaveValue("12.50"));
+        await user.click(screen.getByRole("button", {name: "新增"}));
+
+        await waitFor(() => expect(screen.getByText("DETAIL:")).toBeInTheDocument());
+        expect(confirmMock).toHaveBeenCalledWith(expect.objectContaining({amount_cents: 1250, kind: "expense"}), preview.id, expect.stringMatching(/^[0-9a-f-]{36}$/));
+        expect(createMock).not.toHaveBeenCalled();
+    });
+
+    it("seeds the merchant autocomplete with an unmatched AI merchant name", async () => {
+        const user = userEvent.setup();
+        const preview = {
+            id: "80000000-0000-4000-8000-000000000002",
+            source: "text" as const,
+            image_urls: [],
+            sha256: "a".repeat(64),
+            status: "success" as const,
+            parsed: {amount_cents: 1000, kind: "expense" as const, occurred_at: "2026-09-14T12:00:00+08:00", merchant_name: "食咗杯", confidence: 0.9},
+        };
+        interpretMock.mockResolvedValue({ok: true, value: preview});
+        renderForm();
+
+        await user.type(screen.getByLabelText("AI 打字記帳"), "食咗杯 10 蚊");
+        await user.click(screen.getByRole("button", {name: "解讀"}));
+
+        await waitFor(() => expect(screen.getByLabelText("商戶")).toHaveValue("食咗杯"));
+        expect(screen.getByRole("button", {name: "新增商戶「食咗杯」"})).toBeInTheDocument();
     });
 
     it("clears the list filters and returns to the first page after creating", async () => {

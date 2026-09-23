@@ -60,6 +60,30 @@ describe("ReceiptsRepository", () => {
         expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/parse", data: {image_url: preview.image_urls[0]}}));
     });
 
+    it("interprets a natural-language sentence with trimmed text", async () => {
+        const preview = {
+            id: IMPORT_LOG_ID,
+            source: "text" as const,
+            image_urls: [],
+            sha256: "a".repeat(64),
+            status: "success" as const,
+            parsed: {amount_cents: 4500, kind: "expense" as const, occurred_at: "2026-09-14T16:00:00+08:00", merchant_name: "茶餐廳", confidence: 0.9},
+        };
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: preview});
+
+        expect(await new ReceiptsRepository(TOKEN).interpret(" 尋日茶餐廳 45 蚊 ")).toEqual({ok: true, value: preview});
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/interpret", data: {text: "尋日茶餐廳 45 蚊"}}));
+    });
+
+    it("rejects blank or oversized interpret text locally", async () => {
+        const request = vi.spyOn(apiClient, "request");
+        const repository = new ReceiptsRepository(TOKEN);
+
+        expect(await repository.interpret("   ")).toMatchObject({ok: false, error: {code: "validation"}});
+        expect(await repository.interpret("a".repeat(501))).toMatchObject({ok: false, error: {code: "validation"}});
+        expect(request).not.toHaveBeenCalled();
+    });
+
     it("confirms an AI transaction with the import log id and an idempotency key", async () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transaction: transactionRow}});
         const input = {

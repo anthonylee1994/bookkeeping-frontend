@@ -309,6 +309,23 @@ paths:
             parameters: [{$ref: "#/components/parameters/IdempotencyKey"}]
             requestBody: {$ref: "#/components/requestBodies/Transaction"}
             responses: {"201": {description: AI transaction}}
+    /api/v1/ai/interpret:
+        post:
+            tags: [Receipts and AI]
+            security: [{bearerAuth: []}]
+            summary: Interpret a natural-language transaction into an AI preview
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [text]
+                            properties: {text: {type: string, minLength: 1, maxLength: 500}}
+            responses:
+                "200": {description: "AI preview（同 /ai/parse；source=text，無 image_urls；status 可為 partial，代表解讀唔到）"}
+                "422": {description: "text missing／blank／over 500 characters"}
+                "502": {description: DeepSeek is unavailable}
 components:
     securitySchemes:
         bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}

@@ -150,6 +150,7 @@ export const aiParsedFieldsSchema = z.object({
 
 export const aiPreviewSchema = z.object({
     id: uuidSchema,
+    source: z.enum(["receipt", "text"]).optional(),
     image_urls: z.array(imageUrlSchema),
     sha256: z.string(),
     status: z.enum(["success", "partial", "failed"]),
