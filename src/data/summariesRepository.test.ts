@@ -18,6 +18,19 @@ function summaryResponse() {
     };
 }
 
+function insightResponse() {
+    return {
+        period: "monthly",
+        range: {from: "2026-08-31T16:00:00.000Z", to: "2026-09-30T15:59:59.999Z"},
+        status: "success",
+        text: "2026年9月收入 HK$1,000.00。",
+        highlights: ["支出集中喺飲食。"],
+        cached: false,
+        generated_at: "2026-09-16T12:00:00+08:00",
+        error: null,
+    };
+}
+
 afterEach(() => {
     vi.restoreAllMocks();
 });
@@ -37,6 +50,24 @@ describe("SummariesRepository", () => {
 
         expect(await repository.get("weekly", "14/09/2026")).toMatchObject({ok: false, error: {code: "validation"}});
         expect(await repository.get("weekly", "2026-09-14", 0, 101)).toMatchObject({ok: false, error: {code: "validation"}});
+        expect(request).not.toHaveBeenCalled();
+    });
+
+    it("requests the AI insight and can force a refresh", async () => {
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: insightResponse()});
+        const repository = new SummariesRepository(TOKEN);
+
+        expect(await repository.getInsight("monthly", "2026-09-14")).toEqual({ok: true, value: insightResponse()});
+        expect(request).toHaveBeenLastCalledWith(expect.objectContaining({method: "GET", url: "/summaries/monthly/insight", params: {date: "2026-09-14"}}));
+
+        await repository.getInsight("monthly", "2026-09-14", true);
+        expect(request).toHaveBeenLastCalledWith(expect.objectContaining({url: "/summaries/monthly/insight", params: {date: "2026-09-14", refresh: 1}}));
+    });
+
+    it("rejects an invalid insight date before requesting", async () => {
+        const request = vi.spyOn(apiClient, "request");
+
+        expect(await new SummariesRepository(TOKEN).getInsight("daily", "nope")).toMatchObject({ok: false, error: {code: "validation"}});
         expect(request).not.toHaveBeenCalled();
     });
 });

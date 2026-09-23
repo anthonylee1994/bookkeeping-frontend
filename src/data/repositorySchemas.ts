@@ -8,6 +8,7 @@ import {
     recurringRuleInputSchema,
     recurringRuleSchema,
     responseCentsSchema,
+    summaryInsightSchema,
     transactionRowSchema,
     transactionSchema,
     userSchema,
@@ -110,6 +111,8 @@ export const summaryResponseSchema = z.object({
     transfers: transferSummarySchema,
     transactions: paginatedTransactionRowsResponseSchema,
 });
+
+export const summaryInsightResponseSchema = summaryInsightSchema;
 
 export const dashboardResponseSchema = z.object({
     range: rangeSchema,

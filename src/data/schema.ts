@@ -161,3 +161,14 @@ export const aiPreviewSchema = z.object({
     tokens_out: z.number().nullish(),
     latency_ms: z.number().nullish(),
 });
+
+export const summaryInsightSchema = z.object({
+    period: z.enum(["daily", "weekly", "monthly"]),
+    range: z.object({from: z.string(), to: z.string()}),
+    status: z.enum(["success", "failed", "empty"]),
+    text: z.string().nullable(),
+    highlights: z.array(z.string()).default([]),
+    cached: z.boolean(),
+    generated_at: dateTimeSchema.nullable(),
+    error: z.string().nullable(),
+});

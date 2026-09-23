@@ -8,6 +8,7 @@ import {PageHeader} from "@/components/layout/PageHeader";
 import type {SummaryPeriod} from "@/data/types";
 import {SummaryAccountBreakdown} from "@/features/summaries/SummaryAccountBreakdown";
 import {SummaryCalendarCard} from "@/features/summaries/SummaryCalendarCard";
+import {SummaryInsightCard} from "@/features/summaries/SummaryInsightCard";
 import {SummaryPeriodControl} from "@/features/summaries/SummaryPeriodControl";
 import {SummaryPeriodNavigator} from "@/features/summaries/SummaryPeriodNavigator";
 import {SummaryTotals} from "@/features/summaries/SummaryTotals";
@@ -58,6 +59,7 @@ export const SummariesPage = () => {
         return (
             <Stack gap="5">
                 <SummaryTotals summary={summary} />
+                <SummaryInsightCard summary={summary} period={period} date={date} />
                 {period === "monthly" ? <SummaryCalendarCard daily={summary.daily} date={date} netCents={summary.net_cents} onSelectDate={iso => commit({period: "daily", date: iso})} /> : null}
                 <SimpleGrid columns={{base: 1, lg: 2}} gap="4">
                     <CategoryBreakdownChart

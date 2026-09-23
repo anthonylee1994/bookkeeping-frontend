@@ -265,6 +265,20 @@ export type Summary = {
     transactions: Paginated<TransactionRow>;
 };
 
+export type SummaryInsightStatus = "success" | "failed" | "empty";
+
+/** AI 收支概況；`status` 為 `empty` 代表期間無數據，`failed` 代表未能生成。 */
+export type SummaryInsight = {
+    period: SummaryPeriod;
+    range: Range;
+    status: SummaryInsightStatus;
+    text: string | null;
+    highlights: string[];
+    cached: boolean;
+    generated_at: string | null;
+    error: string | null;
+};
+
 export type Dashboard = {
     range: Range;
     income_cents: number;

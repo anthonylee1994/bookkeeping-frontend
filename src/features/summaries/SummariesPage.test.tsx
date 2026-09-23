@@ -2,7 +2,7 @@ import {beforeEach, describe, expect, it, vi} from "vitest";
 import {screen, waitFor} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {MemoryRouter, Route, Routes, useLocation} from "react-router";
-import type {Summary, TransactionRow} from "@/data/types";
+import type {Summary, SummaryInsight, TransactionRow} from "@/data/types";
 import {SummariesPage} from "@/features/summaries/SummariesPage";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
@@ -18,10 +18,12 @@ vi.mock("recharts", () => ({
 }));
 
 const getMock = vi.hoisted(() => vi.fn());
+const getInsightMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/data/summariesRepository", () => ({
     SummariesRepository: class {
         get = getMock;
+        getInsight = getInsightMock;
     },
 }));
 
@@ -68,6 +70,17 @@ const paginatedSummary: Summary = {
     transactions: {data: [expenseTransaction], meta: {page: 1, per_page: 25, total: 40, total_pages: 2}},
 };
 
+const insightFixture: SummaryInsight = {
+    period: "monthly",
+    range: summaryFixture.range,
+    status: "success",
+    text: "本月收入穩定，支出集中喺飲食。",
+    highlights: ["飲食支出佔比最高。"],
+    cached: false,
+    generated_at: "2026-09-16T12:00:00+08:00",
+    error: null,
+};
+
 const TransactionsStub = () => {
     const location = useLocation();
     return <div>{`TRANSACTIONS:${location.search}`}</div>;
@@ -86,6 +99,8 @@ function renderSummaries(entry = "/summaries?period=monthly&date=2026-09-16"): v
 
 beforeEach(() => {
     getMock.mockReset();
+    getInsightMock.mockReset();
+    getInsightMock.mockResolvedValue({ok: true, value: insightFixture});
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
     useAppStore.setState({...domainTestState, referenceLoaded: true});
 });
@@ -217,5 +232,30 @@ describe("SummariesPage", () => {
         await user.click(screen.getByRole("button", {name: "重試"}));
 
         expect(await screen.findByText("淨額")).toBeInTheDocument();
+    });
+
+    it("shows the AI insight and retries with refresh after a failure", async () => {
+        const user = userEvent.setup();
+        getMock.mockResolvedValue({ok: true, value: summaryFixture});
+        getInsightMock.mockResolvedValueOnce({ok: true, value: {...insightFixture, status: "failed", text: null, error: "bad"}});
+        getInsightMock.mockResolvedValueOnce({ok: true, value: insightFixture});
+        renderSummaries();
+
+        expect(await screen.findByText("暫時未能生成 AI 收支概況")).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", {name: "重試"}));
+
+        expect(await screen.findByText("本月收入穩定，支出集中喺飲食。")).toBeInTheDocument();
+        expect(screen.getByText("飲食支出佔比最高。")).toBeInTheDocument();
+        expect(getInsightMock).toHaveBeenLastCalledWith("monthly", "2026-09-16", true);
+    });
+
+    it("does not request an insight when the period has no transactions", async () => {
+        getMock.mockResolvedValue({ok: true, value: {...summaryFixture, transactions: {data: [], meta: {page: 1, per_page: 25, total: 0, total_pages: 0}}}});
+        renderSummaries();
+
+        await screen.findByText("淨額");
+        expect(screen.queryByText("AI 收支概況")).not.toBeInTheDocument();
+        expect(getInsightMock).not.toHaveBeenCalled();
     });
 });

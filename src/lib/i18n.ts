@@ -444,6 +444,9 @@ export const messages = {
         calendarWeekdaySat: {id: "summaries.calendarWeekdaySat", defaultMessage: "六"},
         calendarDayLabel: {id: "summaries.calendarDayLabel", defaultMessage: "{date}：淨收支 {amount}"},
         loadFailed: {id: "summaries.loadFailed", defaultMessage: "無法載入報表資料"},
+        insightTitle: {id: "summaries.insightTitle", defaultMessage: "AI 收支概況"},
+        insightFailed: {id: "summaries.insightFailed", defaultMessage: "暫時未能生成 AI 收支概況"},
+        insightDisclaimer: {id: "summaries.insightDisclaimer", defaultMessage: "AI 內容只供參考，實際數字以報表為準。"},
     },
     recurring: {
         createTitle: {id: "recurring.createTitle", defaultMessage: "新增定期交易"},

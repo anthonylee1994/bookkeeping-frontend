@@ -114,6 +114,12 @@ const config = defineConfig({
                 income: {value: {base: "{colors.green.600}", _dark: "{colors.green.400}"}},
                 expense: {value: {base: "{colors.red.600}", _dark: "{colors.red.400}"}},
                 transfer: {value: {base: "{colors.blue.600}", _dark: "{colors.blue.400}"}},
+                /** AI 生成內容（報表頁「AI 收支概況」）專用淡藍底，同一般白色 card 區分。 */
+                ai: {
+                    bg: {value: {base: "{colors.blue.50}", _dark: "{colors.blue.900}"}},
+                    border: {value: {base: "{colors.blue.200}", _dark: "{colors.blue.800}"}},
+                    fg: {value: {base: "{colors.blue.500}", _dark: "{colors.blue.300}"}},
+                },
             },
         },
         recipes: {

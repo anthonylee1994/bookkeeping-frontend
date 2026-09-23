@@ -1,11 +1,35 @@
 import {describe, expect, it} from "vitest";
-import {periodRange, periodRangeLabel, periodLabel, shiftPeriod} from "@/features/summaries/summariesFormat";
+import type {Summary} from "@/data/types";
+import {periodRange, periodRangeLabel, periodLabel, shiftPeriod, summaryInsightKey} from "@/features/summaries/summariesFormat";
+
+function summary(overrides: Partial<Summary> = {}): Summary {
+    return {
+        range: {from: "2026-09-01T00:00:00+08:00", to: "2026-09-30T23:59:59+08:00"},
+        income_cents: 100_000,
+        expense_cents: 40_000,
+        net_cents: 60_000,
+        daily: [],
+        by_category: [],
+        by_account: [],
+        transfers: {count: 0, total_cents: 0},
+        transactions: {data: [], meta: {page: 1, per_page: 25, total: 2, total_pages: 1}},
+        ...overrides,
+    };
+}
 
 describe("summariesFormat", () => {
     it("labels each period in Chinese", () => {
         expect(periodLabel("daily")).toBe("日");
         expect(periodLabel("weekly")).toBe("週");
         expect(periodLabel("monthly")).toBe("月");
+    });
+
+    it("keys the AI insight on aggregates and row count, not pagination", () => {
+        const base = summaryInsightKey(summary());
+        expect(summaryInsightKey(summary())).toBe(base);
+        expect(summaryInsightKey(summary({transactions: {data: [], meta: {page: 2, per_page: 25, total: 2, total_pages: 1}}}))).toBe(base);
+        expect(summaryInsightKey(summary({expense_cents: 40_001}))).not.toBe(base);
+        expect(summaryInsightKey(summary({transactions: {data: [], meta: {page: 1, per_page: 25, total: 3, total_pages: 1}}}))).not.toBe(base);
     });
 
     it("keeps the week range Monday to Sunday for any anchor day", () => {

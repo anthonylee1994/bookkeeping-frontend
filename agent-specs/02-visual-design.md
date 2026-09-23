@@ -15,6 +15,7 @@
 - Background：gray.50（dark gray.950）；surface：white（dark gray.900）
 - Primary action：`brand.solid` = emerald 700 `#047857`（dark：emerald 500 `#10b981`）；focus ring `brand.500`
 - Income：green；expense：red；transfer：blue（semantic token，必須配合正負號／文字）
+- AI 生成內容（報表頁「AI 收支概況」）：`ai.bg` 淡藍底（light blue.50／dark blue.900）、`ai.border` blue.200、`ai.fg` blue.700，令佢同一般白色 card 一眼分得開
 - Border radius：控件 10px（`radii.lg`，semantic `l2`）、card 14px（`radii.xl`）、drawer 18px（`radii.2xl`）
 - Touch target：最少 `44px × 44px`
 - 字級（theme 自訂 scale）：body `md` 15px、secondary `sm` 13px、meta `xs` 12px

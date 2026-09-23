@@ -1,8 +1,17 @@
-import type {SummaryPeriod} from "@/data/types";
+import type {Summary, SummaryPeriod} from "@/data/types";
 import {addPeriod, endOfPeriod, startOfPeriod, toDisplayDate, toDisplayMonth, toIsoDate} from "@/lib/date";
 import {formatMessage, messages} from "@/lib/i18n";
 
 export const SUMMARY_PERIODS: readonly SummaryPeriod[] = ["daily", "weekly", "monthly"];
+
+/**
+ * AI 收支概況的輸入指紋。只計 deterministic aggregate 同交易總數，唔計分頁，
+ * 所以純粹轉交易頁碼唔會觸發重新生成；交易一增／改／刪就會變。
+ */
+export function summaryInsightKey(summary: Summary): string {
+    const {transactions, ...aggregate} = summary;
+    return JSON.stringify([aggregate, transactions.meta.total]);
+}
 
 export function periodLabel(period: SummaryPeriod): string {
     if (period === "daily") return formatMessage(messages.summaries.periodDaily);

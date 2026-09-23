@@ -7,6 +7,7 @@
 - Local repository result／error normalization
 - URL filter serialize／parse
 - Recurring frequency label 及 payload mapping
+- Summary insight invalidation key（aggregate／筆數敏感、分頁唔敏感）
 
 ## 12.2 Component / integration
 
@@ -18,6 +19,7 @@
 - 交易 drawer 導航：由詳情撳「修改」停喺 `/edit`、唔彈返列表；關閉詳情返回列表並保留 filter；列表喺 drawer 後面保持 mount
 - 定期交易：status tab、pause／resume／run now／skip next／delete 文案
 - AI upload／parse／edit／confirm，以及每段失敗重試
+- 報表：AI 收支概況 loading／success／失敗重試，以及期間無交易時唔顯示、唔發請求
 - PWA：update banner、install prompt（延遲、dismiss 記憶）、offline ready
 - Repository validation errors 正確套用到 form input
 
