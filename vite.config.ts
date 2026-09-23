@@ -31,6 +31,14 @@ export default defineConfig(() => {
                     // 如遇 stale cache 可於 DevTools 清 Cache Storage。
                     enabled: true,
                     type: "module",
+                    /**
+                     * Dev 底下所有 asset 都由 Vite 喺記憶體 serve，`dev-dist` 淨係得 plugin 自己生成嘅
+                     * `sw.js`／`workbox-*.js`（兩者都被 globIgnores 排除），所以 `globPatterns` 夾零個檔，
+                     * workbox-build 會出「glob pattern doesn't match any files」warning。
+                     * 開咗呢個 flag，plugin 會將 dev 嘅 globPatterns 換成一個空嘅 `suppress-warnings.js`，
+                     * 令 precache manifest 有一項，warning 消失。只影響 dev，build 不受影響。
+                     */
+                    suppressWarnings: true,
                 },
                 manifest: {
                     name: "簡單記帳",

@@ -16,6 +16,7 @@
 - `globPatterns` 會 precache build 出嘅 js／css／html／svg／png／ico／woff／woff2；API 回應唔會被 precache
 - 新版本採 prompt update：顯示「有新版本／重新載入」banner，由用戶按「重新載入」套用
 - 不可在用戶填寫表單時自動 reload
+- Dev 模式（`devOptions`）同樣啟用 SW 方便測試 install／離線；因 dev asset 由 Vite 喺記憶體 serve，`dev-dist` 冇檔可 precache，會開 `devOptions.suppressWarnings` 避免 workbox-build 出「glob pattern doesn't match any files」warning（只影響 dev，build 不受影響）
 
 ## 8.3 Offline UX
 
