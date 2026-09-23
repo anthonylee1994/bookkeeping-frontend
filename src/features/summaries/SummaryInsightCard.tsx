@@ -14,12 +14,15 @@ type SummaryInsightCardProps = {
 
 /**
  * AI 收支概況卡。用淡藍底（`ai.*` semantic token）同其他白色報表卡區分，
- * 令用戶一眼睇到呢段係 AI 生成、只供參考。只喺期間有收入／支出交易時出現；
- * 失敗時顯示可重試嘅提示，永遠唔會遮住上面 deterministic 嘅數字。
+ * 令用戶一眼睇到呢段係 AI 生成、只供參考。
+ *
+ * 只喺 `weekly` / `monthly` 期間、而且期間有收入／支出交易時出現；日報太短、
+ * 冇洞察價值，所以 `daily` 一律唔顯示亦唔會發請求。失敗時顯示可重試嘅提示，
+ * 永遠唔會遮住上面 deterministic 嘅數字。
  */
 export const SummaryInsightCard = ({summary, period, date}: SummaryInsightCardProps) => {
     const intl = useIntl();
-    const enabled = summary.transactions.meta.total > 0;
+    const enabled = period !== "daily" && summary.transactions.meta.total > 0;
     const {insight, isLoading, error, reload} = useSummaryInsight(period, date, enabled, summaryInsightKey(summary));
 
     if (!enabled || insight?.status === "empty") return null;

@@ -258,4 +258,14 @@ describe("SummariesPage", () => {
         expect(screen.queryByText("AI 收支概況")).not.toBeInTheDocument();
         expect(getInsightMock).not.toHaveBeenCalled();
     });
+
+    it("does not show or request the AI insight for daily periods", async () => {
+        getMock.mockResolvedValue({ok: true, value: summaryFixture});
+        renderSummaries("/summaries?period=daily&date=2026-09-16");
+
+        await waitFor(() => expect(getMock).toHaveBeenCalledWith("daily", "2026-09-16", 1, 25));
+
+        expect(screen.queryByText("AI 收支概況")).not.toBeInTheDocument();
+        expect(getInsightMock).not.toHaveBeenCalled();
+    });
 });
