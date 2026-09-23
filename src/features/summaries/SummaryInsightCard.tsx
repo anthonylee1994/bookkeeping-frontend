@@ -28,7 +28,7 @@ export const SummaryInsightCard = ({summary, period, date}: SummaryInsightCardPr
     if (!enabled || insight?.status === "empty") return null;
 
     const retry = (
-        <Button size="sm" variant="outline" onClick={reload} flexShrink="0">
+        <Button borderColor="blue.500" color="blue.500" backgroundColor="transparent" size="sm" variant="outline" onClick={reload} flexShrink="0">
             {intl.formatMessage(messages.common.retry)}
         </Button>
     );
