@@ -16,6 +16,7 @@ const listMock = vi.hoisted(() => vi.fn());
 const accountsListMock = vi.hoisted(() => vi.fn());
 const categoriesListMock = vi.hoisted(() => vi.fn());
 const merchantsSearchMock = vi.hoisted(() => vi.fn());
+const queryMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/data/transactionsRepository", () => ({
     TransactionsRepository: class {
@@ -35,6 +36,12 @@ vi.mock("@/data/categoriesRepository", () => ({
 vi.mock("@/data/merchantsRepository", () => ({
     MerchantsRepository: class {
         search = merchantsSearchMock;
+    },
+}));
+vi.mock("@/data/receiptsRepository", () => ({
+    MAX_QUERY_TEXT: 500,
+    ReceiptsRepository: class {
+        query = queryMock;
     },
 }));
 
@@ -133,6 +140,7 @@ beforeEach(() => {
     accountsListMock.mockReset();
     categoriesListMock.mockReset();
     merchantsSearchMock.mockReset();
+    queryMock.mockReset();
 
     listMock.mockResolvedValue({ok: true, value: {data: [expenseTransaction], meta}});
     accountsListMock.mockResolvedValue({ok: true, value: domainTestState.accounts});
@@ -197,6 +205,27 @@ describe("TransactionsPage", () => {
 
         await waitFor(() => expect(listMock).toHaveBeenLastCalledWith(expect.objectContaining({kind: "income", page: 1})));
         expect(screen.getByTestId("location")).toHaveTextContent("kind=income");
+    });
+
+    it("applies filters from an AI search to the URL", async () => {
+        const user = userEvent.setup();
+        queryMock.mockResolvedValue({
+            ok: true,
+            value: {status: "success", filters: {from: "2026-08-01", to: "2026-08-31", kind: "expense", q: "Starbucks"}, explanation: "上月 Starbucks 支出"},
+        });
+        renderTransactions();
+
+        await screen.findByText(/早餐/);
+
+        await user.click(screen.getByRole("button", {name: "AI 搜尋"}));
+        await user.type(screen.getByLabelText("AI 搜尋交易"), "上月 Starbucks 幾多");
+        await user.click(screen.getByRole("button", {name: "搜尋"}));
+
+        await waitFor(() => {
+            const lastCall = listMock.mock.calls.at(-1)?.[0] as Record<string, unknown>;
+            expect(lastCall).toEqual(expect.objectContaining({from: "2026-08-01", to: "2026-08-31", kind: "expense", keyword: "Starbucks", page: 1}));
+        });
+        expect(screen.getByTestId("location")).toHaveTextContent("q=Starbucks");
     });
 
     it("removes a single filter from its chip", async () => {

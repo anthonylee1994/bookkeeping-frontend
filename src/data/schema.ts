@@ -169,6 +169,28 @@ export const aiPreviewSchema = z.object({
     latency_ms: z.number().nullish(),
 });
 
+export const aiQueryFiltersSchema = z.object({
+    from: z.string().optional(),
+    to: z.string().optional(),
+    kind: z.enum(["income", "expense", "transfer"]).optional(),
+    account_id: uuidSchema.optional(),
+    category_id: uuidSchema.optional(),
+    merchant_id: uuidSchema.optional(),
+    q: z.string().optional(),
+    min: responseCentsSchema.nonnegative().optional(),
+    max: responseCentsSchema.nonnegative().optional(),
+});
+
+export const aiQuerySchema = z.object({
+    status: z.enum(["success", "partial"]),
+    filters: aiQueryFiltersSchema.nullable(),
+    explanation: z.string().nullish(),
+    error: z.string().nullish(),
+    tokens_in: z.number().nullish(),
+    tokens_out: z.number().nullish(),
+    latency_ms: z.number().nullish(),
+});
+
 export const summaryInsightSchema = z.object({
     period: z.enum(["daily", "weekly", "monthly"]),
     range: z.object({from: z.string(), to: z.string()}),

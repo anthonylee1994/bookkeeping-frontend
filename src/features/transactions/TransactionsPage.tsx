@@ -7,6 +7,7 @@ import {LoadingIndicator} from "@/components/layout/LoadingIndicator";
 import {PageHeader} from "@/components/layout/PageHeader";
 import type {SortOrder, Transaction, TransactionFilters, TransactionSortField} from "@/data/types";
 import {useScan} from "@/features/receiptScan/ScanProvider";
+import {AiQuerySearch} from "@/features/transactions/AiQuerySearch";
 import {TransactionFilterChips} from "@/features/transactions/TransactionFilterChips";
 import {TransactionFiltersPanel} from "@/features/transactions/TransactionFiltersPanel";
 import {TransactionList} from "@/features/transactions/TransactionList";
@@ -224,6 +225,7 @@ export const TransactionsPage = () => {
                         />
                     }
                 />
+                <AiQuerySearch onApply={applyFilters} />
                 <TransactionFilterChips chips={chips} onRemove={removeFilter} onClearAll={() => commit({})} />
                 <Box id="transaction-list-top" />
                 {renderBody()}

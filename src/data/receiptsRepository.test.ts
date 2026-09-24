@@ -92,6 +92,28 @@ describe("ReceiptsRepository", () => {
         expect(request).not.toHaveBeenCalled();
     });
 
+    it("queries transactions with trimmed text", async () => {
+        const query = {
+            status: "success" as const,
+            filters: {from: "2026-08-01", to: "2026-08-31", kind: "expense" as const, q: "Starbucks", min: 1000},
+            explanation: "上月 Starbucks 支出",
+        };
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: query});
+
+        const result = await new ReceiptsRepository(TOKEN).query(" 上月 Starbucks 幾多 ");
+        expect(result).toEqual({ok: true, value: query});
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/query", data: {text: "上月 Starbucks 幾多"}}));
+    });
+
+    it("rejects blank or oversized query text locally", async () => {
+        const request = vi.spyOn(apiClient, "request");
+        const repository = new ReceiptsRepository(TOKEN);
+
+        expect(await repository.query("   ")).toMatchObject({ok: false, error: {code: "validation"}});
+        expect(await repository.query("a".repeat(501))).toMatchObject({ok: false, error: {code: "validation"}});
+        expect(request).not.toHaveBeenCalled();
+    });
+
     it("confirms an AI transaction with the import log id and an idempotency key", async () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transaction: transactionRow}});
         const input = {

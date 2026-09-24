@@ -222,6 +222,35 @@ export type TransactionFilters = {
     per_page?: number;
 };
 
+/**
+ * `POST /ai/query` 回傳、可直接寫入交易列表 URL 嘅 filter params。
+ * Key 同 URL query 一致（`q`／`min`／`max`），交俾 `parseTransactionFilters` 正規化。
+ */
+export type AiQueryFilters = {
+    from?: string;
+    to?: string;
+    kind?: TransactionKind;
+    account_id?: UUID;
+    category_id?: UUID;
+    merchant_id?: UUID;
+    q?: string;
+    min?: number;
+    max?: number;
+};
+
+export type AiQueryStatus = "success" | "partial";
+
+/** 自然語言查詢結果；`filters` 為 null 或空即代表 AI 譯唔到可用條件。 */
+export type AiQuery = {
+    status: AiQueryStatus;
+    filters: AiQueryFilters | null;
+    explanation?: string | null;
+    error?: string | null;
+    tokens_in?: number | null;
+    tokens_out?: number | null;
+    latency_ms?: number | null;
+};
+
 export type Paginated<T> = {
     data: T[];
     meta: PaginationMeta;

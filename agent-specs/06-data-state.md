@@ -111,6 +111,8 @@ type DraftState = {
 
 ## 6.5 Repository contract
 
-Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview（`AiPreview` 嘅多筆拆單結果喺 `parsed_items`）、AI 文字解讀（`interpret`）、summaries（含 AI 收支概況 `getInsight`）及 recurring rules。每個 function 只負責 HTTP（加上 url／params／idempotency key），回傳 `LocalResult<T>`。
+Repository 必須提供 typed functions，覆蓋 auth、dashboard、transactions、accounts、categories、merchants、receipts、AI preview（`AiPreview` 嘅多筆拆單結果喺 `parsed_items`）、AI 文字解讀（`interpret`）、AI 自然語言查詢（`query`，回 URL 同名 filter params）、summaries（含 AI 收支概況 `getInsight`）及 recurring rules。每個 function 只負責 HTTP（加上 url／params／idempotency key），回傳 `LocalResult<T>`。
 
 Feature hook 在 `requestKey`（token／filter／reload token；交易列表另加 `transactionsRevision`）改變時重新抓取：`useDomainReference` 會將 accounts／categories／merchants 寫入 appStore，`useTransactions`／`useDashboard`／`useSummary`／`useRecurringRules` 則用 component-local state。不得在 component 直接呼叫 axios。`useSummaryInsight` 另加一個由 summary aggregate 派生嘅 `invalidationKey`（見 §5.7），避免純粹轉交易頁碼就重新生成 AI 概況。AI 打字記帳（`interpret`）只屬 on-demand 呼叫：解讀結果、錯誤同原文用 component-local state；單筆結果填落表單，**多筆拆單嘅待覆核 preview 放 `uiStore.pendingAiBatch`**（非 persist，見 §6.4），因為多筆時新增交易 drawer 已經閂、覆核 drawer 掛喺 `TransactionsLayout`。原文只存記憶體、唔入 appStore、唔 persist（見 §5.10、§8.3）。
+
+AI 自然語言查詢（`query`）同樣只屬 on-demand：原文、loading、error 同「已套用」提示用 `AiQuerySearch` 嘅 component-local state；成功後只將回傳 filter 寫入交易列表 URL（URL 仍係 filter 唯一 source of truth，唔另存 store）。查詢唔會改任何 domain data，亦唔 persist。
