@@ -176,9 +176,8 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         setSuggestingCategory(false);
     };
 
-    /** 入帳 / 修改成功後清走 AI 分類建議狀態，避免殘留喺下一個表單。 */
+    /** 入帳 / 修改成功後清走 AI 分類建議狀態，避免殘留喺下一個表單；失效 in-flight 請求由 onSubmit 做。 */
     const clearCategorySuggestion = () => {
-        suggestionSeqRef.current += 1;
         setAiCategoryId(null);
         setCategorySuggestionError(null);
         setSuggestingCategory(false);
@@ -240,7 +239,14 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
 
     return (
         <React.Fragment>
-            <form onSubmit={submit} noValidate>
+            <form
+                onSubmit={event => {
+                    // 送出即令任何 in-flight AI 分類建議失效（ref 只喺 event handler 掂）。
+                    suggestionSeqRef.current += 1;
+                    void submit(event);
+                }}
+                noValidate
+            >
                 <Stack gap="5">
                     {accounts.length > 0 ? null : (
                         <Alert.Root status="warning" role="alert" rounded="lg">
