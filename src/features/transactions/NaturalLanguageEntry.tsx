@@ -1,5 +1,5 @@
 import React from "react";
-import {Alert, Button, Field, HStack, Input, Stack, Text, Textarea} from "@chakra-ui/react";
+import {Alert, Button, Field, HStack, Stack, Text, Textarea} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {MAX_INTERPRET_TEXT, ReceiptsRepository} from "@/data/receiptsRepository";
 import type {AiPreview} from "@/data/types";
