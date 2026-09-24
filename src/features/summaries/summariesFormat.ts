@@ -31,7 +31,7 @@ export function periodRangeLabel(date: string, period: SummaryPeriod): string {
     const {from, to} = periodRange(date, period);
     if (period === "daily") return toDisplayDate(from);
 
-    return `${toDisplayDate(from)} – ${toDisplayDate(to)}`;
+    return `${toDisplayDate(from)}（${formatMessage(messages.summaries.weekStart)}） – ${toDisplayDate(to)}（${formatMessage(messages.summaries.weekEnd)}）`;
 }
 
 /** 依期間加減，回香港時區 `YYYY-MM-DD`。 */

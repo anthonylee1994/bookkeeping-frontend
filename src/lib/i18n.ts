@@ -447,6 +447,8 @@ export const messages = {
         transactionsDescription: {id: "summaries.transactionsDescription", defaultMessage: "只包括收入及支出，轉帳另計。"},
         noTransactions: {id: "summaries.noTransactions", defaultMessage: "期間內沒有交易"},
         calendarTitle: {id: "summaries.calendarTitle", defaultMessage: "收支日曆"},
+        dailyChartTitle: {id: "summaries.dailyChartTitle", defaultMessage: "每日收支走勢"},
+        dailyChartTotal: {id: "summaries.dailyChartTotal", defaultMessage: "期間淨收支"},
         calendarDescription: {id: "summaries.calendarDescription", defaultMessage: "每日淨收支"},
         calendarNetLabel: {id: "summaries.calendarNetLabel", defaultMessage: "本月淨收支"},
         calendarWeekdaySun: {id: "summaries.calendarWeekdaySun", defaultMessage: "日"},

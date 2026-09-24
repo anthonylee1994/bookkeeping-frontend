@@ -15,6 +15,11 @@ vi.mock("recharts", () => ({
     Pie: () => null,
     Cell: () => null,
     Tooltip: () => null,
+    BarChart: () => null,
+    Bar: () => null,
+    CartesianGrid: () => null,
+    XAxis: () => null,
+    YAxis: () => null,
 }));
 
 const getMock = vi.hoisted(() => vi.fn());
@@ -202,6 +207,23 @@ describe("SummariesPage", () => {
         expect(screen.getByLabelText(/2026年9月14日：淨收支/)).toBeInTheDocument();
     });
 
+    it("shows the daily chart for monthly and weekly periods but not daily", async () => {
+        getMock.mockResolvedValue({ok: true, value: summaryFixture});
+        const {unmount} = renderWithIntl(
+            <MemoryRouter initialEntries={["/summaries?period=monthly&date=2026-09-16"]}>
+                <Routes>
+                    <Route path="/summaries" element={<SummariesPage />} />
+                </Routes>
+            </MemoryRouter>
+        );
+        expect(await screen.findByRole("img", {name: "每日收支走勢"})).toBeInTheDocument();
+        expect(screen.getByRole("table", {name: "每日收支走勢"})).toHaveTextContent("2026-09-14$500.00");
+        unmount();
+
+        renderSummaries("/summaries?period=weekly&date=2026-09-16");
+        expect(await screen.findByRole("img", {name: "每日收支走勢"})).toBeInTheDocument();
+    });
+
     it("opens the daily summary when a calendar day is selected", async () => {
         const user = userEvent.setup();
         getMock.mockResolvedValue({ok: true, value: summaryFixture});
@@ -256,6 +278,7 @@ describe("SummariesPage", () => {
 
         await screen.findByText("淨額");
         expect(screen.queryByText("AI 收支概況")).not.toBeInTheDocument();
+        expect(screen.getByRole("img", {name: "每日收支走勢"})).toBeInTheDocument();
         expect(getInsightMock).not.toHaveBeenCalled();
     });
 
@@ -266,6 +289,7 @@ describe("SummariesPage", () => {
         await waitFor(() => expect(getMock).toHaveBeenCalledWith("daily", "2026-09-16", 1, 25));
 
         expect(screen.queryByText("AI 收支概況")).not.toBeInTheDocument();
+        expect(screen.queryByRole("img", {name: "每日收支走勢"})).not.toBeInTheDocument();
         expect(getInsightMock).not.toHaveBeenCalled();
     });
 });
