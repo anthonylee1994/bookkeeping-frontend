@@ -1,9 +1,9 @@
 import {apiRequest} from "./apiRepository";
 import {localValidation} from "./localResult";
-import {aiResponseSchema, receiptUploadResponseSchema, transactionRowResponseSchema} from "./repositorySchemas";
+import {aiResponseSchema, categorySuggestionResponseSchema, receiptUploadResponseSchema, transactionRowResponseSchema} from "./repositorySchemas";
 import {aiQuerySchema, transactionInputSchema, uuidSchema} from "./schema";
 import {formatMessage, messages} from "../lib/i18n";
-import type {AiPreview, AiQuery, LocalError, LocalResult, ReceiptUpload, TransactionInput, TransactionRow, UUID} from "./types";
+import type {AiPreview, AiQuery, CategorySuggestion, LocalError, LocalResult, ReceiptUpload, TransactionInput, TransactionRow, UUID} from "./types";
 
 export const MAX_RECEIPT_BYTES = 10 * 1024 * 1024;
 export const RECEIPT_ACCEPT = "image/jpeg,image/png,image/webp";
@@ -11,6 +11,9 @@ export const RECEIPT_ACCEPT = "image/jpeg,image/png,image/webp";
 export const MAX_INTERPRET_TEXT = 500;
 /** 自然語言查詢嘅輸入上限（字元），同 backend `MAX_QUERY_TEXT` 一致。 */
 export const MAX_QUERY_TEXT = 500;
+/** 自動分類建議嘅商戶名／備註輸入上限（字元），同 backend `MAX_SUGGEST_*` 一致。 */
+export const MAX_SUGGEST_MERCHANT = 200;
+export const MAX_SUGGEST_NOTE = 500;
 
 const receiptTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -59,6 +62,23 @@ export class ReceiptsRepository {
         if (trimmed === "") return localValidation(formatMessage(messages.validation.queryTextEmpty), {text: formatMessage(messages.fields.required)});
         if (trimmed.length > MAX_QUERY_TEXT) return localValidation(formatMessage(messages.validation.queryTextTooLong), {text: formatMessage(messages.fields.queryTextTooLong)});
         return apiRequest(this.#token, {method: "POST", url: "/ai/query", data: {text: trimmed}}, aiQuerySchema);
+    }
+
+    /** 自動分類建議：由商戶／備註問 AI 拎分類建議（純建議，唔寫入任何資料）。 */
+    async suggestCategory(input: {kind: "income" | "expense"; merchantName: string; note: string}): Promise<LocalResult<CategorySuggestion>> {
+        const merchantName = input.merchantName.trim();
+        const note = input.note.trim();
+        if (merchantName === "" && note === "") return localValidation(formatMessage(messages.validation.suggestCategoryEmpty), {merchant_name: formatMessage(messages.fields.required)});
+        if (merchantName.length > MAX_SUGGEST_MERCHANT || note.length > MAX_SUGGEST_NOTE) return localValidation(formatMessage(messages.validation.suggestCategoryTooLong));
+        return apiRequest(
+            this.#token,
+            {
+                method: "POST",
+                url: "/ai/suggest-category",
+                data: {kind: input.kind, merchant_name: merchantName === "" ? null : merchantName, note: note === "" ? null : note},
+            },
+            categorySuggestionResponseSchema
+        );
     }
 
     async confirm(input: TransactionInput, importLogId: UUID, idempotencyKey: UUID): Promise<LocalResult<TransactionRow>> {

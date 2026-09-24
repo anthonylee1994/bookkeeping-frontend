@@ -15,6 +15,7 @@ const createMock = vi.hoisted(() => vi.fn());
 const updateMock = vi.hoisted(() => vi.fn());
 const interpretMock = vi.hoisted(() => vi.fn());
 const confirmMock = vi.hoisted(() => vi.fn());
+const suggestCategoryMock = vi.hoisted(() => vi.fn());
 const merchantSearchMock = vi.hoisted(() => vi.fn());
 const merchantCreateMock = vi.hoisted(() => vi.fn());
 const merchantUpdateMock = vi.hoisted(() => vi.fn());
@@ -31,6 +32,7 @@ vi.mock("@/data/receiptsRepository", () => ({
     ReceiptsRepository: class {
         interpret = interpretMock;
         confirm = confirmMock;
+        suggestCategory = suggestCategoryMock;
     },
 }));
 
@@ -78,6 +80,8 @@ beforeEach(() => {
     updateMock.mockReset();
     interpretMock.mockReset();
     confirmMock.mockReset();
+    suggestCategoryMock.mockReset();
+    suggestCategoryMock.mockResolvedValue({ok: true, value: {status: "partial", category_id: null, category_name: null, confidence: null}});
     merchantSearchMock.mockReset();
     merchantCreateMock.mockReset();
     merchantUpdateMock.mockReset();
@@ -301,5 +305,58 @@ describe("TransactionForm", () => {
         const input = updateMock.mock.calls[0][1] as Record<string, unknown>;
         expect(input).not.toHaveProperty("source");
         expect(input.note).toBe("已修改");
+    });
+
+    it("asks AI for a category on merchant blur and applies it with a badge", async () => {
+        const user = userEvent.setup();
+        const categoryId = domainTestState.categories[1].id;
+        suggestCategoryMock.mockResolvedValue({ok: true, value: {status: "success", category_id: categoryId, category_name: "飲食", confidence: 0.8}});
+        renderForm();
+
+        await user.type(screen.getByLabelText("商戶"), "譚仔");
+        await user.tab();
+
+        await waitFor(() => expect(screen.getByLabelText("分類")).toHaveValue(categoryId));
+        expect(suggestCategoryMock).toHaveBeenCalledWith(expect.objectContaining({kind: "expense", merchantName: "譚仔"}));
+        expect(screen.getByText("AI 建議")).toBeInTheDocument();
+    });
+
+    it("does not ask AI when the merchant's default category already applies", async () => {
+        const user = userEvent.setup();
+        renderForm();
+
+        await user.type(screen.getByLabelText("商戶"), "街角咖啡");
+        await waitFor(() => expect(screen.getByLabelText("分類")).toHaveValue(domainTestState.categories[1].id));
+        await user.tab();
+
+        expect(suggestCategoryMock).not.toHaveBeenCalled();
+    });
+
+    it("lets the user override an AI category and clears the badge", async () => {
+        const user = userEvent.setup();
+        suggestCategoryMock.mockResolvedValue({ok: true, value: {status: "success", category_id: domainTestState.categories[1].id, category_name: "飲食", confidence: 0.8}});
+        renderForm();
+
+        await user.type(screen.getByLabelText("商戶"), "譚仔");
+        await user.tab();
+        await waitFor(() => expect(screen.getByText("AI 建議")).toBeInTheDocument());
+
+        await user.selectOptions(screen.getByLabelText("分類"), "");
+
+        expect(screen.queryByText("AI 建議")).not.toBeInTheDocument();
+    });
+
+    it("shows an inline retry when AI cannot suggest a category", async () => {
+        const user = userEvent.setup();
+        suggestCategoryMock.mockResolvedValue({ok: false, error: {code: "api_failed", message: "暫時無法連接服務"}});
+        renderForm();
+
+        await user.type(screen.getByLabelText("商戶"), "譚仔");
+        await user.tab();
+        expect(await screen.findByText("AI 暫時建議唔到分類")).toBeInTheDocument();
+
+        suggestCategoryMock.mockResolvedValue({ok: true, value: {status: "success", category_id: domainTestState.categories[1].id, category_name: "飲食", confidence: 0.8}});
+        await user.click(screen.getByRole("button", {name: "重試"}));
+        await waitFor(() => expect(screen.getByLabelText("分類")).toHaveValue(domainTestState.categories[1].id));
     });
 });

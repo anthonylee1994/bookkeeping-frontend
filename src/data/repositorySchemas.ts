@@ -3,6 +3,7 @@ import {
     accountSchema,
     aiPreviewSchema,
     categorySchema,
+    categorySuggestionSchema,
     merchantSchema,
     paginationMetaSchema,
     recurringRuleInputSchema,
@@ -60,6 +61,8 @@ export const recurringRulesResponseSchema = listResponseSchema("recurring_rules"
 export const recurringRuleResponseSchema = itemResponseSchema("recurring_rule", recurringRuleSchema);
 
 export const aiResponseSchema = itemResponseSchema("preview", aiPreviewSchema);
+
+export const categorySuggestionResponseSchema = categorySuggestionSchema;
 
 export const paginatedTransactionsResponseSchema = z.union([
     z.object({data: z.array(transactionSchema), meta: paginationMetaSchema}),

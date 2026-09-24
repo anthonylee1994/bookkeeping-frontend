@@ -10,6 +10,7 @@
 - Summary insight invalidation key（aggregate／筆數敏感、分頁唔敏感）
 - AI 文字解讀 repository validation（空白／超過 500 字）及 text → 表單欄位 mapping（重用 `scanModel`），包括多筆 `parsed_items`（`previewItems` 正規化、逐筆 `parsedItemToReviewValues`／`suggested_category_id`）
 - AI 自然語言查詢 repository validation（空白／超過 500 字）及 `aiQueryToFilters`（URL 同名 params `q`／`min`／`max` → `keyword`／`min_amount_cents`／`max_amount_cents`，無效值丟棄、`filters: null` → 空 filter）
+- AI 自動分類建議 repository validation（商戶同備註皆空白）及 request mapping（trim、空白邊傳 `null`、`kind` 原樣傳）
 
 ## 12.2 Component / integration
 
@@ -24,6 +25,7 @@
 - AI 打字記帳：解讀成功預填並提示、低信心／缺欄位標示、`422`／`502` 重試與改用手動、空白唔可送出
 - AI 打字記帳拆單：多筆 `parsed_items` 先閂新增交易 drawer、喺交易 layout 層開批量覆核 drawer、逐筆改／刪、逐筆 `/ai/confirm`（共用 log id、各自 idempotency key）、失敗保留 drawer 同重試、全部成功收 drawer 並 bump revision
 - AI 自然語言查詢：`AiQuerySearch` 面板開合、空白唔可送出、成功將 filter 寫入 URL 並清空輸入、`partial`／空 filters 顯示「解讀唔到」、錯誤保留原文同重試
+- AI 自動分類建議：商戶／備註失焦先觸發、商戶有 default category 時唔發請求、成功套用分類並顯示「AI 建議」badge、用戶改分類清走 badge、失敗顯示 inline 重試
 - 報表：AI 收支概況 loading／success／失敗重試；期間無交易或 `daily` 期間時唔顯示、唔發請求
 - PWA：update banner、install prompt（延遲、dismiss 記憶）、offline ready
 - Repository validation errors 正確套用到 form input

@@ -191,6 +191,17 @@ export const aiQuerySchema = z.object({
     latency_ms: z.number().nullish(),
 });
 
+export const categorySuggestionSchema = z.object({
+    status: z.enum(["success", "partial"]),
+    category_id: uuidSchema.nullable(),
+    category_name: z.string().nullable(),
+    confidence: z.number().nullable(),
+    error: z.string().nullish(),
+    tokens_in: z.number().nullish(),
+    tokens_out: z.number().nullish(),
+    latency_ms: z.number().nullish(),
+});
+
 export const summaryInsightSchema = z.object({
     period: z.enum(["daily", "weekly", "monthly"]),
     range: z.object({from: z.string(), to: z.string()}),

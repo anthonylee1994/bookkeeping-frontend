@@ -114,6 +114,28 @@ describe("ReceiptsRepository", () => {
         expect(request).not.toHaveBeenCalled();
     });
 
+    it("suggests a category from a trimmed merchant name and note", async () => {
+        const suggestion = {
+            status: "success" as const,
+            category_id: "20000000-0000-4000-8000-000000000002",
+            category_name: "飲食",
+            confidence: 0.8,
+        };
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: suggestion});
+
+        const result = await new ReceiptsRepository(TOKEN).suggestCategory({kind: "expense", merchantName: " 茶餐廳 ", note: " 午餐 "});
+        expect(result).toEqual({ok: true, value: suggestion});
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/suggest-category", data: {kind: "expense", merchant_name: "茶餐廳", note: "午餐"}}));
+    });
+
+    it("sends null for the missing side and rejects an all-blank suggestion locally", async () => {
+        const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {status: "partial", category_id: null, category_name: null, confidence: null}});
+
+        expect(await new ReceiptsRepository(TOKEN).suggestCategory({kind: "income", merchantName: "  ", note: "雜項"})).toMatchObject({ok: true});
+        expect(request).toHaveBeenCalledWith(expect.objectContaining({data: {kind: "income", merchant_name: null, note: "雜項"}}));
+        expect(await new ReceiptsRepository(TOKEN).suggestCategory({kind: "expense", merchantName: "   ", note: "  "})).toMatchObject({ok: false, error: {code: "validation"}});
+    });
+
     it("confirms an AI transaction with the import log id and an idempotency key", async () => {
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: {transaction: transactionRow}});
         const input = {

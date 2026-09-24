@@ -240,6 +240,18 @@ export type AiQueryFilters = {
 
 export type AiQueryStatus = "success" | "partial";
 
+/** 自動分類建議結果；`category_id` 為 null 代表 AI 揀唔到或對唔上當前用戶分類。 */
+export type CategorySuggestion = {
+    status: AiQueryStatus;
+    category_id: UUID | null;
+    category_name: string | null;
+    confidence: number | null;
+    error?: string | null;
+    tokens_in?: number | null;
+    tokens_out?: number | null;
+    latency_ms?: number | null;
+};
+
 /** 自然語言查詢結果；`filters` 為 null 或空即代表 AI 譯唔到可用條件。 */
 export type AiQuery = {
     status: AiQueryStatus;

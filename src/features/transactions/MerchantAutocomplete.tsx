@@ -17,9 +17,13 @@ type MerchantAutocompleteProps = {
     error?: string;
     /** 未對應到現有商戶時的初始搜尋字（例如 AI 由單據讀到的名稱）。 */
     defaultQuery?: string;
+    /** 每次輸入內容改變（包括建立新商戶）時通知父層，方便父層攞最新商戶名。 */
+    onQueryChange?: (query: string) => void;
+    /** 商戶欄失焦（例如觸發 AI 分類建議）。 */
+    onBlur?: () => void;
 };
 
-export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, badge, error, defaultQuery = ""}: MerchantAutocompleteProps) => {
+export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, badge, error, defaultQuery = "", onQueryChange, onBlur}: MerchantAutocompleteProps) => {
     const intl = useIntl();
     const token = useAuthStore(state => state.token);
     const selected = merchants.find(merchant => merchant.id === value) ?? null;
@@ -40,6 +44,7 @@ export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, bad
 
     const updateQuery = (next: string) => {
         setQuery(next);
+        onQueryChange?.(next);
         const exact = merchants.find(merchant => merchant.name.localeCompare(next, "zh-HK", {sensitivity: "accent"}) === 0) ?? null;
         onChange(exact);
         setCreateError(null);
@@ -59,6 +64,7 @@ export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, bad
         useAppStore.getState().setMerchants([...current.filter(merchant => merchant.id !== result.value.id), result.value]);
         setResults(previous => [...previous.filter(merchant => merchant.id !== result.value.id), result.value]);
         setQuery(result.value.name);
+        onQueryChange?.(result.value.name);
         onChange(result.value);
         onCreated?.(result.value);
     };
@@ -82,6 +88,7 @@ export const MerchantAutocomplete = ({merchants, value, onChange, onCreated, bad
                         value={query}
                         placeholder={intl.formatMessage(messages.transactions.form.merchantPlaceholder)}
                         onChange={event => updateQuery(event.target.value)}
+                        onBlur={onBlur}
                     />
                 </InputGroup>
                 <datalist id={listId}>
