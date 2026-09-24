@@ -388,6 +388,16 @@ export const messages = {
         cancelled: {id: "interpret.cancelled", defaultMessage: "已取消解讀，可以重試或改為手動輸入。"},
         failed: {id: "interpret.failed", defaultMessage: "解讀唔到，請試清楚啲或者直接手動填。"},
         prefilled: {id: "interpret.prefilled", defaultMessage: "AI 已預填，入帳前請自行核對。"},
+        batchDetected: {id: "interpret.batchDetected", defaultMessage: "偵測到 {count} 筆交易，請逐筆覆核。"},
+    },
+    batch: {
+        reviewTitle: {id: "batch.reviewTitle", defaultMessage: "AI 拆單覆核"},
+        reviewDescription: {id: "batch.reviewDescription", defaultMessage: "以下 {count} 筆交易由一句話拆出，可逐筆修改或刪除；入帳前請自行核對。"},
+        rowTitle: {id: "batch.rowTitle", defaultMessage: "第 {index} 筆"},
+        remove: {id: "batch.remove", defaultMessage: "刪除這筆"},
+        confirmAll: {id: "batch.confirmAll", defaultMessage: "全部入帳（{count}）"},
+        lowConfidence: {id: "batch.lowConfidence", defaultMessage: "部分交易信心度偏低，請逐筆核對。"},
+        empty: {id: "batch.empty", defaultMessage: "已刪除所有交易，冇嘢可以入帳。"},
     },
     dashboard: {
         previousMonth: {id: "dashboard.previousMonth", defaultMessage: "上個月"},

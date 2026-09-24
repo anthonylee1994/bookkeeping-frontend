@@ -2,7 +2,7 @@ import {z} from "zod";
 import {dateTimeLocalToIso, isoToDateTimeLocal} from "@/features/transactions/TransactionFormModel";
 import {formatMessage, messages} from "@/lib/i18n";
 import {dollarsToCents} from "@/lib/money";
-import type {Account, AiPreview, Category, Merchant, TransactionInput} from "@/data/types";
+import type {Account, AiParsedItem, AiPreview, Category, Merchant, TransactionInput} from "@/data/types";
 
 /** 低於此信心度即須明顯提示用戶逐項核對。 */
 export const LOW_CONFIDENCE_THRESHOLD = 0.6;
@@ -42,18 +42,27 @@ function toDateTimeLocal(iso: string | null | undefined): string {
     return isoToDateTimeLocal(Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString());
 }
 
-export function isLowConfidence(preview: AiPreview): boolean {
-    const confidence = preview.parsed?.confidence;
+/** 正規化 preview 內嘅每筆解析結果；舊 payload（只有 `parsed`）會合成單筆。 */
+export function previewItems(preview: AiPreview): AiParsedItem[] {
+    if (preview.parsed_items !== undefined && preview.parsed_items.length > 0) return preview.parsed_items;
+    if (preview.parsed !== null && preview.parsed !== undefined) {
+        return [{parsed: preview.parsed, suggested_category_id: preview.suggested_category_id ?? null}];
+    }
+    return [];
+}
+
+export function isItemLowConfidence(item: AiParsedItem): boolean {
+    const confidence = item.parsed.confidence;
     return confidence !== null && confidence !== undefined && confidence < LOW_CONFIDENCE_THRESHOLD;
 }
 
-export function confidencePercent(preview: AiPreview): number {
-    return Math.round((preview.parsed?.confidence ?? 0) * 100);
+export function itemConfidencePercent(item: AiParsedItem): number {
+    return Math.round((item.parsed.confidence ?? 0) * 100);
 }
 
 /** AI 未能辨識的欄位；UI 會逐個標示「需覆核」。 */
-export function missingReviewFields(preview: AiPreview): ScanReviewField[] {
-    const parsed = preview.parsed;
+export function itemMissingReviewFields(item: AiParsedItem): ScanReviewField[] {
+    const parsed = item.parsed;
     const missing: ScanReviewField[] = [];
     if (parsed?.amount_cents === null || parsed?.amount_cents === undefined) missing.push("amount");
     if (parsed?.kind === null || parsed?.kind === undefined) missing.push("kind");
@@ -62,45 +71,71 @@ export function missingReviewFields(preview: AiPreview): ScanReviewField[] {
     return missing;
 }
 
+export function isLowConfidence(preview: AiPreview): boolean {
+    const first = previewItems(preview)[0];
+    return first === undefined ? false : isItemLowConfidence(first);
+}
+
+export function confidencePercent(preview: AiPreview): number {
+    const first = previewItems(preview)[0];
+    return first === undefined ? 0 : itemConfidencePercent(first);
+}
+
+export function missingReviewFields(preview: AiPreview): ScanReviewField[] {
+    const first = previewItems(preview)[0];
+    return itemMissingReviewFields(first ?? {parsed: {}});
+}
+
 /**
  * Backend 已經用當前用戶的分類將 AI hint resolve 做 category id，優先相信它；
  * 沒有（例如舊 cache 或 hint 無法對應）才退回前端按名稱比對。
  */
-function findSuggestedCategory(preview: AiPreview, categories: Category[], kind: ScanReviewValues["kind"]): Category | null {
-    const suggestedId = preview.suggested_category_id;
+function findSuggestedCategory(item: AiParsedItem, categories: Category[], kind: ScanReviewValues["kind"]): Category | null {
+    const suggestedId = item.suggested_category_id;
     if (suggestedId != null) {
-        const match = categories.find(item => item.id === suggestedId && item.kind === kind);
+        const match = categories.find(entry => entry.id === suggestedId && entry.kind === kind);
         if (match !== undefined) return match;
     }
     return findByName(
-        categories.filter(item => item.kind === kind),
-        preview.parsed?.category_hint
+        categories.filter(entry => entry.kind === kind),
+        item.parsed.category_hint
     );
 }
 
 /** 解析結果只作建議：無法對應名稱的商戶／分類留空，不會亂猜。 */
-export function previewToReviewValues(preview: AiPreview, reference: ScanReference): ScanReviewValues {
-    const parsed = preview.parsed;
-    const kind = parsed?.kind ?? "expense";
-    const merchant = findByName(reference.merchants, parsed?.merchant_name);
+export function parsedItemToReviewValues(item: AiParsedItem, reference: ScanReference): ScanReviewValues {
+    const parsed = item.parsed;
+    const kind = parsed.kind ?? "expense";
+    const merchant = findByName(reference.merchants, parsed.merchant_name);
     const category =
-        findSuggestedCategory(preview, reference.categories, kind) ??
-        (merchant?.default_category_id != null ? (reference.categories.find(item => item.id === merchant.default_category_id && item.kind === kind) ?? null) : null);
+        findSuggestedCategory(item, reference.categories, kind) ??
+        (merchant?.default_category_id != null ? (reference.categories.find(entry => entry.id === merchant.default_category_id && entry.kind === kind) ?? null) : null);
 
     return {
         kind,
-        amount: parsed?.amount_cents === null || parsed?.amount_cents === undefined ? "" : (parsed.amount_cents / 100).toFixed(2),
+        amount: parsed.amount_cents === null || parsed.amount_cents === undefined ? "" : (parsed.amount_cents / 100).toFixed(2),
         accountId: reference.accounts[0]?.id ?? "",
         categoryId: category?.id ?? "",
         merchantId: merchant?.id ?? "",
-        occurredAt: toDateTimeLocal(parsed?.occurred_at),
-        note: parsed?.note ?? "",
+        occurredAt: toDateTimeLocal(parsed.occurred_at),
+        note: parsed.note ?? "",
     };
 }
 
+/** 單筆 preview（receipt 或第一筆）→ 覆核表單預設值。 */
+export function previewToReviewValues(preview: AiPreview, reference: ScanReference): ScanReviewValues {
+    const first = previewItems(preview)[0];
+    return parsedItemToReviewValues(first ?? {parsed: {}}, reference);
+}
+
 /** 無法對應現有商戶時，仍然將 AI 讀到的名稱帶入 autocomplete，讓用戶一按即可建立。 */
+export function suggestedMerchantNameForItem(item: AiParsedItem): string {
+    return item.parsed.merchant_name?.trim() ?? "";
+}
+
 export function suggestedMerchantName(preview: AiPreview): string {
-    return preview.parsed?.merchant_name?.trim() ?? "";
+    const first = previewItems(preview)[0];
+    return first === undefined ? "" : suggestedMerchantNameForItem(first);
 }
 
 export const scanReviewSchema = z

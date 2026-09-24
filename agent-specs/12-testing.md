@@ -8,7 +8,7 @@
 - URL filter serialize／parse
 - Recurring frequency label 及 payload mapping
 - Summary insight invalidation key（aggregate／筆數敏感、分頁唔敏感）
-- AI 文字解讀 repository validation（空白／超過 500 字）及 text → 表單欄位 mapping（重用 `scanModel`）
+- AI 文字解讀 repository validation（空白／超過 500 字）及 text → 表單欄位 mapping（重用 `scanModel`），包括多筆 `parsed_items`（`previewItems` 正規化、逐筆 `parsedItemToReviewValues`／`suggested_category_id`）
 
 ## 12.2 Component / integration
 
@@ -20,7 +20,8 @@
 - 交易 drawer 導航：由詳情撳「修改」停喺 `/edit`、唔彈返列表；關閉詳情返回列表並保留 filter；列表喺 drawer 後面保持 mount
 - 定期交易：status tab、pause／resume／run now／skip next／delete 文案
 - AI upload／parse／edit／confirm，以及每段失敗重試
-- AI 打字記帳：解讀成功預填並提示、低信心／缺欄位標示、`422`／`502` 重試與改用手動、空白唔可送出、多筆只填第一筆並提示
+- AI 打字記帳：解讀成功預填並提示、低信心／缺欄位標示、`422`／`502` 重試與改用手動、空白唔可送出
+- AI 打字記帳拆單：多筆 `parsed_items` 先閂新增交易 drawer、喺交易 layout 層開批量覆核 drawer、逐筆改／刪、逐筆 `/ai/confirm`（共用 log id、各自 idempotency key）、失敗保留 drawer 同重試、全部成功收 drawer 並 bump revision
 - 報表：AI 收支概況 loading／success／失敗重試；期間無交易或 `daily` 期間時唔顯示、唔發請求
 - PWA：update banner、install prompt（延遲、dismiss 記憶）、offline ready
 - Repository validation errors 正確套用到 form input

@@ -7,6 +7,7 @@ import type {Transaction} from "@/data/types";
 import {TransactionForm} from "@/features/transactions/TransactionForm";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
+import {useUiStore} from "@/stores/uiStore";
 import {domainTestState} from "@/test/domainFixtures";
 import {renderWithIntl} from "@/test/renderWithIntl";
 
@@ -83,6 +84,7 @@ beforeEach(() => {
     merchantSearchMock.mockResolvedValue({ok: true, value: domainTestState.merchants});
     useAuthStore.setState({token: "test-token", user: null, hydrated: true});
     useAppStore.getState().resetAppState();
+    useUiStore.getState().resetUiState();
 });
 
 describe("TransactionForm", () => {
@@ -174,6 +176,33 @@ describe("TransactionForm", () => {
         await waitFor(() => expect(screen.getByText("DETAIL:")).toBeInTheDocument());
         expect(confirmMock).toHaveBeenCalledWith(expect.objectContaining({amount_cents: 1250, kind: "expense"}), preview.id, expect.stringMatching(/^[0-9a-f-]{36}$/));
         expect(createMock).not.toHaveBeenCalled();
+    });
+
+    it("hands a multi-transaction interpretation to the list-level batch drawer", async () => {
+        const user = userEvent.setup();
+        const preview = {
+            id: "80000000-0000-4000-8000-000000000010",
+            source: "text" as const,
+            image_urls: [],
+            sha256: "a".repeat(64),
+            status: "success" as const,
+            parsed: {amount_cents: 3000, kind: "expense" as const, occurred_at: "2026-09-14T08:00:00+08:00", confidence: 0.9},
+            parsed_items: [
+                {parsed: {amount_cents: 3000, kind: "expense" as const, occurred_at: "2026-09-14T08:00:00+08:00", confidence: 0.9}},
+                {parsed: {amount_cents: 5000, kind: "expense" as const, occurred_at: "2026-09-14T12:00:00+08:00", confidence: 0.9}},
+            ],
+        };
+        interpretMock.mockResolvedValue({ok: true, value: preview});
+        confirmMock.mockResolvedValue({ok: true, value: created});
+        renderForm();
+
+        await user.type(screen.getByLabelText("AI 打字記帳"), "早餐 30 午餐 50");
+        await user.click(screen.getByRole("button", {name: "解讀"}));
+
+        // 多筆：閂新增交易 drawer（返列表），並交俾列表層嘅批量覆核 drawer；唔預填表單、唔即時入帳。
+        expect(await screen.findByText("LIST")).toBeInTheDocument();
+        expect(useUiStore.getState().pendingAiBatch?.id).toBe(preview.id);
+        expect(confirmMock).not.toHaveBeenCalled();
     });
 
     it("seeds the merchant autocomplete with an unmatched AI merchant name", async () => {

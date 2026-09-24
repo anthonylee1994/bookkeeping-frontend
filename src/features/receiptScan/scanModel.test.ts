@@ -1,7 +1,19 @@
 import {describe, expect, it} from "vitest";
-import {confidencePercent, isLowConfidence, missingReviewFields, previewToReviewValues, reviewValuesToInput, scanReviewSchema, suggestedMerchantName} from "@/features/receiptScan/scanModel";
+import {
+    confidencePercent,
+    isItemLowConfidence,
+    isLowConfidence,
+    itemMissingReviewFields,
+    missingReviewFields,
+    parsedItemToReviewValues,
+    previewItems,
+    previewToReviewValues,
+    reviewValuesToInput,
+    scanReviewSchema,
+    suggestedMerchantName,
+} from "@/features/receiptScan/scanModel";
 import {domainTestState} from "@/test/domainFixtures";
-import type {AiParsedFields, AiPreview} from "@/data/types";
+import type {AiParsedFields, AiParsedItem, AiPreview} from "@/data/types";
 
 const reference = {accounts: domainTestState.accounts, categories: domainTestState.categories, merchants: domainTestState.merchants};
 
@@ -91,5 +103,29 @@ describe("scanReviewSchema and payload", () => {
             source: "ai",
             image_urls: ["https://example.test/receipt.png"],
         });
+    });
+});
+
+describe("multi-item preview", () => {
+    const items: AiParsedItem[] = [
+        {parsed: {amount_cents: 3000, kind: "expense", occurred_at: "2026-09-14T08:00:00+08:00", confidence: 0.3}, suggested_category_id: domainTestState.categories[1].id},
+        {parsed: {amount_cents: 5000, kind: "expense", confidence: 0.9}},
+    ];
+    const multi: AiPreview = {...preview(null), parsed: {amount_cents: 3000, kind: "expense"}, parsed_items: items};
+
+    it("reads parsed_items and falls back to a legacy single parsed", () => {
+        expect(previewItems(multi)).toHaveLength(2);
+        expect(previewItems(preview({amount_cents: 100, kind: "expense"}))).toHaveLength(1);
+        expect(previewItems(preview(null))).toEqual([]);
+    });
+
+    it("maps each item with its own suggested category and review flags", () => {
+        const values = parsedItemToReviewValues(items[0], reference);
+
+        expect(values.amount).toBe("30.00");
+        expect(values.categoryId).toBe(domainTestState.categories[1].id);
+        expect(isItemLowConfidence(items[0])).toBe(true);
+        expect(isItemLowConfidence(items[1])).toBe(false);
+        expect(itemMissingReviewFields(items[1])).toEqual(["occurredAt", "merchant"]);
     });
 });

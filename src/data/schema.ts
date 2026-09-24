@@ -148,6 +148,11 @@ export const aiParsedFieldsSchema = z.object({
     confidence: z.number().nullish(),
 });
 
+export const aiParsedItemSchema = z.object({
+    parsed: aiParsedFieldsSchema,
+    suggested_category_id: uuidSchema.nullish(),
+});
+
 export const aiPreviewSchema = z.object({
     id: uuidSchema,
     source: z.enum(["receipt", "text"]).optional(),
@@ -156,6 +161,7 @@ export const aiPreviewSchema = z.object({
     status: z.enum(["success", "partial", "failed"]),
     parsed: aiParsedFieldsSchema.nullable(),
     suggested_category_id: uuidSchema.nullish(),
+    parsed_items: z.array(aiParsedItemSchema).default([]),
     raw_response: z.string().nullish(),
     error: z.string().nullish(),
     tokens_in: z.number().nullish(),

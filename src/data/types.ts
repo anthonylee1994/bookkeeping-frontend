@@ -178,6 +178,12 @@ export type AiParsedFields = {
     confidence?: number | null;
 };
 
+/** 一筆 AI 解析結果連 backend 已 resolve 嘅分類建議（`/ai/interpret` 可回多筆）。 */
+export type AiParsedItem = {
+    parsed: AiParsedFields;
+    suggested_category_id?: UUID | null;
+};
+
 export type AiPreviewSource = "receipt" | "text";
 
 export type AiPreview = {
@@ -188,6 +194,8 @@ export type AiPreview = {
     status: "success" | "partial" | "failed";
     parsed: AiParsedFields | null;
     suggested_category_id?: UUID | null;
+    /** 多筆 preview：`/ai/interpret` 拆單後逐筆結果；receipt 恆一筆。`parsed` 係第一筆。 */
+    parsed_items?: AiParsedItem[];
     raw_response?: string | null;
     error?: string | null;
     tokens_in?: number | null;

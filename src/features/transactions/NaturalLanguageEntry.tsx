@@ -1,9 +1,9 @@
 import React from "react";
-import {Alert, Button, Field, HStack, Input, Stack, Text} from "@chakra-ui/react";
+import {Alert, Button, Field, HStack, Input, Stack, Text, Textarea} from "@chakra-ui/react";
 import {useIntl} from "react-intl";
 import {MAX_INTERPRET_TEXT, ReceiptsRepository} from "@/data/receiptsRepository";
 import type {AiPreview} from "@/data/types";
-import {confidencePercent, isLowConfidence} from "@/features/receiptScan/scanModel";
+import {confidencePercent, isLowConfidence, previewItems} from "@/features/receiptScan/scanModel";
 import {messages} from "@/lib/i18n";
 import {useAuthStore} from "@/stores/authStore";
 
@@ -12,11 +12,12 @@ type NaturalLanguageEntryProps = {
     onInterpreted: (preview: AiPreview) => void;
 };
 
-/** 「解讀唔到」：AI 冇回 parsed、冇金額，或者整體 status 係 failed。 */
+/** 「解讀唔到」：AI 冇回 parsed_items、全部冇金額，或者整體 status 係 failed。 */
 function isUnusable(preview: AiPreview): boolean {
     if (preview.status === "failed") return true;
-    const amount = preview.parsed?.amount_cents;
-    return amount === null || amount === undefined;
+    const items = previewItems(preview);
+    if (items.length === 0) return true;
+    return items.every(item => item.parsed.amount_cents === null || item.parsed.amount_cents === undefined);
 }
 
 /** 新增交易表單頂部嘅自然語言入口：打一句話 → `/ai/interpret` → 預填同一張表單。 */
@@ -72,10 +73,11 @@ export const NaturalLanguageEntry = ({onInterpreted}: NaturalLanguageEntryProps)
                 <Text fontSize="sm" color="fg.muted">
                     {intl.formatMessage(messages.interpret.description)}
                 </Text>
-                <Input
+                <Textarea
                     mt="1"
                     borderColor="blue.200"
                     value={text}
+                    rows={3}
                     maxLength={MAX_INTERPRET_TEXT}
                     placeholder={intl.formatMessage(messages.interpret.placeholder)}
                     aria-label={intl.formatMessage(messages.interpret.title)}
@@ -106,7 +108,11 @@ export const NaturalLanguageEntry = ({onInterpreted}: NaturalLanguageEntryProps)
                 <Alert.Root status="info" rounded="lg" aria-live="polite" backgroundColor="blue.200">
                     <Alert.Indicator />
                     <Alert.Title>
-                        {isLowConfidence(prefilled) ? intl.formatMessage(messages.scan.lowConfidence, {percent: confidencePercent(prefilled)}) : intl.formatMessage(messages.interpret.prefilled)}
+                        {previewItems(prefilled).length > 1
+                            ? intl.formatMessage(messages.interpret.batchDetected, {count: previewItems(prefilled).length})
+                            : isLowConfidence(prefilled)
+                              ? intl.formatMessage(messages.scan.lowConfidence, {percent: confidencePercent(prefilled)})
+                              : intl.formatMessage(messages.interpret.prefilled)}
                     </Alert.Title>
                 </Alert.Root>
             )}

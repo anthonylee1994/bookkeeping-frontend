@@ -9,7 +9,7 @@ import {MerchantsRepository} from "@/data/merchantsRepository";
 import {ReceiptsRepository} from "@/data/receiptsRepository";
 import {TransactionsRepository} from "@/data/transactionsRepository";
 import type {Account, AiPreview, Category, Merchant, Transaction, TransactionKind} from "@/data/types";
-import {previewToReviewValues, suggestedMerchantName} from "@/features/receiptScan/scanModel";
+import {previewItems, previewToReviewValues, suggestedMerchantName} from "@/features/receiptScan/scanModel";
 import {DirtyLeaveDialog} from "@/features/transactions/DirtyLeaveDialog";
 import {MerchantAutocomplete} from "@/features/transactions/MerchantAutocomplete";
 import {NaturalLanguageEntry} from "@/features/transactions/NaturalLanguageEntry";
@@ -20,6 +20,7 @@ import {createId} from "@/lib/id";
 import {ROUTES, transactionDetailPath, transactionsPath} from "@/routes/paths";
 import {useAppStore} from "@/stores/appStore";
 import {useAuthStore} from "@/stores/authStore";
+import {useUiStore} from "@/stores/uiStore";
 
 type TransactionFormProps = {
     transaction: Transaction | null;
@@ -98,8 +99,13 @@ export const TransactionForm = ({transaction, accounts, categories, merchants}: 
         setValue("categoryId", defaultCategory.id, {shouldDirty: true, shouldValidate: true});
     };
 
-    /** AI 打字記帳成功：將 preview 映射落現有表單欄位，並記住 log id 以便 `/ai/confirm`。 */
+    /** AI 打字記帳成功：單筆映射落現有表單；多筆閂新增交易 drawer、返列表開批量覆核 drawer。 */
     const applyInterpretation = (preview: AiPreview) => {
+        if (previewItems(preview).length > 1) {
+            useUiStore.getState().openAiBatch(preview);
+            navigate(transactionsPath(location.search));
+            return;
+        }
         const review = previewToReviewValues(preview, {accounts, categories, merchants});
         reset({
             kind: review.kind,

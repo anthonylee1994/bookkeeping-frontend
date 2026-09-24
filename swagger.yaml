@@ -323,7 +323,10 @@ paths:
                             required: [text]
                             properties: {text: {type: string, minLength: 1, maxLength: 500}}
             responses:
-                "200": {description: "AI preview（同 /ai/parse；source=text，無 image_urls；status 可為 partial，代表解讀唔到）"}
+                "200":
+                    {
+                        description: "AI preview（同 /ai/parse；source=text，無 image_urls；parsed_items 逐筆列出，最多 20 筆，parsed／suggested_category_id 為第一筆；一句都拆唔到時 status=partial、parsed_items=[]）",
+                    }
                 "422": {description: "text missing／blank／over 500 characters"}
                 "502": {description: DeepSeek is unavailable}
 components:

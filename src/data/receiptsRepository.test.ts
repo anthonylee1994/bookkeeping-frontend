@@ -53,6 +53,7 @@ describe("ReceiptsRepository", () => {
             sha256: "a".repeat(64),
             status: "success" as const,
             parsed: {amount_cents: 1200, kind: "expense" as const, occurred_at: "2026-09-14T16:00:00+08:00", merchant_name: "茶餐廳", confidence: 0.9},
+            parsed_items: [],
         };
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: preview});
 
@@ -67,11 +68,18 @@ describe("ReceiptsRepository", () => {
             image_urls: [],
             sha256: "a".repeat(64),
             status: "success" as const,
-            parsed: {amount_cents: 4500, kind: "expense" as const, occurred_at: "2026-09-14T16:00:00+08:00", merchant_name: "茶餐廳", confidence: 0.9},
+            parsed: {amount_cents: 3000, kind: "expense" as const, occurred_at: "2026-09-14T16:00:00+08:00", merchant_name: "茶餐廳", confidence: 0.9},
+            suggested_category_id: null,
+            parsed_items: [
+                {parsed: {amount_cents: 3000, kind: "expense" as const, occurred_at: "2026-09-14T16:00:00+08:00", merchant_name: "茶餐廳", confidence: 0.9}, suggested_category_id: null},
+                {parsed: {amount_cents: 4500, kind: "expense" as const, occurred_at: "2026-09-14T18:00:00+08:00", confidence: 0.8}, suggested_category_id: null},
+            ],
         };
         const request = vi.spyOn(apiClient, "request").mockResolvedValue({data: preview});
 
-        expect(await new ReceiptsRepository(TOKEN).interpret(" 尋日茶餐廳 45 蚊 ")).toEqual({ok: true, value: preview});
+        const result = await new ReceiptsRepository(TOKEN).interpret(" 尋日茶餐廳 45 蚊 ");
+        expect(result).toEqual({ok: true, value: preview});
+        if (result.ok) expect(result.value.parsed_items).toHaveLength(2);
         expect(request).toHaveBeenCalledWith(expect.objectContaining({method: "POST", url: "/ai/interpret", data: {text: "尋日茶餐廳 45 蚊"}}));
     });
 

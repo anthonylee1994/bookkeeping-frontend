@@ -65,6 +65,7 @@ describe("ui store", () => {
         state.setActiveDialog("confirm");
         state.setOffline(true);
         state.setInstallPrompt("available");
+        state.openAiBatch({id: "80000000-0000-4000-8000-000000000001", image_urls: [], sha256: "a".repeat(64), status: "success", parsed: null});
 
         state.resetUiState();
 
@@ -73,7 +74,18 @@ describe("ui store", () => {
             activeDialog: null,
             isOffline: false,
             installPrompt: "unavailable",
+            pendingAiBatch: null,
         });
+    });
+
+    it("tracks the pending AI batch preview", () => {
+        const preview = {id: "80000000-0000-4000-8000-000000000001", image_urls: [], sha256: "a".repeat(64), status: "success" as const, parsed: null};
+
+        useUiStore.getState().openAiBatch(preview);
+        expect(useUiStore.getState().pendingAiBatch).toEqual(preview);
+
+        useUiStore.getState().closeAiBatch();
+        expect(useUiStore.getState().pendingAiBatch).toBeNull();
     });
 
     it("records install prompt status without re-prompting after dismissal", () => {

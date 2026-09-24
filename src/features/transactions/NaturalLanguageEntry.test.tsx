@@ -69,6 +69,34 @@ describe("NaturalLanguageEntry", () => {
         expect(screen.getByLabelText("AI 打字記帳")).toHaveValue("");
     });
 
+    it("prompts batch review when the sentence splits into multiple transactions", async () => {
+        const user = userEvent.setup();
+        const onInterpreted = vi.fn();
+        const result = preview(
+            {amount_cents: 3000, kind: "expense", occurred_at: "2026-09-14T08:00:00+08:00", confidence: 0.9},
+            {
+                parsed_items: [
+                    {parsed: {amount_cents: 3000, kind: "expense", occurred_at: "2026-09-14T08:00:00+08:00", confidence: 0.9}},
+                    {parsed: {amount_cents: 5000, kind: "expense", occurred_at: "2026-09-14T12:00:00+08:00", confidence: 0.9}},
+                    {parsed: {amount_cents: 2000, kind: "expense", occurred_at: "2026-09-14T18:00:00+08:00", confidence: 0.9}},
+                ],
+            }
+        );
+        interpretMock.mockResolvedValue({ok: true, value: result});
+        renderWithIntl(
+            <React.Fragment>
+                <NaturalLanguageEntry onInterpreted={onInterpreted} />
+            </React.Fragment>
+        );
+
+        await user.type(screen.getByLabelText("AI 打字記帳"), "早餐 30 午餐 50 車費 20");
+        await user.click(screen.getByRole("button", {name: "解讀"}));
+
+        await waitFor(() => expect(onInterpreted).toHaveBeenCalledWith(result));
+        expect(screen.getByText("偵測到 3 筆交易，請逐筆覆核。")).toBeInTheDocument();
+        expect(screen.getByLabelText("AI 打字記帳")).toHaveValue("");
+    });
+
     it("shows a failure message when the sentence has no amount", async () => {
         const user = userEvent.setup();
         const onInterpreted = vi.fn();

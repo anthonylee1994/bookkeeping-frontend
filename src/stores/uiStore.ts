@@ -1,4 +1,5 @@
 import {create} from "zustand";
+import type {AiPreview} from "../data/types";
 
 export type InstallPromptStatus = "unavailable" | "available" | "dismissed" | "installed";
 
@@ -7,6 +8,8 @@ const EMPTY_UI_STATE = {
     activeDialog: null as string | null,
     isOffline: false,
     installPrompt: "unavailable" as InstallPromptStatus,
+    /** AI 打字記帳拆單嘅待覆核 preview；喺列表 layout 層開 drawer，唔 persist。 */
+    pendingAiBatch: null as AiPreview | null,
 };
 
 /** 純 UI state，不 persist；reload 後由預設值重新開始。 */
@@ -15,6 +18,8 @@ export type UiState = typeof EMPTY_UI_STATE & {
     setActiveDialog: (dialog: string | null) => void;
     setOffline: (offline: boolean) => void;
     setInstallPrompt: (status: InstallPromptStatus) => void;
+    openAiBatch: (preview: AiPreview) => void;
+    closeAiBatch: () => void;
     resetUiState: () => void;
 };
 
@@ -24,6 +29,8 @@ export const useUiStore = create<UiState>()(set => ({
     setActiveDialog: activeDialog => set({activeDialog}),
     setOffline: isOffline => set({isOffline}),
     setInstallPrompt: installPrompt => set({installPrompt}),
+    openAiBatch: pendingAiBatch => set({pendingAiBatch}),
+    closeAiBatch: () => set({pendingAiBatch: null}),
     resetUiState: () => set({...EMPTY_UI_STATE}),
 }));
 
